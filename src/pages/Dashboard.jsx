@@ -7,7 +7,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
-import { createPageUrl } from './utils';
 
 export default function Dashboard() {
   const { data: systems = [] } = useQuery({
@@ -167,11 +166,9 @@ export default function Dashboard() {
                         </div>
                       )}
                     </div>
-                    <Link to={createPageUrl('IncidentDetail', `id=${incident.id}`)}>
-                      <Button size="sm" variant="outline">
-                        View Details
-                      </Button>
-                    </Link>
+                    <Button size="sm" variant="outline">
+                      View Details
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -187,7 +184,7 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link to={createPageUrl('CrisisCoordination')}>
+          <Link to="/CrisisCoordination">
             <Card className="hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-blue-300">
               <CardContent className="p-6 text-center">
                 <Activity className="h-8 w-8 mx-auto mb-2 text-blue-600" />
@@ -197,7 +194,7 @@ export default function Dashboard() {
             </Card>
           </Link>
 
-          <Link to={createPageUrl('SystemManagement')}>
+          <Link to="/SystemManagement">
             <Card className="hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-green-300">
               <CardContent className="p-6 text-center">
                 <Server className="h-8 w-8 mx-auto mb-2 text-green-600" />
@@ -207,7 +204,7 @@ export default function Dashboard() {
             </Card>
           </Link>
 
-          <Link to={createPageUrl('AuthorityManagement')}>
+          <Link to="/AuthorityManagement">
             <Card className="hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-purple-300">
               <CardContent className="p-6 text-center">
                 <Shield className="h-8 w-8 mx-auto mb-2 text-purple-600" />

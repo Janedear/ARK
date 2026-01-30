@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { createPageUrl } from './pages/utils';
 import { Activity, Server, Shield, FileText, Home, BookOpen } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
@@ -40,7 +39,7 @@ export default function Layout({ children, currentPageName }) {
               return (
                 <Link
                   key={item.path}
-                  to={createPageUrl(item.path)}
+                  to={`/${item.path}`}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                     isActive
                       ? 'bg-blue-600 text-white shadow-md'
