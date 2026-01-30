@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Activity, Shield, Server, Clock, AlertTriangle, Users } from 'lucide-react';
+import { Activity, Shield, Server, Clock, AlertTriangle, Users, CheckCircle } from 'lucide-react';
+import { format } from 'date-fns';
 import MetricCard from '../components/dashboard/MetricCard';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
