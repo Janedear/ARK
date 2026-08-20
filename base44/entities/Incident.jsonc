@@ -1,0 +1,94 @@
+{
+  "name": "Incident",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Incident title"
+    },
+    "incident_type": {
+      "type": "string",
+      "enum": [
+        "credential_compromise",
+        "malware",
+        "ddos",
+        "supply_chain",
+        "insider_threat",
+        "infrastructure_failure",
+        "other"
+      ],
+      "description": "Type of incident"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium",
+      "description": "Incident severity"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "reported",
+        "investigating",
+        "responding",
+        "recovering",
+        "resolved"
+      ],
+      "default": "reported",
+      "description": "Current incident status"
+    },
+    "affected_region": {
+      "type": "string",
+      "enum": [
+        "region_a",
+        "region_b",
+        "region_c",
+        "region_d",
+        "national",
+        "multi_region"
+      ],
+      "description": "Geographic scope"
+    },
+    "affected_systems": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "System IDs affected"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed incident description"
+    },
+    "response_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Actions taken in response"
+    },
+    "civilians_affected": {
+      "type": "number",
+      "description": "Estimated civilian population affected"
+    },
+    "declared_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "title",
+    "incident_type",
+    "severity",
+    "affected_region"
+  ]
+}

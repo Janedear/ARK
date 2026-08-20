@@ -1,0 +1,87 @@
+{
+  "name": "Playbook",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Playbook title"
+    },
+    "scenario_type": {
+      "type": "string",
+      "enum": [
+        "credential_compromise",
+        "malware_outbreak",
+        "supply_chain_attack",
+        "infrastructure_failure",
+        "coordinated_attack"
+      ],
+      "description": "What scenario this playbook addresses"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed playbook description"
+    },
+    "trigger_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Conditions that suggest using this playbook"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step_number": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "responsible_role": {
+            "type": "string"
+          },
+          "estimated_duration": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Ordered list of response steps"
+    },
+    "required_authority": {
+      "type": "string",
+      "enum": [
+        "regional",
+        "national",
+        "emergency_override"
+      ],
+      "description": "Authority level needed to execute"
+    },
+    "last_validated": {
+      "type": "string",
+      "format": "date"
+    },
+    "validation_status": {
+      "type": "string",
+      "enum": [
+        "validated",
+        "needs_review",
+        "draft"
+      ],
+      "default": "draft"
+    },
+    "success_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "How to know playbook execution succeeded"
+    }
+  },
+  "required": [
+    "title",
+    "scenario_type",
+    "required_authority"
+  ]
+}

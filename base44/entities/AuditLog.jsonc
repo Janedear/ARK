@@ -1,0 +1,65 @@
+{
+  "name": "AuditLog",
+  "type": "object",
+  "properties": {
+    "sequence_number": {
+      "type": "number",
+      "description": "Sequential audit entry number"
+    },
+    "actor_email": {
+      "type": "string",
+      "description": "Who performed the action"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "system_reconstituted",
+        "trust_reset",
+        "authority_granted",
+        "authority_revoked",
+        "incident_declared",
+        "incident_resolved",
+        "priority_changed",
+        "baseline_updated"
+      ],
+      "description": "Type of action"
+    },
+    "action_details": {
+      "type": "string",
+      "description": "Detailed description of action"
+    },
+    "affected_resources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Systems, users, or resources affected"
+    },
+    "authority_id": {
+      "type": "string",
+      "description": "Authority used for this action"
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failure",
+        "partial"
+      ],
+      "description": "Action outcome"
+    },
+    "region": {
+      "type": "string",
+      "description": "Where action occurred"
+    },
+    "previous_entry_hash": {
+      "type": "string",
+      "description": "Hash of previous audit entry for chain integrity"
+    }
+  },
+  "required": [
+    "actor_email",
+    "action_type",
+    "action_details"
+  ]
+}

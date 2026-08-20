@@ -1,0 +1,81 @@
+{
+  "name": "RecoveryTask",
+  "type": "object",
+  "properties": {
+    "task_title": {
+      "type": "string",
+      "description": "Recovery task title"
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "reconstitute_system",
+        "reset_credentials",
+        "verify_integrity",
+        "update_baseline",
+        "coordinate_response"
+      ],
+      "description": "Type of recovery task"
+    },
+    "priority_score": {
+      "type": "number",
+      "description": "Calculated priority (higher = more urgent)"
+    },
+    "harm_hours": {
+      "type": "number",
+      "description": "Civilian harm calculation: population \u00d7 (recovery_time / critical_harm_threshold)"
+    },
+    "system_id": {
+      "type": "string",
+      "description": "System being recovered"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "User email assigned to task"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "blocked",
+        "in_progress",
+        "verification",
+        "complete",
+        "failed"
+      ],
+      "default": "queued"
+    },
+    "blocked_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Task IDs that must complete before this can start"
+    },
+    "incident_id": {
+      "type": "string",
+      "description": "Related incident"
+    },
+    "authority_id": {
+      "type": "string",
+      "description": "Authority authorizing this task"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Operator notes and details"
+    }
+  },
+  "required": [
+    "task_title",
+    "task_type",
+    "priority_score"
+  ]
+}
