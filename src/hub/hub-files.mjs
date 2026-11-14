@@ -30,7 +30,15 @@ export function startFileIndex(dir, cacheFile) {
       await writeFile(cacheFile, JSON.stringify(cache));
     }
   };
-  scan().catch(error => console.error('Library index failed:', error.message));
+  // Rescan every 2 minutes so files copied in after the hub started show up too.
+  let scanning = false;
+  const rescan = () => {
+    if (scanning) return;
+    scanning = true;
+    scan().catch(error => console.error('Library index failed:', error.message)).finally(() => { scanning = false; });
+  };
+  rescan();
+  setInterval(rescan, 120000).unref();
   return {
     dir,
     has: name => entries.some(entry => entry.name === name),

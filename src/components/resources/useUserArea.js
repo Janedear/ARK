@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 
 /**
@@ -18,9 +18,9 @@ export default function useUserArea() {
     return () => { alive = false; };
   }, []);
 
-  const coords = user && typeof user.home_lat === 'number' && typeof user.home_lon === 'number'
-    ? { lat: user.home_lat, lon: user.home_lon }
-    : null;
+  const lat = user?.home_lat, lon = user?.home_lon;
+  // Stable object, so screens that refetch when the area changes don't refetch on every render.
+  const coords = useMemo(() => typeof lat === 'number' && typeof lon === 'number' ? { lat, lon } : null, [lat, lon]);
 
   const save = async area => {
     await base44.auth.updateMe({ home_area: area.label, home_lat: area.lat, home_lon: area.lon });

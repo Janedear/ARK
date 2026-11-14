@@ -20,26 +20,33 @@ Deno.serve(async (req) => {
     if (!Array.isArray(body.packets) || body.packets.length < 1 || body.packets.length > 40) return Response.json({ error: 'Send between 1 and 40 packets.' }, { status: 400 });
     const encoder = new TextEncoder();
     const hex = bytes => Array.from(new Uint8Array(bytes), n => n.toString(16).padStart(2, '0')).join('');
-    const verified = [];
-    for (const e of body.packets) {
-      if (!e || e.v !== 1 || !['message', 'ack'].includes(e.kind) || typeof e.channel !== 'string' || !/^[a-z0-9][a-z0-9-]{0,39}$/.test(e.channel) || typeof e.alias !== 'string' || !e.alias.trim() || e.alias.length > 40 || typeof e.text !== 'string' || e.text.length > 1000 || typeof e.ref !== 'string' || !/^[a-f0-9]{64}$/.test(e.id || '')) return Response.json({ error: 'Invalid public packet.' }, { status: 400 });
-      if ((e.kind === 'message' && (!e.text.trim() || e.ref !== '')) || (e.kind === 'ack' && (e.text !== '' || !/^[a-f0-9]{64}$/.test(e.ref)))) return Response.json({ error: 'Invalid message or acknowledgment.' }, { status: 400 });
+    // Check each packet on its own: one bad or clock-skewed packet must not block the rest of a device's queue.
+    const verified = [], rejected = [];
+    const check = async e => {
+      if (!e || e.v !== 1 || !['message', 'ack'].includes(e.kind) || typeof e.channel !== 'string' || !/^[a-z0-9][a-z0-9-]{0,39}$/.test(e.channel) || typeof e.alias !== 'string' || !e.alias.trim() || e.alias.length > 40 || typeof e.text !== 'string' || e.text.length > 1000 || typeof e.ref !== 'string' || !/^[a-f0-9]{64}$/.test(e.id || '')) return 'Invalid public packet.';
+      if ((e.kind === 'message' && (!e.text.trim() || e.ref !== '')) || (e.kind === 'ack' && (e.text !== '' || !/^[a-f0-9]{64}$/.test(e.ref)))) return 'Invalid message or acknowledgment.';
       const issued = Date.parse(e.issued_at), expires = Date.parse(e.expires_at);
-      if (typeof e.issued_at !== 'string' || typeof e.expires_at !== 'string' || !Number.isFinite(issued) || !Number.isFinite(expires) || new Date(issued).toISOString() !== e.issued_at || new Date(expires).toISOString() !== e.expires_at || issued > Date.now() + 300000 || expires <= Date.now() || expires <= issued || expires - issued > 259200000) return Response.json({ error: 'Expired packet or invalid device time. Check the sender clock.' }, { status: 400 });
+      if (typeof e.issued_at !== 'string' || typeof e.expires_at !== 'string' || !Number.isFinite(issued) || !Number.isFinite(expires) || new Date(issued).toISOString() !== e.issued_at || new Date(expires).toISOString() !== e.expires_at || issued > Date.now() + 300000 || expires <= Date.now() || expires <= issued || expires - issued > 259200000) return 'Expired packet or invalid device time. Check the sender clock.';
       const k = e.public_key;
-      if (!k || k.kty !== 'EC' || k.crv !== 'P-256' || !/^[A-Za-z0-9_-]{43}$/.test(k.x || '') || !/^[A-Za-z0-9_-]{43}$/.test(k.y || '') || typeof e.signature !== 'string' || !/^[A-Za-z0-9_-]{86}$/.test(e.signature)) return Response.json({ error: 'Invalid signing key.' }, { status: 400 });
+      if (!k || k.kty !== 'EC' || k.crv !== 'P-256' || !/^[A-Za-z0-9_-]{43}$/.test(k.x || '') || !/^[A-Za-z0-9_-]{43}$/.test(k.y || '') || typeof e.signature !== 'string' || !/^[A-Za-z0-9_-]{86}$/.test(e.signature)) return 'Invalid signing key.';
       const payload = { v: 1, kind: e.kind, channel: e.channel, alias: e.alias, text: e.text, ref: e.ref, issued_at: e.issued_at, expires_at: e.expires_at, public_key: { kty: 'EC', crv: 'P-256', x: k.x, y: k.y } };
       const bytes = encoder.encode(JSON.stringify(payload));
-      if (hex(await crypto.subtle.digest('SHA-256', bytes)) !== e.id) return Response.json({ error: 'Packet fingerprint does not match.' }, { status: 400 });
+      if (hex(await crypto.subtle.digest('SHA-256', bytes)) !== e.id) return 'Packet fingerprint does not match.';
       let valid = false;
       try {
         const key = await crypto.subtle.importKey('jwk', payload.public_key, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
         const signature = Uint8Array.from(atob(e.signature.replace(/-/g, '+').replace(/_/g, '/') + '=='), c => c.charCodeAt(0));
         valid = await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, key, signature, bytes);
       } catch { valid = false; }
-      if (!valid) return Response.json({ error: 'Invalid device signature. Nothing in this batch was accepted.' }, { status: 400 });
+      if (!valid) return 'Invalid device signature.';
       verified.push({ ...payload, id: e.id, signature: e.signature });
+      return null;
+    };
+    for (const e of body.packets) {
+      const reason = await check(e);
+      if (reason) rejected.push({ id: typeof e?.id === 'string' ? e.id.slice(0, 64) : null, reason });
     }
+    if (!verified.length) return Response.json({ accepted: [], rejected, checked_at: now });
     const unique = [...new Map(verified.map(e => [e.id, e])).values()];
     const [recent, existing] = await Promise.all([
       store.count({ relay_user_id: user.id, created_date: { $gte: new Date(Date.now() - 60000).toISOString() } }),
@@ -49,7 +56,7 @@ Deno.serve(async (req) => {
     const missing = unique.filter(e => !known.has(e.id));
     if (recent + missing.length > 200) return Response.json({ error: 'Gateway busy for this account. Wait at least one minute; packets remain on your device.' }, { status: 429, headers: { 'Retry-After': '60' } });
     if (missing.length) await store.bulkCreate(missing.map(e => ({ message_id: e.id, kind: e.kind, channel: e.channel, reference_id: e.ref, envelope_json: JSON.stringify(e), expires_at: e.expires_at, received_at: now, relay_user_id: user.id })));
-    return Response.json({ accepted: unique.map(e => ({ id: e.id, serverAt: known.get(e.id) || now })), checked_at: now });
+    return Response.json({ accepted: unique.map(e => ({ id: e.id, serverAt: known.get(e.id) || now })), rejected, checked_at: now });
   } catch (error) {
     const status = error.status === 429 ? 429 : 500;
     console.error('Network gateway:', error.message);

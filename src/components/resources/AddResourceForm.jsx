@@ -32,7 +32,7 @@ export default function AddResourceForm({ defaultArea, onAdded }) {
         status: 'unverified',
         visibility: keepPrivate ? 'private' : 'shared',
         last_verified: new Date().toISOString().slice(0, 10),
-        ...(pin || {}),
+        ...(pin ? { latitude: pin.lat, longitude: pin.lon } : {}),
       });
       setForm(blank);
       setPin(null);

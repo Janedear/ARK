@@ -120,10 +120,14 @@ export function createStore(file, limit = 5000) {
     },
     messages(channel = '', now = Date.now()) {
       const rowsNow = live(now), seen = new Map();
-      for (const r of rowsNow) if (r.e.kind === 'ack') seen.set(r.e.ref, (seen.get(r.e.ref) || 0) + 1);
+      // Count each person once per message, however many times they tap "I saw this".
+      for (const r of rowsNow) if (r.e.kind === 'ack') {
+        if (!seen.has(r.e.ref)) seen.set(r.e.ref, new Set());
+        seen.get(r.e.ref).add(deviceOf(r.e.public_key) + ':' + r.e.alias.trim().toLowerCase());
+      }
       return rowsNow.filter(r => r.e.kind === 'message' && (!channel || r.e.channel === channel)).slice(0, 200).map(r => ({
         id: r.e.id, channel: r.e.channel, alias: r.e.alias, text: r.e.text, issued_at: r.e.issued_at,
-        expires_at: r.e.expires_at, seen: seen.get(r.e.id) || 0, device: deviceOf(r.e.public_key), source: r.source,
+        expires_at: r.e.expires_at, seen: seen.get(r.e.id)?.size || 0, device: deviceOf(r.e.public_key), source: r.source,
       }));
     },
     count: (now = Date.now()) => live(now).length,

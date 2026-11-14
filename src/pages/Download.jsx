@@ -9,7 +9,7 @@ import '@/components/lifeline/lifeline.css';
 
 export default function Download() {
   const [done, setDone] = useState(false);
-  const [meetingPoint, setMeetingPointState] = useState(() => JSON.parse(localStorage.getItem('ark-meeting-point') || 'null'));
+  const [meetingPoint, setMeetingPointState] = useState(() => { try { return JSON.parse(localStorage.getItem('ark-meeting-point') || 'null'); } catch { return null; } });
   const setMeetingPoint = point => { setMeetingPointState(point); localStorage.setItem('ark-meeting-point', JSON.stringify(point)); };
   const download = () => { downloadBlob(buildZip(buildKitFiles(meetingPoint)), 'ARK-offline-kit.zip'); setDone(true); };
 
@@ -44,7 +44,7 @@ export default function Download() {
       <section className="ll-card" style={{ marginTop: 18 }}>
         <h2>After downloading</h2>
         <ol style={{ paddingLeft: 22 }}>
-          <li>Unzip it on your phone or computer and open <b>START-HERE.txt</b>.</li>
+          <li>Unzip it on your phone or computer and open <b>START-HERE.html</b>.</li>
           <li>Open the guidance and relay files once to confirm they work with your connection off.</li>
           <li>Print the guidance, contacts and plan worksheet. Copy the zip to a USB stick.</li>
           <li>Pass the kit to neighbours. Every copy works on its own.</li>

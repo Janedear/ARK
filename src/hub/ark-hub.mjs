@@ -68,7 +68,7 @@ const routes = {
   'GET /': (req, res) => send(res, 200, page, 'text/html; charset=utf-8'),
   'GET /api/status': (req, res) => send(res, 200, { name: NAME, time: new Date().toISOString(), packets: store.count(), hub_device: deviceOf(signer.publicKey), peers: PEERS.length }),
   'GET /api/messages': (req, res, url) => send(res, 200, store.messages(url.searchParams.get('channel') || '')),
-  'GET /api/bundle': (req, res, url) => send(res, 200, store.bundle({ channel: url.searchParams.get('channel') || '', max: Math.min(Number(url.searchParams.get('limit')) || 40, 5000) }), 'application/json; charset=utf-8', url.searchParams.has('download') ? { 'content-disposition': 'attachment; filename="ark-hub-bundle.json"' } : {}),
+  'GET /api/bundle': (req, res, url) => send(res, 200, store.bundle({ channel: url.searchParams.get('channel') || '', max: Math.max(1, Math.min(Math.floor(Number(url.searchParams.get('limit'))) || 40, 5000)) }), 'application/json; charset=utf-8', url.searchParams.has('download') ? { 'content-disposition': 'attachment; filename="ark-hub-bundle.json"' } : {}),
   'GET /files/manifest.json': (req, res) => send(res, 200, files.manifest()),
   'GET /sign': (req, res) => send(res, 200, `<!doctype html><meta charset="utf-8"><title>Hub sign</title><body style="font:28px/1.4 Arial;text-align:center;padding:40px"><h1 style="font-size:56px">${esc(NAME)}</h1><p>No internet needed.</p><p>1. Join this Wi-Fi network:<br><b style="font-size:40px">________________</b></p><p>2. Open your web browser and type:</p>${addresses().map(a => `<p style="font-size:44px;font-weight:700">${esc(a)}</p>`).join('')}<p>Messages, first aid, maps and Wikipedia.</p><p style="font-size:20px">In danger? Call 911 if any phone works. This board is not monitored.</p></body>`, 'text/html; charset=utf-8'),
   'POST /api/post': async (req, res, url, ip) => {
@@ -122,6 +122,8 @@ async function usbCycle() {
   for (const name of await readdir(INBOX)) {
     if (!name.endsWith('.json')) continue;
     const path = join(INBOX, name);
+    // Leave files that are still being copied in from a USB stick until the copy finishes.
+    if (Date.now() - (await stat(path)).mtimeMs < 15000) continue;
     try {
       const bundle = JSON.parse(await readFile(path, 'utf8'));
       if (bundle.protocol !== PROTOCOL) throw new Error('not an ARK bundle');

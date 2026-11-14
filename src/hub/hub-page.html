@@ -160,7 +160,8 @@ $('post').onclick = async () => {
 };
 $('showBundle').onclick = async () => {
   const out = $('bundleOut');
-  out.value = JSON.stringify(await api('/api/bundle?limit=40'));
+  try { out.value = JSON.stringify(await api('/api/bundle?limit=40')); }
+  catch { out.value = 'Lost contact with the hub. Check you are still on its Wi-Fi.'; }
   out.hidden = false; out.focus(); out.select();
 };
 $('import').onclick = async () => {

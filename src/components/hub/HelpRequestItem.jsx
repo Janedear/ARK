@@ -11,9 +11,20 @@ export default function HelpRequestItem({ request, me, onChange }) {
   const isClaimer = request.claimed_by === me?.email;
   const canClose = isClaimer || request.created_by_id === me?.id || me?.role === 'admin';
 
+  const [error, setError] = useState('');
+
   const update = async (data) => {
-    setBusy(true);
-    await base44.entities.HelpRequest.update(request.id, data);
+    setBusy(true); setError('');
+    try {
+      // Someone else may have claimed it since this list loaded.
+      if (data.status === 'claimed' && (await base44.entities.HelpRequest.get(request.id)).status !== 'open') {
+        setError('Someone else just took this one.');
+      } else {
+        await base44.entities.HelpRequest.update(request.id, data);
+      }
+    } catch (e) {
+      setError(e.message || 'That change could not be saved. Try again.');
+    }
     setBusy(false);
     onChange();
   };
@@ -42,6 +53,7 @@ export default function HelpRequestItem({ request, me, onChange }) {
           <Button size="sm" variant="outline" disabled={busy} onClick={() => update({ status: 'done' })}>Mark done</Button>
         )}
       </div>
+      {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
     </div>
   );
 }

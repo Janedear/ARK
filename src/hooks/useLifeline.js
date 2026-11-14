@@ -17,7 +17,9 @@ export default function useLifeline() {
   const load = async () => {
     setLoading(true);
     try {
-      const hh = (await base44.entities.Household.filter({}, { sort: '-created_date', limit: 1 })).items[0] || null;
+      // Always the signed-in person's own household, even for admins who can read everyone's.
+      const me = await base44.auth.me();
+      const hh = (await base44.entities.Household.filter({ created_by_id: me.id }, { sort: '-created_date', limit: 1 })).items[0] || null;
       const [contacts, supplies, announcements, openHelp, activeIncidents] = await Promise.all([
         hh ? base44.entities.HouseholdContact.filter({ household_id: hh.id }, { sort: 'created_date', limit: 200 }) : { items: [] },
         hh ? base44.entities.SupplyItem.filter({ household_id: hh.id }, { sort: 'created_date', limit: 200 }) : { items: [] },

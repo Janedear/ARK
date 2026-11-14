@@ -27,7 +27,10 @@ export default function GetArk({ meetingPoint }) {
       catch (e) { setNotice(e.name === 'AbortError' ? 'Sharing cancelled.' : e.message); }
     } else { downloadBlob(blob, 'ARK-offline-kit.zip'); setNotice('This device cannot share files directly. The kit was saved instead: pass it by USB stick, Bluetooth or email.'); }
   };
-  const copy = async () => { await navigator.clipboard.writeText(webUrl); setNotice('Web address copied.'); };
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(webUrl); setNotice('Web address copied.'); }
+    catch { setNotice(`Copying is blocked on this device. The address is ${webUrl}`); }
+  };
 
   return <section className="ll-card" style={{ marginTop: 18 }}>
     <h2>Get ARK any way you can</h2>
