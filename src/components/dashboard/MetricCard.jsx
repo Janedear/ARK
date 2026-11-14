@@ -18,7 +18,7 @@ export default function MetricCard({ title, value, subtitle, trend, icon: Icon, 
   };
 
   return (
-    <Card className={`${statusColors[status]} border-2 transition-all hover:shadow-lg`}>
+    <Card className={`fo-metric ${statusColors[status]}`}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
@@ -26,7 +26,7 @@ export default function MetricCard({ title, value, subtitle, trend, icon: Icon, 
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold text-gray-900">{value}</div>
+        <div className="font-display text-4xl font-bold tracking-tight tabular-nums text-foreground">{value}</div>
         {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
         {trend && (
           <div className="flex items-center mt-2 text-sm">

@@ -66,8 +66,8 @@ export default function IncidentDetail() {
   const openActionCount = actions.filter((a) => OPEN_ACTION_STATUSES.includes(a.status)).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6">
-      <div className="max-w-6xl mx-auto space-y-4">
+    <div className="fo-screen">
+      <div className="fo-container space-y-6">
         <Link to="/Incidents" className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4" />All incidents
         </Link>

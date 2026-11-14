@@ -15,7 +15,7 @@ export default function StageFilter({ value, onChange, rows }) {
         <button
           key={f.key}
           onClick={() => onChange(f.key)}
-          className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium border transition ${
+          className={`fo-filter shrink-0 px-4 py-2 rounded text-xs font-semibold border transition ${
             value === f.key ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-gray-700 hover:bg-gray-50'
           }`}
         >

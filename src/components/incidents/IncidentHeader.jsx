@@ -24,7 +24,7 @@ export default function IncidentHeader({ incident, onAdvance, onChange }) {
   };
 
   return (
-    <div className="bg-white border rounded-xl p-4 space-y-3">
+    <div className="fo-incident-header space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="min-w-0">
           <div className="text-xs font-mono text-gray-500">{incident.incident_number || 'No reference number'}</div>

@@ -7,7 +7,7 @@ export default function StageTracker({ status }) {
   const stage = getStage(status);
 
   return (
-    <div className="bg-white border rounded-xl p-4">
+    <div className="fo-panel">
       <div className="flex items-center gap-1 overflow-x-auto pb-1">
         {STAGES.map((s, i) => (
           <div key={s.key} className="flex items-center gap-1 shrink-0">

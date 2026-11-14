@@ -28,9 +28,9 @@ export default function Incidents() {
   const incidents = list.data?.pages.flatMap((p) => p.items) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6">
-      <div className="max-w-5xl mx-auto space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div className="fo-screen">
+      <div className="fo-container space-y-6">
+        <div className="fo-page-header">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Incidents</h1>
             <p className="text-sm text-gray-500">Track every incident from first report to closure</p>

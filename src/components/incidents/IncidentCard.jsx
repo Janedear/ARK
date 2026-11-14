@@ -6,7 +6,7 @@ import { getStage, SEVERITY_BADGE, humanize } from './incidentConfig';
 export default function IncidentCard({ incident }) {
   const stage = getStage(incident.status);
   return (
-    <Link to={`/IncidentDetail?id=${incident.id}`} className="block bg-white border rounded-xl p-4 hover:shadow-md hover:border-slate-300 transition">
+    <Link to={`/IncidentDetail?id=${incident.id}`} className="fo-panel fo-interactive block">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           {incident.incident_number && <div className="text-xs font-mono text-gray-400">{incident.incident_number}</div>}

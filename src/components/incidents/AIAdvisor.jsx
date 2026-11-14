@@ -30,7 +30,7 @@ export default function AIAdvisor({ incident, actions, onChange }) {
   };
 
   return (
-    <div className="rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-white p-4 space-y-3">
+    <div className="fo-panel fo-advisor space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
           <div className="font-semibold text-indigo-950 flex items-center gap-2"><Sparkles className="h-4 w-4 text-indigo-600" />AI Response Advisor</div>

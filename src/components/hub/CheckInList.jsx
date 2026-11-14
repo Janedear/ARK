@@ -15,7 +15,7 @@ export default function CheckInList({ checkIns, counts, filter, onFilter }) {
         <div className="flex flex-wrap gap-2 pt-2">
           {tabs.map(([key, label, n]) => (
             <button key={key} onClick={() => onFilter(key)}
-              className={`rounded-full px-3 py-1 text-sm font-medium border ${filter === key ? 'bg-slate-900 text-white border-slate-900' : 'bg-card hover:bg-muted'}`}>
+              className={`fo-filter rounded px-3 py-2 text-xs font-semibold border ${filter === key ? 'bg-slate-900 text-white border-slate-900' : 'bg-card hover:bg-muted'}`}>
               {label} <span className="font-bold">{n}</span>
             </button>
           ))}

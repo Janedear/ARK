@@ -66,13 +66,13 @@ export default function ResponseHub() {
   const onCheckInSaved = () => { loadMine(me); loadCheckIns(); };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-      <div>
+    <div className="fo-screen fo-hub space-y-6">
+      <div className="fo-page-header">
         <h1 className="text-2xl font-bold">Response Hub</h1>
         <p className="text-sm text-muted-foreground">Check in, see who needs help, and claim what you can handle. Updates appear live.</p>
       </div>
       <Announcements items={announcements} me={me} onChange={loadAnnouncements} />
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-6 xl:grid-cols-3 items-start">
         <CheckInForm me={me} existing={myCheckIn} onSaved={onCheckInSaved} />
         <HelpBoard requests={requests} me={me} onChange={loadRequests} />
         <CheckInList checkIns={checkIns} counts={counts} filter={filter} onFilter={setFilter} />
