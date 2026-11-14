@@ -33,13 +33,13 @@ export default function Dashboard() {
   // Calculate metrics
   const operationalSystems = systems.filter(s => s.status === 'operational').length;
   const compromisedSystems = systems.filter(s => s.status === 'compromised').length;
-  const activeIncidents = incidents.filter(i => i.status !== 'resolved').length;
-  const criticalIncidents = incidents.filter(i => i.severity === 'critical' && i.status !== 'resolved').length;
+  const activeIncidents = incidents.filter(i => !['resolved', 'closed'].includes(i.status)).length;
+  const criticalIncidents = incidents.filter(i => i.severity === 'critical' && !['resolved', 'closed'].includes(i.status)).length;
   const activeAuthorities = authorities.filter(a => a.status === 'active').length;
   const pendingTasks = tasks.filter(t => t.status === 'queued' || t.status === 'in_progress').length;
 
   const totalCiviliansAffected = incidents
-    .filter(i => i.status !== 'resolved')
+    .filter(i => !['resolved', 'closed'].includes(i.status))
     .reduce((sum, i) => sum + (i.civilians_affected || 0), 0);
 
   const systemHealth = systems.length > 0 ? (operationalSystems / systems.length) * 100 : 100;

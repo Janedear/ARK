@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, Server, Shield, FileText, Home, BookOpen } from 'lucide-react';
+import { Activity, Server, Shield, FileText, Home, BookOpen, AlertOctagon } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
   const navigation = [
     { name: 'Dashboard', icon: Home, path: 'Dashboard' },
+    { name: 'Incidents', icon: AlertOctagon, path: 'Incidents' },
     { name: 'Crisis Coordination', icon: Activity, path: 'CrisisCoordination' },
     { name: 'System Management', icon: Server, path: 'SystemManagement' },
     { name: 'Authority Management', icon: Shield, path: 'AuthorityManagement' },

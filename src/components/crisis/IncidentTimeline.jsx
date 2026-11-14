@@ -11,10 +11,12 @@ export default function IncidentTimeline({ incident, auditLogs }) {
 
   const statusSteps = [
     { status: 'reported', label: 'Reported', color: 'text-blue-600' },
-    { status: 'investigating', label: 'Investigating', color: 'text-yellow-600' },
-    { status: 'responding', label: 'Responding', color: 'text-orange-600' },
-    { status: 'recovering', label: 'Recovering', color: 'text-purple-600' },
-    { status: 'resolved', label: 'Resolved', color: 'text-green-600' }
+    { status: 'analysis', label: 'Analysis', color: 'text-yellow-600' },
+    { status: 'containment', label: 'Containment', color: 'text-orange-600' },
+    { status: 'eradication', label: 'Eradication', color: 'text-red-600' },
+    { status: 'recovery', label: 'Recovery', color: 'text-purple-600' },
+    { status: 'resolved', label: 'Resolved', color: 'text-green-600' },
+    { status: 'closed', label: 'Closed', color: 'text-gray-600' }
   ];
 
   const currentStepIndex = statusSteps.findIndex(s => s.status === incident.status);

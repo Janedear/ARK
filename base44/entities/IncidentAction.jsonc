@@ -1,0 +1,146 @@
+{
+  "name": "IncidentAction",
+  "type": "object",
+  "properties": {
+    "incident_id": {
+      "type": "string",
+      "description": "Incident this action belongs to"
+    },
+    "title": {
+      "type": "string",
+      "description": "What needs to be done"
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "analysis",
+        "containment",
+        "eradication",
+        "recovery",
+        "communication"
+      ],
+      "enumColors": [
+        "yellow",
+        "pink",
+        "red",
+        "purple",
+        "blue"
+      ],
+      "default": "analysis",
+      "description": "Response phase this action supports"
+    },
+    "details": {
+      "type": "string",
+      "description": "Instructions or context"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Email of the responder assigned"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "in_progress",
+        "done",
+        "failed",
+        "cancelled"
+      ],
+      "enumColors": [
+        "gray",
+        "blue",
+        "green",
+        "red",
+        "gray"
+      ],
+      "default": "planned"
+    },
+    "result_notes": {
+      "type": "string",
+      "description": "Outcome recorded when the action finished"
+    },
+    "due_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_by": {
+      "type": "string",
+      "description": "Email of who closed out the action"
+    },
+    "ai_suggested": {
+      "type": "boolean",
+      "default": false,
+      "description": "Added from an AI advisor recommendation"
+    }
+  },
+  "required": [
+    "incident_id",
+    "title",
+    "phase"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.assigned_to": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

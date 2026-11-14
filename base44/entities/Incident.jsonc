@@ -2,6 +2,10 @@
   "name": "Incident",
   "type": "object",
   "properties": {
+    "incident_number": {
+      "type": "string",
+      "description": "Human-readable reference, e.g. INC-2026-12345"
+    },
     "title": {
       "type": "string",
       "description": "Incident title"
@@ -27,6 +31,12 @@
         "high",
         "critical"
       ],
+      "enumColors": [
+        "green",
+        "yellow",
+        "pink",
+        "red"
+      ],
       "default": "medium",
       "description": "Incident severity"
     },
@@ -34,13 +44,24 @@
       "type": "string",
       "enum": [
         "reported",
-        "investigating",
-        "responding",
-        "recovering",
-        "resolved"
+        "analysis",
+        "containment",
+        "eradication",
+        "recovery",
+        "resolved",
+        "closed"
+      ],
+      "enumColors": [
+        "blue",
+        "yellow",
+        "pink",
+        "red",
+        "purple",
+        "green",
+        "gray"
       ],
       "default": "reported",
-      "description": "Current incident status"
+      "description": "Current response stage (NIST-style lifecycle)"
     },
     "affected_region": {
       "type": "string",
@@ -70,11 +91,23 @@
       "items": {
         "type": "string"
       },
-      "description": "Actions taken in response"
+      "description": "Legacy: actions taken in response"
     },
     "civilians_affected": {
       "type": "number",
       "description": "Estimated civilian population affected"
+    },
+    "lead_email": {
+      "type": "string",
+      "description": "Incident lead responsible for the response"
+    },
+    "resolution_summary": {
+      "type": "string",
+      "description": "How the incident was resolved"
+    },
+    "lessons_learned": {
+      "type": "string",
+      "description": "Post-incident review findings"
     },
     "declared_at": {
       "type": "string",
@@ -90,5 +123,55 @@
     "incident_type",
     "severity",
     "affected_region"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.lead_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
