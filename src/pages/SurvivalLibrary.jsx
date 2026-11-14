@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { guides, guideCategories } from '@/content/lifelineGuides';
+import EmergencyContacts from '@/components/lifeline/EmergencyContacts';
 import '@/components/lifeline/lifeline.css';
 
 export default function SurvivalLibrary() {
@@ -13,9 +14,11 @@ export default function SurvivalLibrary() {
   return <div className="ll-page">
     <span className="ll-eyebrow">Guidance</span>
     <h1 style={{ margin: '10px 0 8px' }}>Emergency guidance</h1>
-    <p className="ll-muted">Short, sourced guidance for the situations this app is built for. Every article cites its source and is marked as a draft until an emergency or medical professional reviews it.</p>
+    <p className="ll-muted">Specific, actionable guidance for the situations this app is built for. Each article cites published government and humanitarian sources, with the date it was sourced. None has been reviewed by a clinician or your local emergency authority, and the app does not claim otherwise.</p>
 
-    <div className="ll-alert"><strong>Draft content, not medical advice</strong>These articles are being prepared for professional review. For a life-threatening emergency, call your local emergency number. Do not use this library to treat a serious injury or illness.</div>
+    <div className="ll-alert"><strong>For a life-threatening emergency, call 911 now</strong>Call first, then read. This library helps you prepare and escalate; it is not medical advice, not a dispatcher, and not a replacement for trained responders.</div>
+
+    <EmergencyContacts />
 
     <div className="ll-search">
       <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search guidance, e.g. water, generator, reunification" aria-label="Search guidance" />
@@ -29,7 +32,7 @@ export default function SurvivalLibrary() {
       {shown.map(g => <Link key={g.slug} to={`/Guidance/${g.slug}`} className="ll-item">
         <b>{g.title}</b>
         <div className="ll-muted">{g.summary}</div>
-        <div className="ll-eyebrow" style={{ marginTop: 6 }}>{g.quickSteps.length} quick steps · draft for review</div>
+        <div className="ll-eyebrow" style={{ marginTop: 6 }}>{g.quickSteps.length} quick steps · sourced, not independently reviewed</div>
       </Link>)}
       {shown.length === 0 && <p className="ll-muted">Nothing matches that search.</p>}
     </div>

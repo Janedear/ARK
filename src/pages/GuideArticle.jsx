@@ -27,7 +27,7 @@ export default function GuideArticle() {
     <Link to="/Guidance" className="ll-eyebrow">← All guidance</Link>
     <h1 style={{ margin: '10px 0 8px' }}>{guide.title}</h1>
     <p className="ll-muted">{guide.summary}</p>
-    <div className="ll-alert"><strong>Draft for professional review</strong>Prepared from public preparedness sources. Not reviewed by a clinician yet, and not a substitute for emergency services.</div>
+    <div className="ll-alert"><strong>For a life-threatening emergency, call 911 now</strong>Sourced from published government and humanitarian guidance on {new Date(guide.sourcedOn).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}. No clinician or local emergency authority has reviewed this page, and it is not a substitute for responders or medical advice.</div>
     <button className="ll-btn no-print" onClick={() => window.print()} style={{ marginBottom: 20 }}><Printer size={16} /> Print this page</button>
 
     <section className="ll-card" style={{ marginBottom: 16 }}>
