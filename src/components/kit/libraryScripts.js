@@ -26,6 +26,13 @@ get "kiwix-tools-linux.tar.gz" "kiwix-serve, shares Wikipedia over a hotspot (Li
 get "ARK-Offline-AI.llamafile" "Offline AI assistant, Llama 3.2 1B (about 1.3 GB)" "${LLM_URL}"
 chmod +x ARK-Offline-AI.llamafile 2>/dev/null
 
+ND=https://nodejs.org/dist/latest-v22.x
+SUMS=$(curl -sL "$ND/SHASUMS256.txt")
+for P in linux-arm64.tar.xz linux-x64.tar.xz win-x64.zip darwin-arm64.tar.gz; do
+  N=$(echo "$SUMS" | grep -oE "node-v[0-9.]+-$P" | head -1)
+  [ -n "$N" ] && get "$N" "Node.js to run the community hub ($P)" "$ND/$N"
+done
+
 echo; echo "Finished. Files are in: $(pwd)"; ls -lh
 `;
 
@@ -47,6 +54,8 @@ $a = Latest 'org\\.kiwix\\.kiwixmobile\\.standalone-v?[0-9.]+[0-9]\\.apk' "$K/re
 $o = (Invoke-RestMethod 'https://api.github.com/repos/organicmaps/organicmaps/releases/latest').assets | Where-Object { $_.name -like '*.apk' } | Select-Object -First 1
 Get-ArkFile 'OrganicMaps-Android.apk' 'Organic Maps offline maps for Android' $o.browser_download_url
 Get-ArkFile 'ARK-Offline-AI.exe' 'Offline AI assistant, Llama 3.2 1B (about 1.3 GB)' '${LLM_URL}'
+$nd = 'https://nodejs.org/dist/latest-v22.x'; $sums = (Invoke-WebRequest -UseBasicParsing "$nd/SHASUMS256.txt").Content
+foreach ($p in 'win-x64.zip', 'linux-arm64.tar.xz', 'linux-x64.tar.xz', 'darwin-arm64.tar.gz') { $n = [regex]::Match($sums, "node-v[0-9.]+-$p").Value; if ($n) { Get-ArkFile $n "Node.js to run the community hub ($p)" "$nd/$n" } }
 
 Write-Host ""; Write-Host "Finished. Files are in: $(Get-Location)"; Get-ChildItem | Format-Table Name, Length
 Read-Host 'Press Enter to close'

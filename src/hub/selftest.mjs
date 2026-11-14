@@ -25,7 +25,7 @@ await check('changed text is rejected', () => rejects(verify({ ...msg, text: 'AL
 await check('changed id is rejected', () => rejects(verify({ ...msg, id: 'a'.repeat(64) }), /Fingerprint/));
 await check('forged signature is rejected', async () => {
   const forged = await mallory.sign({ channel: 'help', alias: 'Alice', text: msg.text });
-  await rejects(verify({ ...forged, public_key: msg.public_key, id: msg.id }), /Signature/);
+  await rejects(verify({ ...msg, signature: forged.signature }), /Signature/);
 });
 await check('future packet is rejected', async () => rejects(verify(await alice.sign({ channel: 'help', alias: 'A', text: 'x', now: Date.now() + 3600000 })), /future/));
 await check('lifetime is capped at 72 hours', async () => {

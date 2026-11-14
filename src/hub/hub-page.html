@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARK hub</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font:17px/1.5 -apple-system,"Segoe UI",Arial,sans-serif;background:#eef2ee;color:#1d2b25}
+header{background:#203B32;color:#fff;padding:14px 16px}
+header h1{margin:0;font-size:22px}
+header p{margin:2px 0 0;font-size:14px;opacity:.85}
+main{max-width:760px;margin:0 auto;padding:12px}
+h2{font-size:19px;margin:0 0 10px}
+.card{background:#fff;border:1px solid #c3cfc0;border-radius:8px;padding:14px;margin:12px 0}
+.red{border:2px solid #8a2c1c}
+.warn{background:#fbeccc;color:#6b4206;border-color:#e3c27d}
+.links{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:10px 14px;border-radius:6px;border:1px solid #203B32;background:#203B32;color:#fff;font:600 15px/1.2 inherit;text-decoration:none;text-align:center;cursor:pointer}
+.ghost{background:#fff;color:#203B32}
+label{display:block;font-weight:600;font-size:14px;margin:10px 0 4px}
+input,select,textarea{width:100%;min-height:46px;padding:10px;font:16px inherit;border:1px solid #8a9a86;border-radius:6px;background:#fff;color:#1d2b25}
+textarea{min-height:90px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.tabs .btn{min-height:40px;padding:6px 12px}
+.msg{border-top:1px solid #c3cfc0;padding:12px 0}
+.msg p{margin:4px 0;white-space:pre-wrap}
+.meta{font-size:13px;color:#4f5f49;word-break:break-all}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+small{color:#4f5f49}
+</style>
+</head>
+<body>
+<header><h1 id="name">ARK community hub</h1><p>Works with no internet. Everyone on this Wi-Fi sees the same board.</p></header>
+<main>
+  <div class="card red"><b>In danger? Call 911 if any phone works.</b> Emergency services do not watch this board, and nobody is guaranteed to read it.</div>
+  <div id="clock" class="card warn" hidden></div>
+
+  <div class="card">
+    <h2>Get the essentials</h2>
+    <div class="links">
+      <a class="btn ghost" href="/kit/start-here">Start here</a>
+      <a class="btn ghost" href="/kit/guidance">First aid and survival</a>
+      <a class="btn ghost" href="/kit/meeting-point">Meeting point</a>
+      <a class="btn ghost" href="/kit/contacts">Emergency numbers</a>
+      <a class="btn ghost" href="/kit/relay">Save the offline message app</a>
+      <a class="btn ghost" href="#files">Apps, maps and Wikipedia</a>
+    </div>
+    <p><small>Save the offline message app, then open it from your downloads. It keeps working after you leave this Wi-Fi.</small></p>
+  </div>
+
+  <div class="card">
+    <h2>Post to the board</h2>
+    <label for="alias">Your name or nickname</label><input id="alias" maxlength="40" autocomplete="nickname">
+    <label for="channel">Topic</label>
+    <select id="channel"><option value="help">I need help</option><option value="safe">I am safe</option><option value="offers">I can help or have supplies</option><option value="missing">Looking for someone</option><option value="general">General news</option></select>
+    <label for="text">Message</label>
+    <textarea id="text" maxlength="1000" placeholder="Short and specific, e.g. Need insulin for 1 adult, at the school gym"></textarea>
+    <label for="hours">Keep it up for</label>
+    <select id="hours"><option value="6">6 hours</option><option value="24" selected>24 hours</option><option value="72">3 days (the most allowed)</option></select>
+    <p><small>Everything here is public. Never post a home address or medical details you would not say out loud in the street.</small></p>
+    <div class="row"><button class="btn" id="post">Post</button><span id="postStatus" role="status"></span></div>
+  </div>
+
+  <div class="card">
+    <h2>Board</h2>
+    <div class="tabs" id="tabs"></div>
+    <div id="list"><p>Loading…</p></div>
+  </div>
+
+  <div class="card">
+    <h2>Carry messages to other places</h2>
+    <p>Copy this board into the offline message app, or bring messages back from it.</p>
+    <div class="row"><button class="btn ghost" id="showBundle">Show the newest 40 messages to copy</button><a class="btn ghost" href="/api/bundle?limit=5000&amp;download=1">Download everything (for USB)</a></div>
+    <textarea id="bundleOut" readonly hidden></textarea>
+    <label for="bundleIn">Paste messages from the offline app</label>
+    <textarea id="bundleIn" placeholder='{"protocol":"ARK-RELAY-1","packets":[...]}'></textarea>
+    <div class="row"><button class="btn" id="import">Add to this hub</button><span id="importStatus" role="status"></span></div>
+  </div>
+
+  <div class="card" id="files">
+    <h2>Apps, maps and Wikipedia</h2>
+    <div id="fileList"><p>Loading…</p></div>
+    <p><small>Android: open a downloaded .apk file to install it, and allow "install unknown apps" when asked. iPhones cannot install apps from here. Open .zim files in the Kiwix app. Each file shows a SHA-256 fingerprint you can compare with a copy you trust.</small></p>
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const TOPICS = [['', 'All'], ['help', 'Need help'], ['safe', 'Safe'], ['offers', 'Can help'], ['missing', 'Looking for'], ['general', 'General']];
+const NAMES = Object.fromEntries(TOPICS);
+let topic = '', hubDevice = '';
+const el = (tag, text, cls) => { const n = document.createElement(tag); if (text != null) n.textContent = text; if (cls) n.className = cls; return n; };
+const api = async (path, body) => {
+  const res = await fetch(path, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {});
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'The hub refused that.');
+  return data;
+};
+const ago = iso => { const m = Math.round((Date.now() - Date.parse(iso)) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : Math.round(m / 60) + ' h ago'; };
+const size = b => b > 1e9 ? (b / 1e9).toFixed(1) + ' GB' : b > 1e6 ? (b / 1e6).toFixed(1) + ' MB' : Math.ceil(b / 1e3) + ' KB';
+const alias = () => $('alias').value.trim();
+$('alias').value = localStorage.getItem('ark-alias') || '';
+$('alias').onchange = () => localStorage.setItem('ark-alias', alias());
+
+function drawTabs() {
+  $('tabs').replaceChildren(...TOPICS.map(([value, label]) => {
+    const b = el('button', label, 'btn' + (value === topic ? '' : ' ghost'));
+    b.onclick = () => { topic = value; drawTabs(); refresh(); };
+    return b;
+  }));
+}
+
+async function refresh() {
+  try {
+    const s = await api('/api/status');
+    $('name').textContent = s.name; document.title = s.name; hubDevice = s.hub_device;
+    const drift = Math.round((Date.now() - Date.parse(s.time)) / 60000);
+    $('clock').hidden = Math.abs(drift) < 5;
+    $('clock').textContent = 'This phone\u2019s clock is ' + Math.abs(drift) + ' minutes ' + (drift > 0 ? 'ahead of' : 'behind') + ' the hub (hub time ' + new Date(s.time).toLocaleString() + '). Messages from the offline app may be refused until one clock is corrected.';
+    const list = await api('/api/messages?channel=' + encodeURIComponent(topic));
+    const box = $('list'); box.replaceChildren();
+    if (!list.length) box.append(el('p', 'No messages here yet.'));
+    for (const m of list) {
+      const row = el('div', null, 'msg');
+      const origin = m.device === hubDevice ? 'posted on this hub' : 'carried in from device ' + m.device;
+      row.append(el('b', m.alias), el('p', m.text), el('div', (NAMES[m.channel] || m.channel) + ' \u00b7 ' + ago(m.issued_at) + ' \u00b7 ' + origin + ' \u00b7 ' + m.seen + ' saw it', 'meta'));
+      const seen = el('button', 'I saw this', 'btn ghost');
+      seen.onclick = async () => {
+        if (!alias()) { $('alias').focus(); return alert('Add your name at the top of the post form first.'); }
+        try { await api('/api/ack', { id: m.id, alias: alias() }); refresh(); } catch (e) { alert(e.message); }
+      };
+      row.append(seen); box.append(row);
+    }
+  } catch {
+    $('list').replaceChildren(el('p', 'Lost contact with the hub. Check you are still on its Wi-Fi.'));
+  }
+}
+
+async function loadFiles() {
+  const m = await api('/files/manifest.json').catch(() => ({ files: [] }));
+  const box = $('fileList'); box.replaceChildren();
+  if (!m.files.length) box.append(el('p', 'No library files on this hub yet.'));
+  for (const f of m.files) {
+    const row = el('div', null, 'msg'), link = el('a', f.name);
+    link.href = '/files/' + encodeURIComponent(f.name);
+    row.append(link, el('div', size(f.bytes) + ' \u00b7 ' + (f.sha256 ? 'SHA-256 ' + f.sha256 : 'fingerprint still being worked out'), 'meta'));
+    box.append(row);
+  }
+}
+
+$('post').onclick = async () => {
+  if (!alias() || !$('text').value.trim()) return ($('postStatus').textContent = 'Add your name and a message.');
+  $('post').disabled = true; $('postStatus').textContent = 'Posting…';
+  try {
+    await api('/api/post', { alias: alias(), channel: $('channel').value, text: $('text').value, hours: $('hours').value });
+    $('text').value = ''; $('postStatus').textContent = 'Posted on this hub. That does not mean anyone has read it yet.';
+    refresh();
+  } catch (e) { $('postStatus').textContent = e.message; }
+  $('post').disabled = false;
+};
+$('showBundle').onclick = async () => {
+  const out = $('bundleOut');
+  out.value = JSON.stringify(await api('/api/bundle?limit=40'));
+  out.hidden = false; out.focus(); out.select();
+};
+$('import').onclick = async () => {
+  try {
+    const r = await api('/api/bundle', JSON.parse($('bundleIn').value));
+    $('importStatus').textContent = r.added + ' new, ' + r.duplicate + ' already here, ' + r.rejected.length + ' refused' + (r.rejected[0] ? ' (' + r.rejected[0].reason + ')' : '') + '.';
+    $('bundleIn').value = ''; refresh();
+  } catch (e) { $('importStatus').textContent = e instanceof SyntaxError ? 'That text is not a complete ARK bundle. Copy all of it.' : e.message; }
+};
+
+drawTabs(); refresh(); loadFiles();
+setInterval(refresh, 15000);
+</script>
+</body>
+</html>

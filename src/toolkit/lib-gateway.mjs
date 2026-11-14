@@ -30,6 +30,26 @@ async function call(body, attempt = 1) {
   return data;
 }
 
-export const pushPackets = packets => call({ action: 'push', packets });
+// With ARK_HUB_URL set, bridges talk to an ARK Local Hub on the same network instead (no internet needed).
+const hubUrl = () => (process.env.ARK_HUB_URL || '').replace(/\/$/, '');
 
-export const fetchFeed = channel => call({ action: 'feed', channel });
+async function hubCall(path, body) {
+  const response = await fetch(hubUrl() + path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {});
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Hub returned ' + response.status);
+  return data;
+}
+
+export async function pushPackets(packets) {
+  if (!hubUrl()) return call({ action: 'push', packets });
+  const result = await hubCall('/api/bundle', { protocol: 'ARK-RELAY-1', packets });
+  // Stored, already there, or permanently refused: none of these should stay queued.
+  result.rejected.forEach(item => console.log('hub refused packet', item.id, item.reason));
+  return { accepted: packets.map(packet => ({ id: packet.id })) };
+}
+
+export async function fetchFeed(channel) {
+  if (!hubUrl()) return call({ action: 'feed', channel });
+  const bundle = await hubCall(`/api/bundle?channel=${encodeURIComponent(channel)}&limit=40`);
+  return { packets: bundle.packets.map(envelope => ({ envelope })) };
+}
