@@ -7,7 +7,6 @@ import FieldSystems from '@/components/crisis/FieldSystems';
 import FieldRecovery from '@/components/crisis/FieldRecovery';
 import FieldIncidentForm from '@/components/crisis/FieldIncidentForm';
 import FieldSystemDetail from '@/components/crisis/FieldSystemDetail';
-import '@/components/crisis/fieldOperations.css';
 
 export default function CrisisCoordination() {
   const [showIncidentDialog, setShowIncidentDialog] = useState(false);

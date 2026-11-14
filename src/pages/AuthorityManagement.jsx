@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Shield, Plus, UserPlus } from 'lucide-react';
+import { Shield, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from 'sonner';
-import { addHours, addDays } from 'date-fns';
+import { addHours } from 'date-fns';
 import AuthorityChain from '../components/crisis/AuthorityChain';
 
 export default function AuthorityManagement() {

@@ -39,7 +39,7 @@ export default function AdvanceStageDialog({ incident, openActionCount, open, on
       }
       onOpenChange(false);
       onChange();
-    } catch (e) {
+    } catch {
       setError('Only the incident lead or an admin can change this incident\'s stage.');
     } finally {
       setSaving(false);

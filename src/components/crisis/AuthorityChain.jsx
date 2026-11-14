@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, ArrowRight, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Shield, Clock, CheckCircle, XCircle } from "lucide-react";
 import { format, isAfter } from "date-fns";
 
 export default function AuthorityChain({ authorities }) {
