@@ -9,8 +9,8 @@ import '@/components/network/network.css';
 
 export default function Layout({ children, currentPageName }) {
   return <div className="field-shell">
-    <div className="network-banner"><div className="flex items-center justify-between"><div className="flex items-center gap-3"><Shield className="h-5 w-5" /><span>NCRS-P PROTOTYPE</span></div><div>DEMONSTRATION SYSTEM — NOT CONNECTED TO REAL INFRASTRUCTURE</div></div></div>
+    <div className="network-banner"><div className="flex items-center justify-between"><div className="flex items-center gap-3"><Shield className="h-5 w-5" /><span>LIFELINE</span></div><div>PREPAREDNESS PROTOTYPE — NOT EMERGENCY SERVICES, NOT A MESH NETWORK</div></div></div>
     <div className="network-workspace"><NetworkNavigation currentPageName={currentPageName} /><main className="network-main"><ConnectionNotice /><PageOrientation page={currentPageName} />{children}</main></div>
-    <footer><div><div>National Cyber Resilience & Snap-Back Platform</div><div><div>Planning and demonstration workspace. Not authorized for operational use.</div><div>No emergency dispatch, infrastructure control, or offline communications network.</div><div>Use verified local guidance and qualified, authorized responders.</div></div></div></footer>
+    <footer><div><div>Lifeline</div><div><div>Preparedness and local coordination prototype. Not authorized for operational use.</div><div>No emergency dispatch, no guaranteed message delivery, no offline communications network.</div><div>For immediate danger call your local emergency number. Use verified local guidance and qualified responders.</div></div></div></footer>
   </div>;
 }

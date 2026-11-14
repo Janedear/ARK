@@ -1,0 +1,91 @@
+{
+  "name": "HouseholdContact",
+  "type": "object",
+  "properties": {
+    "household_id": {
+      "type": "string",
+      "description": "Household this contact belongs to"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "relationship": {
+      "type": "string",
+      "description": "e.g. partner, neighbour, doctor, school"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "area": {
+      "type": "string",
+      "description": "Town or neighbourhood only"
+    },
+    "is_out_of_area": {
+      "type": "boolean",
+      "default": false,
+      "description": "Lives outside the local area and can act as the relay contact"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "household_id",
+    "full_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

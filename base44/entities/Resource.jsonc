@@ -1,0 +1,112 @@
+{
+  "name": "Resource",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "water",
+        "food",
+        "shelter",
+        "medical",
+        "charging",
+        "information",
+        "supplies"
+      ],
+      "enumColors": [
+        "blue",
+        "green",
+        "purple",
+        "red",
+        "yellow",
+        "gray",
+        "pink"
+      ],
+      "default": "water"
+    },
+    "area": {
+      "type": "string",
+      "description": "Town or neighbourhood"
+    },
+    "address": {
+      "type": "string",
+      "description": "Public location only. Never a private residence."
+    },
+    "access_notes": {
+      "type": "string",
+      "description": "Hours, eligibility, limits, what to bring"
+    },
+    "accessibility": {
+      "type": "string",
+      "description": "Step-free access, interpreter, delivery options"
+    },
+    "contact": {
+      "type": "string",
+      "description": "Public phone number or website"
+    },
+    "source_name": {
+      "type": "string",
+      "description": "Who supplied this information"
+    },
+    "source_url": {
+      "type": "string"
+    },
+    "last_verified": {
+      "type": "string",
+      "format": "date",
+      "description": "Date a person last confirmed this listing"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "verified",
+        "closed"
+      ],
+      "enumColors": [
+        "yellow",
+        "green",
+        "gray"
+      ],
+      "default": "unverified"
+    }
+  },
+  "required": [
+    "name",
+    "category"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

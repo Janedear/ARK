@@ -11,8 +11,14 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Incidents from '@/pages/Incidents';
 import IncidentDetail from '@/pages/IncidentDetail';
 import ResponseHub from '@/pages/ResponseHub';
-import StartHere from '@/pages/StartHere';
 import FieldGuide from '@/pages/FieldGuide';
+import Lifeline from '@/pages/Lifeline';
+import HouseholdPlan from '@/pages/HouseholdPlan';
+import SurvivalLibrary from '@/pages/SurvivalLibrary';
+import GuideArticle from '@/pages/GuideArticle';
+import PrintPacket from '@/pages/PrintPacket';
+import Resources from '@/pages/Resources';
+import Capabilities from '@/pages/Capabilities';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -47,10 +53,16 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/" element={
-        <LayoutWrapper currentPageName="StartHere">
-          <StartHere />
+        <LayoutWrapper currentPageName="Lifeline">
+          <Lifeline />
         </LayoutWrapper>
       } />
+      <Route path="/HouseholdPlan" element={<LayoutWrapper currentPageName="HouseholdPlan"><HouseholdPlan /></LayoutWrapper>} />
+      <Route path="/Guidance" element={<LayoutWrapper currentPageName="SurvivalLibrary"><SurvivalLibrary /></LayoutWrapper>} />
+      <Route path="/Guidance/:slug" element={<LayoutWrapper currentPageName="GuideArticle"><GuideArticle /></LayoutWrapper>} />
+      <Route path="/PrintPacket" element={<LayoutWrapper currentPageName="PrintPacket"><PrintPacket /></LayoutWrapper>} />
+      <Route path="/Resources" element={<LayoutWrapper currentPageName="Resources"><Resources /></LayoutWrapper>} />
+      <Route path="/Capabilities" element={<LayoutWrapper currentPageName="Capabilities"><Capabilities /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
