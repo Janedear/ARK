@@ -4,11 +4,14 @@ import { Download as DownloadIcon, Shield, Check, ArrowRight } from 'lucide-reac
 import { buildZip, downloadBlob } from '@/components/toolkit/zip';
 import { buildKitFiles, KIT_CONTENTS } from '@/components/kit/kitFiles';
 import GetArk from '@/components/kit/GetArk';
+import MeetingPointPicker from '@/components/kit/MeetingPointPicker';
 import '@/components/lifeline/lifeline.css';
 
 export default function Download() {
   const [done, setDone] = useState(false);
-  const download = () => { downloadBlob(buildZip(buildKitFiles()), 'ARK-offline-kit.zip'); setDone(true); };
+  const [meetingPoint, setMeetingPointState] = useState(() => JSON.parse(localStorage.getItem('ark-meeting-point') || 'null'));
+  const setMeetingPoint = point => { setMeetingPointState(point); localStorage.setItem('ark-meeting-point', JSON.stringify(point)); };
+  const download = () => { downloadBlob(buildZip(buildKitFiles(meetingPoint)), 'ARK-offline-kit.zip'); setDone(true); };
 
   return <div className="min-h-screen bg-background">
     <header className="border-b border-border bg-card">
@@ -25,7 +28,7 @@ export default function Download() {
 
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', margin: '22px 0' }}>
         <button className="ll-btn" style={{ minHeight: 54, fontSize: 17, padding: '12px 26px' }} onClick={download}><DownloadIcon size={18} />Download ARK-offline-kit.zip</button>
-        {done && <span className="ll-chip ok"><Check size={13} />Saved. Unzip it and open START-HERE.txt</span>}
+        {done && <span className="ll-chip ok"><Check size={13} />Saved. Unzip it and open START-HERE.html</span>}
       </div>
 
       <div className="ll-grid" style={{ marginBottom: 22 }}>
@@ -34,7 +37,9 @@ export default function Download() {
 
       <div className="ll-alert danger"><strong>For immediate danger, call 911</strong>ARK does not dispatch help or call anyone. Relay messages are public and unencrypted. Guidance is sourced from government agencies but not reviewed by a clinician. Keep paper copies — browser storage can be cleared.</div>
 
-      <GetArk />
+      <MeetingPointPicker value={meetingPoint} onChange={setMeetingPoint} />
+
+      <GetArk meetingPoint={meetingPoint} />
 
       <section className="ll-card" style={{ marginTop: 18 }}>
         <h2>After downloading</h2>

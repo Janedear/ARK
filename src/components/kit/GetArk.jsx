@@ -15,12 +15,12 @@ function StoreTile({ icon: Icon, name, url }) {
   </div>;
 }
 
-export default function GetArk() {
+export default function GetArk({ meetingPoint }) {
   const [notice, setNotice] = useState('');
   const webUrl = `${window.location.origin}/Home`;
 
   const share = async () => {
-    const blob = buildZip(buildKitFiles());
+    const blob = buildZip(buildKitFiles(meetingPoint));
     const file = new File([blob], 'ARK-offline-kit.zip', { type: 'application/zip' });
     if (navigator.canShare?.({ files: [file] })) {
       try { await navigator.share({ files: [file], title: 'ARK offline kit' }); setNotice('Share sheet opened. This does not confirm the other person received it.'); }
