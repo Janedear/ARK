@@ -10,6 +10,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 // Add page imports here
 import Incidents from '@/pages/Incidents';
 import IncidentDetail from '@/pages/IncidentDetail';
+import ResponseHub from '@/pages/ResponseHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
       ))}
       <Route path="/Incidents" element={<LayoutWrapper currentPageName="Incidents"><Incidents /></LayoutWrapper>} />
       <Route path="/IncidentDetail" element={<LayoutWrapper currentPageName="Incidents"><IncidentDetail /></LayoutWrapper>} />
+      <Route path="/ResponseHub" element={<LayoutWrapper currentPageName="ResponseHub"><ResponseHub /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

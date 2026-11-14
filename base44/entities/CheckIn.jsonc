@@ -1,0 +1,98 @@
+{
+  "name": "CheckIn",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Person's name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "safe",
+        "need_help",
+        "can_help"
+      ],
+      "enumColors": [
+        "green",
+        "red",
+        "blue"
+      ],
+      "description": "Current status"
+    },
+    "location": {
+      "type": "string",
+      "description": "Where they are"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Best way to reach them"
+    },
+    "skills": {
+      "type": "string",
+      "description": "Skills or resources they can offer"
+    },
+    "note": {
+      "type": "string",
+      "description": "Anything else"
+    }
+  },
+  "required": [
+    "name",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
