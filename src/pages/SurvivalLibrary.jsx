@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { guides, guideCategories } from '@/content/lifelineGuides';
 import EmergencyContacts from '@/components/lifeline/EmergencyContacts';
+import LocalAlerts from '@/components/lifeline/LocalAlerts';
 import '@/components/lifeline/lifeline.css';
 
 export default function SurvivalLibrary() {
@@ -17,6 +18,8 @@ export default function SurvivalLibrary() {
     <p className="ll-muted">Specific, actionable guidance for the situations this app is built for. Each article cites published government and humanitarian sources, with the date it was sourced. None has been reviewed by a clinician or your local emergency authority, and the app does not claim otherwise.</p>
 
     <div className="ll-alert"><strong>For a life-threatening emergency, call 911 now</strong>Call first, then read. This library helps you prepare and escalate; it is not medical advice, not a dispatcher, and not a replacement for trained responders.</div>
+
+    <LocalAlerts />
 
     <EmergencyContacts />
 
