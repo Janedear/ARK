@@ -4,7 +4,7 @@ import '@/components/lifeline/lifeline.css';
 
 const capabilities = [
   ['Household plan, contacts and supply checklist', 'working', 'Real records in the database, readable only by the owning account and admins. Create, edit, reload and delete all exercised.', 'Yes, saved online. Readable offline only from the saved snapshot on the home screen.', 'Requires the app to load at least once.'],
-  ['Saved snapshot on the home dashboard', 'working', 'A compressed copy of your plan, contacts, supply counts and community counts, stored in this browser at the last successful load.', 'Yes: it renders with no connection and is clearly labelled as a saved copy.', 'Browser storage on one device only. It is not encrypted by Lifeline.'],
+  ['Saved snapshot on the home dashboard', 'working', 'A compressed copy of your plan, contacts, supply counts and community counts, stored in this browser at the last successful load.', 'Yes: it renders with no connection and is clearly labelled as a saved copy.', 'Browser storage on one device only. It is not encrypted by ARK.'],
   ['Printable emergency packet', 'working', 'Builds from your saved records and prints through the browser. Includes blanks for handwriting where data is missing.', 'Yes, on paper. Paper needs no power.', 'Printing or saving as PDF is a manual step you take.'],
   ['Guidance library', 'working', 'Ten sourced articles, searchable and filterable, marked draft pending professional review.', 'Partial: article text is bundled with the app and does not need a database call, but a cold load still needs the app itself.', 'Does not include treatment instructions, and no clinician has reviewed it yet.'],
   ['Community help board, announcements, incident register', 'working', 'Existing tables with live shared records; posts, claims and status updates save to the database.', 'No. These read and write over the network.', 'Not a monitored emergency channel. Not dispatch.'],
@@ -27,7 +27,7 @@ export default function Capabilities() {
     <h1 style={{ margin: '10px 0 8px' }}>What actually works</h1>
     <p className="ll-muted">Every row states what is built, whether it survives losing the internet, and what would have to be built elsewhere. If a row says blocked, no amount of configuration in this app will make it work.</p>
 
-    <div className="ll-alert"><strong>How to check any claim yourself</strong>Open the feature and look at the data. Then disconnect the device and reload. If it does not appear, it is not offline. The printed packet is the only part of Lifeline that keeps working when everything else fails.</div>
+    <div className="ll-alert"><strong>How to check any claim yourself</strong>Open the feature and look at the data. Then disconnect the device and reload. If it does not appear, it is not offline. The printed packet is the only part of ARK that keeps working when everything else fails.</div>
 
     <table className="ll-status-table">
       <thead><tr><th>Feature</th><th>Status</th><th>What was built</th><th>Works without internet</th><th>Limit</th></tr></thead>
@@ -47,10 +47,10 @@ export default function Capabilities() {
     </section>
 
     <section className="ll-card" style={{ marginTop: 16 }}>
-      <h2>What happens if Lifeline itself is down</h2>
-      <p>Lifeline runs on Base44: its database, logins, file storage and hosting all live there, and Base44 does not support self-hosting. If that service is unreachable, this app is unreachable, no matter where a copy of the code is kept.</p>
+      <h2>What happens if ARK itself is down</h2>
+      <p>ARK runs on Base44: its database, logins, file storage and hosting all live there, and Base44 does not support self-hosting. If that service is unreachable, this app is unreachable, no matter where a copy of the code is kept.</p>
       <p>Keeping the code in a repository protects the code from being lost. It does not keep the app running, and a rebuild elsewhere would mean replacing the database, logins, storage and hosting.</p>
-      <p><b>Design consequence:</b> nobody should depend on Lifeline during an emergency. The printed packet is the only layer that keeps working when the app, the network and the power all fail. Print it, keep it with your kit, reprint after every change.</p>
+      <p><b>Design consequence:</b> nobody should depend on ARK during an emergency. The printed packet is the only layer that keeps working when the app, the network and the power all fail. Print it, keep it with your kit, reprint after every change.</p>
     </section>
   </div>;
 }

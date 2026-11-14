@@ -26,8 +26,8 @@ export const navigation = [
   ] }
 ];
 export const guidance = {
-  Lifeline: { who: 'Anyone preparing a household or facing a disruption', next: 'Check the connection status → open the urgent block if someone is in danger → pick a task from the grid.', limit: 'Lifeline does not dispatch responders or call anyone for you. A saved snapshot is a copy, not live data.' },
-  Capabilities: { who: 'Anyone deciding whether to rely on Lifeline', next: 'Read the status of each feature → disconnect and test the ones you care about.', limit: 'Statuses are conservative until a person tests them on a real phone.' },
+  Lifeline: { who: 'Anyone preparing a household or facing a disruption', next: 'Check the connection status → open the urgent block if someone is in danger → pick a task from the grid.', limit: 'ARK does not dispatch responders or call anyone for you. A saved snapshot is a copy, not live data.' },
+  Capabilities: { who: 'Anyone deciding whether to rely on ARK', next: 'Read the status of each feature → disconnect and test the ones you care about.', limit: 'Statuses are conservative until a person tests them on a real phone.' },
   HouseholdPlan: { who: 'One household, one account', next: 'Save the plan → add contacts and one out-of-area relay → work through the supply checklist → print the packet.', limit: 'Records are private to this account, and admins can read all records. Use the town or neighbourhood, never a full street address.' },
   PrintPacket: { who: 'Anyone who may lose power or signal', next: 'Print or save as PDF → keep it with the kit → reprint after every change.', limit: 'The packet is a snapshot. It will not update itself, and it contains private information.' },
   SurvivalLibrary: { who: 'Households and volunteers', next: 'Search or pick a topic → read the quick steps → check the cited source.', limit: 'Draft content. Not reviewed by a clinician, and not a substitute for emergency services.' },

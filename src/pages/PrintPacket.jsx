@@ -64,7 +64,7 @@ export default function PrintPacket() {
     <section className="ll-card" style={{ marginTop: 16 }}>
       <h2>6. If the phone does not work</h2>
       <ol style={{ paddingLeft: 22 }}>{keyGuides.map(slug => { const g = guideBySlug(slug); return g ? <li key={slug} style={{ marginBottom: 8 }}><b>{g.title}:</b> {g.quickSteps[0]}</li> : null; })}</ol>
-      <p className="ll-muted">Full guidance, with sources, is in the Lifeline guidance library. This list is a reminder, not a substitute.</p>
+      <p className="ll-muted">Full guidance, with sources, is in the ARK guidance library. This list is a reminder, not a substitute.</p>
     </section>
 
     <section className="ll-card" style={{ marginTop: 16 }}>

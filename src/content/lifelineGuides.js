@@ -58,11 +58,11 @@ export const guides = [
     summary: 'Who to call, what to say, and the difference between self-care guidance and emergency care.',
     quickSteps: [
       'For a life-threatening emergency, call your local emergency number immediately. In the United States that is 911.',
-      'Follow the dispatcher or a trained responder. Lifeline does not provide treatment instructions.',
+      'Follow the dispatcher or a trained responder. ARK does not provide treatment instructions.',
       'Write down medication names, doses, allergies and conditions in advance so you can read them to a responder.'
     ],
     sections: [
-      { heading: 'What this app will not do', body: ['Lifeline does not diagnose, prescribe, or replace a clinician or dispatcher. It will not tell you how to treat a serious injury.', 'Guidance here is limited to preparation and escalation: keeping medication, records and contact routes ready, and knowing who to reach.'] },
+      { heading: 'What this app will not do', body: ['ARK does not diagnose, prescribe, or replace a clinician or dispatcher. It will not tell you how to treat a serious injury.', 'Guidance here is limited to preparation and escalation: keeping medication, records and contact routes ready, and knowing who to reach.'] },
       { heading: 'Preparing for a medical need in an outage', body: ['Keep at least 7 days of prescription medication where you can grab it, plus a written list of doses and prescriber contacts.', 'For powered medical equipment, register with your utility and local emergency management where such programmes exist, and plan a backup power source with your equipment supplier.'] },
       { heading: 'When services are overwhelmed', body: ['Expect delays. Report the location, the number of people, the condition, and whether the person is breathing.', 'Do not move someone with a suspected spinal injury unless they are in immediate danger.'] }
     ],
@@ -143,8 +143,8 @@ export const guides = [
     ],
     sections: [
       { heading: 'Before it happens', body: ['Choose a contact outside your region. Local lines saturate first; long-distance routes are often clearer.', 'Give every member the same printed card with the contact, meeting points and any medical information a responder would need.'] },
-      { heading: 'During an outage', body: ['Conserve battery: reduce brightness, close apps, and keep the phone off until a scheduled check-in window.', 'Do not assume a message arrived. Delivery in Lifeline is only confirmed when a recipient acts on it, and this app cannot send messages without a connection.'] },
-      { heading: 'What Lifeline cannot do', body: ['Lifeline is a web application. It cannot create a radio link, a Bluetooth mesh, or a satellite connection, and it cannot deliver messages while you are offline.', 'Plan on paper and on existing communications equipment as the dependable path.'] }
+      { heading: 'During an outage', body: ['Conserve battery: reduce brightness, close apps, and keep the phone off until a scheduled check-in window.', 'Do not assume a message arrived. Delivery in ARK is only confirmed when a recipient acts on it, and this app cannot send messages without a connection.'] },
+      { heading: 'What ARK cannot do', body: ['ARK is a web application. It cannot create a radio link, a Bluetooth mesh, or a satellite connection, and it cannot deliver messages while you are offline.', 'Plan on paper and on existing communications equipment as the dependable path.'] }
     ],
     sources: [
       { label: 'Ready.gov, emergency communications plan', url: 'https://www.ready.gov/plan' },

@@ -13,7 +13,7 @@ export default function Lifeline() {
 
   return <div className="ll-page">
     <header style={{ marginBottom: 6 }}>
-      <span className="ll-eyebrow">Lifeline · preparedness and local coordination</span>
+      <span className="ll-eyebrow">ARK · preparedness and local coordination</span>
       <h1 style={{ margin: '10px 0 8px' }}>Get ready. Stay reachable. Help nearby.</h1>
       <p className="ll-muted">A household plan, plain-language emergency guidance, and a way to coordinate with your community when normal services fail.</p>
     </header>
@@ -22,7 +22,7 @@ export default function Lifeline() {
 
     {(!online || stale) && <div className="ll-alert" role="alert">
       <strong>You are seeing a saved copy.</strong>
-      Nothing on this screen will update until a connection returns, and anything you change will not be saved. Guidance pages you already opened may stay readable, but Lifeline cannot send messages or call for help. Use your printed packet and your local emergency number.
+      Nothing on this screen will update until a connection returns, and anything you change will not be saved. Guidance pages you already opened may stay readable, but ARK cannot send messages or call for help. Use your printed packet and your local emergency number.
     </div>}
 
     <UrgentHelp />
@@ -40,7 +40,7 @@ export default function Lifeline() {
     </div>
 
     <div className="ll-alert" style={{ marginTop: 24 }}>
-      <strong>What Lifeline is not</strong>
+      <strong>What ARK is not</strong>
       Not a replacement for emergency services. It cannot guarantee rescue, medical treatment, message delivery, or that a resource is open. Device-to-device networking and offline map packages are not built. <Link to="/Capabilities" style={{ textDecoration: 'underline' }}>See exactly what works</Link>.
     </div>
   </div>;
