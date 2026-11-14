@@ -1,0 +1,21 @@
+[Unit]
+Description=ARK bridge (radio or SMS)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=arkbridge
+WorkingDirectory=/opt/ark-toolkit
+# Change to bridges/sms.mjs for the SMS bridge.
+ExecStart=/usr/bin/node --env-file=.env bridges/meshtastic.mjs
+Restart=always
+RestartSec=15
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/opt/ark-toolkit
+
+[Install]
+WantedBy=multi-user.target

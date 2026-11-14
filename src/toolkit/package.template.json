@@ -1,0 +1,16 @@
+{
+  "name": "ark-bridge-toolkit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ARK radio and SMS bridges for the free offline relay network",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "selftest": "node selftest.mjs",
+    "radio": "node --env-file=.env bridges/meshtastic.mjs",
+    "sms": "node --env-file=.env bridges/sms.mjs"
+  },
+  "dependencies": {
+    "mqtt": "^5.7.0"
+  }
+}

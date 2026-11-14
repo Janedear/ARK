@@ -21,6 +21,7 @@ import Resources from '@/pages/Resources';
 import Capabilities from '@/pages/Capabilities';
 import Network from '@/pages/Network';
 import OfflineMap from '@/pages/OfflineMap';
+import Toolkit from '@/pages/Toolkit';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -67,6 +68,7 @@ const AuthenticatedApp = () => {
       <Route path="/Capabilities" element={<LayoutWrapper currentPageName="Capabilities"><Capabilities /></LayoutWrapper>} />
       <Route path="/Network" element={<LayoutWrapper currentPageName="Network"><Network /></LayoutWrapper>} />
       <Route path="/Map" element={<LayoutWrapper currentPageName="OfflineMap"><OfflineMap /></LayoutWrapper>} />
+      <Route path="/Toolkit" element={<LayoutWrapper currentPageName="Toolkit"><Toolkit /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}

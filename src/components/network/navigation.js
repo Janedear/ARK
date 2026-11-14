@@ -15,6 +15,7 @@ export const navigation = [
     { name: 'Open relay network', path: '/Network', page: 'Network', hint: 'Messages, offline queues, relay paths' },
     { name: 'Resources', path: '/Resources', page: 'Resources', hint: 'Water, food, shelter, charging' },
     { name: 'Offline map', path: '/Map', page: 'OfflineMap', hint: 'Save an area, works without signal' },
+    { name: 'Bridge toolkit', path: '/Toolkit', page: 'Toolkit', hint: 'Download radio and SMS bridges' },
     { name: 'People & help', path: '/ResponseHub', page: 'ResponseHub', hint: 'Check in, ask, offer support' },
     { name: 'Incident register', path: '/Incidents', page: 'Incidents', hint: 'Report and track local disruption' }
   ] },
@@ -37,6 +38,7 @@ export const guidance = {
   GuideArticle: { who: 'Households and volunteers', next: 'Read the quick steps first → print the page if you may lose power.', limit: 'Draft content awaiting professional review. Source links need a connection.' },
   Resources: { who: 'People looking for local help, and coordinators who add listings', next: 'Filter by category → check the source and last-checked date → call ahead before travelling.', limit: 'No live availability and no verified feed. Listings are claims. Never publish a private address.' },
   OfflineMap: { who: 'Anyone who may lose signal but still needs to find their way', next: 'Centre the map on your area → pick a radius and detail level → save the area → turn off your connection and check it still draws.', limit: 'OpenStreetMap data saved in this one browser. No search, no directions, no live conditions, nothing outside saved areas. Not a native offline map app.' },
+  Toolkit: { who: 'A person willing to run a small program on a computer or spare phone', next: 'Download the zip → publish the app → fill in the function address and token → run the self-test → start a bridge.', limit: 'Runs outside ARK. Public unencrypted packets, no delivery guarantee, no satellite, no Bluetooth mesh. Needs a machine that stays awake.' },
   ResponseHub: { who: 'People seeking help, volunteers and local coordinators', next: 'Check in → read announcements → post or claim a need.', limit: 'Posts are not monitored emergency calls. Shared records require connectivity; no offline intake is implemented.' },
   Incidents: { who: 'Incident leads and response teams', next: 'Report an incident → name a lead → assign actions → record outcomes.', limit: 'A report is not a verified alert. Use established emergency channels for immediate danger.' },
   IncidentDetail: { who: 'The incident lead and assigned responders', next: 'Review context → agree on actions → record evidence → change stage with a reason.', limit: 'AI advice requires human review. Recorded completion is not independent proof of recovery.' },
