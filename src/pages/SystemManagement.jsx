@@ -131,10 +131,10 @@ export default function SystemManagement() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
               <Server className="h-8 w-8 text-blue-600" />
-              System Management & Baselines
+              Infrastructure register
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Register systems, maintain baselines, execute reconstitution
+              Document essential systems and the trusted configurations used to plan recovery.
             </p>
           </div>
 
@@ -290,7 +290,7 @@ export default function SystemManagement() {
                         className="bg-orange-600 hover:bg-orange-700"
                       >
                         <RefreshCw className="h-3 w-3 mr-1" />
-                        Reconstitute
+                        Simulate recovery
                       </Button>
                     )}
 

@@ -82,10 +82,10 @@ export default function Playbooks() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
               <BookOpen className="h-8 w-8 text-emerald-600" />
-              Response Playbooks
+              Response procedures
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Pre-authorized response procedures for rapid crisis execution
+              Review documented response steps and check their scope before a supervised exercise.
             </p>
           </div>
 

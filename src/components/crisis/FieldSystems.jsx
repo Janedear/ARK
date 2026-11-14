@@ -6,7 +6,7 @@ export default function FieldSystems({ systems, onSystemClick }) {
   const groups = systems.reduce((all, system) => ({ ...all, [system.region]: [...(all[system.region] || []), system] }), {});
   return <section className="fo-sec"><h2 className="fo-h2"><i>01</i>Systems</h2>
     {Object.entries(groups).map(([region, entries], index) => <div className="fo-band" key={region}>
-      <h3 className="fo-h2"><i>{String(index + 3).padStart(2, '0')}</i>{region.replace(/_/g, ' ')}<em>{entries.length} systems</em></h3>
+      <h3 className="fo-h2"><i>{String.fromCharCode(65 + index)}</i>{region.replace(/_/g, ' ')}<em>{entries.length} systems</em></h3>
       <div className="fo-grid">{entries.map(system => { const Icon = icons[system.system_type] || Building2;
         return <button className="fo-sys" key={system.id} onClick={() => onSystemClick(system)}>
           <div className="fo-sh"><span className="fo-ic"><Icon size={22} strokeWidth={1.8} /></span><div><div className="fo-sn">{system.system_name}</div><div className="fo-st">{system.system_type.replace(/_/g, ' ')}</div></div></div>

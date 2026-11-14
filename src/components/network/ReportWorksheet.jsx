@@ -1,0 +1,5 @@
+import React from 'react';
+export default function ReportWorksheet() {
+  const fields = ['Hub / local area', 'Coordinator / backup / safe contact', 'Primary channel / backup channel', 'Next check-in time / overdue-contact procedure', 'Report ID / correction to report ID', 'Origin / destination / date / time / timezone', 'Confirmed observation or unverified report / source', 'Need / affected service / urgency', 'Assigned to / next update due', 'Sent at / received by / acknowledgement time', 'Outcome / unresolved issue'];
+  return <section className="network-print-section"><h2>Local hub & message worksheet</h2><p>Fill by hand. Use a reference code instead of a full name where practical. Keep private rosters separate from publicly shared updates.</p><table className="network-worksheet"><tbody>{fields.map(field => <tr key={field}><th scope="row">{field}</th><td aria-label={`Space to write ${field}`} /></tr>)}</tbody></table><p>Mark undelivered reports clearly. Record corrections as new entries; keep the original. Do not treat a record in this worksheet as proof that assistance has arrived.</p></section>;
+}

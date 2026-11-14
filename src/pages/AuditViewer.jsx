@@ -69,10 +69,10 @@ export default function AuditViewer() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
               <FileText className="h-8 w-8 text-indigo-600" />
-              Audit & Attestation Log
+              Activity log
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Immutable record of all platform actions for accountability and oversight
+              Review saved actions, their actors, and recorded outcomes alongside original evidence.
             </p>
           </div>
 
@@ -83,16 +83,16 @@ export default function AuditViewer() {
         </div>
 
         {/* Integrity Notice */}
-        <Card className="border-green-300 bg-green-50">
+        <Card className="border-border bg-card">
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              <Shield className="h-6 w-6 text-green-600" />
+              <Shield className="h-6 w-6 text-muted-foreground" />
               <div>
-                <div className="font-bold text-green-900">
-                  Log Integrity: Verified
+                <div className="font-bold text-foreground">
+                  Application activity records
                 </div>
-                <div className="text-sm text-green-700">
-                  All {auditLogs.length} entries verified via hash chain. Last verification: {format(new Date(), 'MMM d, yyyy HH:mm')}
+                <div className="text-sm text-muted-foreground">
+                  {auditLogs.length} recent records loaded. Independent integrity verification is not implemented.
                 </div>
               </div>
             </div>
@@ -156,7 +156,7 @@ export default function AuditViewer() {
         {/* Audit Log Entries */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Audit Trail (Append-Only)</CardTitle>
+            <CardTitle className="text-lg">Recorded activity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">

@@ -9,7 +9,7 @@ export default function FieldIncidentForm({ form, setForm, onCancel, onDeclare, 
       <div><label className="fo-lb" htmlFor={`${prefix}-severity`}>Severity *</label><select className="fo-inp" {...field('severity')}>{['low','medium','high','critical'].map(s => <option key={s} value={s}>{s[0].toUpperCase() + s.slice(1)}</option>)}</select><div className="fo-opts">Low · Medium · High · Critical</div></div></div>
     <div><label className="fo-lb" htmlFor={`${prefix}-affected_region`}>Affected Region *</label><select className="fo-inp" {...field('affected_region')}>{regions.map(([key,label]) => <option key={key} value={key}>{label}</option>)}</select><div className="fo-opts">{regions.map(r => r[1]).join(' · ')}</div></div>
     <div><label className="fo-lb" htmlFor={`${prefix}-description`}>Description</label><textarea className="fo-inp" rows={3} {...field('description')} placeholder="Detailed incident information (will be logged in audit trail)" /></div>
-    <div className="fo-notice"><b>⚠️ Authority Notice</b><span>Declaring an incident creates an immutable audit log entry and may trigger automated response protocols. Ensure you have appropriate authority.</span></div>
+    <div className="fo-notice"><b>⚠️ Authority Notice</b><span>Declaring an incident saves a report and an activity entry. It does not dispatch responders or authorize operational action. Confirm your remit before proceeding.</span></div>
     <div className="fo-actions"><button className="fo-btn fo-out" onClick={onCancel}>Cancel</button><button className="fo-btn fo-sm" disabled={!form.title} onClick={onDeclare}>Declare Incident</button></div>
   </div>;
 }

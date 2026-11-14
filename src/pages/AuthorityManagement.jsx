@@ -113,10 +113,10 @@ export default function AuthorityManagement() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
               <Shield className="h-8 w-8 text-purple-600" />
-              Authority Management
+              Authority records
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Grant, delegate, and audit crisis response authorities
+              Document who is responsible, the scope of their mandate, and when it expires.
             </p>
           </div>
 
@@ -227,12 +227,12 @@ export default function AuthorityManagement() {
                 </div>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-                  <div className="font-semibold text-blue-900">🔒 Authority Principles</div>
+                  <div className="font-semibold text-blue-900">Authority record limitations</div>
                   <div className="text-blue-700 text-xs mt-1 space-y-1">
-                    <div>• Time-bounded: All authorities expire automatically</div>
-                    <div>• Scope-limited: Cannot exceed your own authority</div>
-                    <div>• Auditable: Creates immutable log entry</div>
-                    <div>• Revocable: Can be revoked before expiration</div>
+                    <div>• Expiry dates document the intended duration; they do not enforce account access.</div>
+                    <div>• Scope records the mandate; it is not an implemented permission boundary.</div>
+                    <div>• An activity entry is saved, but independent tamper verification is not implemented.</div>
+                    <div>• Confirm the legal mandate and the recipient before recording a grant.</div>
                   </div>
                 </div>
 

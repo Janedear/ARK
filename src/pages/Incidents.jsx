@@ -32,8 +32,8 @@ export default function Incidents() {
       <div className="fo-container space-y-6">
         <div className="fo-page-header">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Incidents</h1>
-            <p className="text-sm text-gray-500">Track every incident from first report to closure</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Incident register</h1>
+            <p className="text-sm text-gray-500">Give each disruption a lead, a response plan, and a record of what happened.</p>
           </div>
           <DeclareIncidentDialog />
         </div>

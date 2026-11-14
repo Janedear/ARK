@@ -11,10 +11,10 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Incidents from '@/pages/Incidents';
 import IncidentDetail from '@/pages/IncidentDetail';
 import ResponseHub from '@/pages/ResponseHub';
+import StartHere from '@/pages/StartHere';
+import FieldGuide from '@/pages/FieldGuide';
 
-const { Pages, Layout, mainPage } = pagesConfig;
-const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
+const { Pages, Layout } = pagesConfig;
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
@@ -47,8 +47,8 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
+        <LayoutWrapper currentPageName="StartHere">
+          <StartHere />
         </LayoutWrapper>
       } />
       {Object.entries(Pages).map(([path, Page]) => (
@@ -63,7 +63,8 @@ const AuthenticatedApp = () => {
         />
       ))}
       <Route path="/Incidents" element={<LayoutWrapper currentPageName="Incidents"><Incidents /></LayoutWrapper>} />
-      <Route path="/IncidentDetail" element={<LayoutWrapper currentPageName="Incidents"><IncidentDetail /></LayoutWrapper>} />
+      <Route path="/IncidentDetail" element={<LayoutWrapper currentPageName="IncidentDetail"><IncidentDetail /></LayoutWrapper>} />
+      <Route path="/FieldGuide" element={<LayoutWrapper currentPageName="FieldGuide"><FieldGuide /></LayoutWrapper>} />
       <Route path="/ResponseHub" element={<LayoutWrapper currentPageName="ResponseHub"><ResponseHub /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

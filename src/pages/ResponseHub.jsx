@@ -68,8 +68,8 @@ export default function ResponseHub() {
   return (
     <div className="fo-screen fo-hub space-y-6">
       <div className="fo-page-header">
-        <h1 className="text-2xl font-bold">Response Hub</h1>
-        <p className="text-sm text-muted-foreground">Check in, see who needs help, and claim what you can handle. Updates appear live.</p>
+        <h1 className="text-2xl font-bold">People & help</h1>
+        <p className="text-sm text-muted-foreground">Tell your team how you are, read local updates, and coordinate specific needs. This is not emergency dispatch.</p>
       </div>
       <Announcements items={announcements} me={me} onChange={loadAnnouncements} />
       <div className="grid gap-6 xl:grid-cols-3 items-start">

@@ -121,21 +121,20 @@ export default function CrisisCoordination() {
 
   const detailSystem = selectedSystem || systems[0];
   const formProps = { form: incidentForm, setForm: setIncidentForm, onCancel: () => setShowIncidentDialog(false), onDeclare: () => createIncidentMutation.mutate(incidentForm) };
-  const regionNames = [...new Set(systems.map(s => s.region))];
+
   return (
     <div className="field-page">
-      <header className="fo-mission"><div><h1>Crisis Coordination Center</h1><p>Real-time incident response and system recovery coordination</p></div><button className="fo-btn" onClick={() => setShowIncidentDialog(true)}>Declare Incident</button></header>
+      <header className="fo-mission"><div><h1>Recovery desk</h1><p>Review affected services and prioritize recovery work. Execution in this prototype is simulated.</p></div><button className="fo-btn" onClick={() => setShowIncidentDialog(true)}>Declare Incident</button></header>
       <div className="fo-wrap">
-        <aside className="fo-idx">{['Active Incidents Requiring Response', 'Recovery Queue', ...regionNames.map(r => r.replace(/_/g, ' ')), 'Declare New Incident', 'System Detail'].map((text, index) => <div key={text}><b>{String(index + 1).padStart(2, '0')}</b>{text}</div>)}</aside>
         <div className="fo-main">
           <FieldSystems systems={systems} onSystemClick={setSelectedSystem} />
           <div className="fo-two fo-sec">
-            <section><h2 className="fo-h2"><i>01</i>Active Incidents Requiring Response</h2><div className="fo-card">{activeIncidents.map(incident => <div key={incident.id} className={`fo-inc ${incident.severity === 'high' ? 'fo-high-border' : ''}`}><div><div className="fo-it">{incident.title}</div><div className="fo-im">{incident.incident_type.replace(/_/g, ' ')} • {incident.affected_region.replace(/_/g, ' ')}</div></div><span className={`fo-bd fo-severity-${incident.severity}`}>{incident.severity}</span></div>)}</div></section>
+            <section><h2 className="fo-h2"><i>02</i>Open incidents</h2><div className="fo-card">{activeIncidents.map(incident => <div key={incident.id} className={`fo-inc ${incident.severity === 'high' ? 'fo-high-border' : ''}`}><div><div className="fo-it">{incident.title}</div><div className="fo-im">{incident.incident_type.replace(/_/g, ' ')} • {incident.affected_region.replace(/_/g, ' ')}</div></div><span className={`fo-bd fo-severity-${incident.severity}`}>{incident.severity}</span></div>)}</div></section>
             <FieldRecovery tasks={tasks} systems={systems} onExecuteTask={task => executeTaskMutation.mutate(task)} />
           </div>
           <div className="fo-sp fo-sec">
-            <section><h2 className="fo-h2"><i>{String(regionNames.length + 3).padStart(2, '0')}</i>Declare New Incident</h2><FieldIncidentForm {...formProps} /></section>
-            <section><h2 className="fo-h2"><i>{String(regionNames.length + 4).padStart(2, '0')}</i>{detailSystem?.system_name || 'System Detail'}</h2><FieldSystemDetail system={detailSystem} systems={systems} /><div className="fo-brief"><img src="https://media.base44.com/images/public/697c6a76a32bbc3cd9c4736d/37447ca1a_generated_e51e3f2b.jpg" alt="Fine-line regional infrastructure drawing" /></div></section>
+            <section><h2 className="fo-h2"><i>04</i>Declare New Incident</h2><FieldIncidentForm {...formProps} /></section>
+            <section><h2 className="fo-h2"><i>05</i>{detailSystem?.system_name || 'System Detail'}</h2><FieldSystemDetail system={detailSystem} systems={systems} /><div className="fo-brief"><img src="https://media.base44.com/images/public/697c6a76a32bbc3cd9c4736d/37447ca1a_generated_e51e3f2b.jpg" alt="Fine-line regional infrastructure drawing" /></div></section>
           </div>
         </div>
       </div>

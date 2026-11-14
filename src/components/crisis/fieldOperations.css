@@ -7,15 +7,8 @@
 .field-shell>div:first-child svg,.field-shell>div:first-child .animate-pulse{display:none}
 .field-shell>div:first-child span{font-size:12px}
 .field-shell>div:first-child>div>div:last-child{font-weight:400;color:#c9d6c6}
-.field-shell>div:nth-child(2){background:var(--fo-surface);border-bottom:1px solid var(--fo-line);padding:0 64px;box-shadow:0 2px 8px rgba(32,59,50,.06);position:relative}
-.field-shell>div:nth-child(2)>div{max-width:none;padding:0}
-.field-shell nav{display:flex;gap:4px;height:56px;align-items:center;padding:0}
-.field-shell nav a{font-size:13px;letter-spacing:.06em;color:var(--fo-muted);text-decoration:none;padding:9px 16px;border-radius:4px;cursor:pointer;transition:background .2s,color .2s;font-weight:600;box-shadow:none}
-.field-shell nav a svg{display:none}
-.field-shell nav a:hover{background:var(--fo-bg);color:var(--fo-ink)}
-.field-shell nav a:active{background:#d5dfd3}
-.field-shell nav a.bg-blue-600{background:var(--fo-ink);color:var(--fo-surface)}
-.field-shell nav a:focus-visible,.fo-btn:focus-visible,.fo-sys:focus-visible,.fo-inp:focus-visible{outline:2px solid #203B32;outline-offset:2px}
+.field-shell .network-workspace{background:var(--fo-bg)}
+.network-nav a:focus-visible,.fo-btn:focus-visible,.fo-sys:focus-visible,.fo-inp:focus-visible{outline:2px solid #203B32;outline-offset:2px}
 .fo-mission{margin:32px 64px 0;background:var(--fo-ink);color:var(--fo-surface);border-radius:6px;padding:26px 36px;display:flex;justify-content:space-between;align-items:center;gap:24px;box-shadow:0 10px 30px rgba(32,59,50,.22)}
 .fo-mission h1{margin:0;font-size:28px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;line-height:1.2}
 .fo-mission p{margin:8px 0 0;font-size:15px;color:#c9d6c6;line-height:1.4}
@@ -63,6 +56,6 @@
 .fo-dependencies{margin-top:20px}.fo-actions{display:flex;justify-content:flex-end;gap:12px}
 .field-shell footer{background:var(--fo-ink);color:var(--fo-surface);padding:44px 64px;margin-top:20px;text-align:center}.field-shell footer>div{max-width:none;padding:0}.field-shell footer>div>div:first-child{font-size:14px;letter-spacing:.2em;text-transform:uppercase;font-weight:800}.field-shell footer>div>div:last-child{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;font-size:13px;color:#c9d6c6;line-height:1.9;margin-top:14px}
 .field-dialog{background:var(--fo-bg);max-width:760px;max-height:90vh;overflow-y:auto;border-color:var(--fo-line)}
-@media(max-width:1400px){.fo-wrap{gap:24px;padding:28px 32px 0}.fo-mission{margin:28px 32px 0}.fo-idx{width:185px;padding:16px}.fo-two{grid-template-columns:1fr}.fo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.field-shell>div:first-child,.field-shell>div:nth-child(2){padding-left:32px;padding-right:32px}}
+@media(max-width:1400px){.fo-wrap{gap:24px;padding:28px 32px 0}.fo-mission{margin:28px 32px 0}.fo-idx{width:185px;padding:16px}.fo-two{grid-template-columns:1fr}.fo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.field-shell>div:first-child{padding-left:32px;padding-right:32px}}
 @media(max-width:900px){.fo-idx{display:none}.fo-sp{grid-template-columns:1fr}.fo-mission h1{font-size:22px}.fo-mission{align-items:flex-start;flex-direction:column}.field-shell>div:first-child>div{gap:12px;align-items:flex-start;flex-direction:column}.fo-task{flex-wrap:wrap}.fo-h2{flex-wrap:wrap}}
-@media(max-width:600px){.fo-wrap{padding:24px 16px 0}.fo-mission{margin:20px 16px 0;padding:24px}.fo-grid,.fo-fg{grid-template-columns:1fr}.fo-card,.fo-band{padding:20px}.field-shell>div:first-child,.field-shell>div:nth-child(2){padding-left:16px;padding-right:16px}.fo-inc{flex-wrap:wrap}.field-shell footer{padding:32px 16px}.fo-mission h1{font-size:19px}.fo-actions{flex-wrap:wrap}}
+@media(max-width:600px){.fo-wrap{padding:24px 16px 0}.fo-mission{margin:20px 16px 0;padding:24px}.fo-grid,.fo-fg{grid-template-columns:1fr}.fo-card,.fo-band{padding:20px}.field-shell>div:first-child{padding-left:16px;padding-right:16px}.fo-inc{flex-wrap:wrap}.field-shell footer{padding:32px 16px}.fo-mission h1{font-size:19px}.fo-actions{flex-wrap:wrap}}
