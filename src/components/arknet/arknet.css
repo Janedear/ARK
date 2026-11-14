@@ -1,0 +1,10 @@
+.ark-network .ark-field{display:grid;gap:.35rem;font-size:.875rem;font-weight:600}
+.ark-network .ark-field input,.ark-network .ark-field textarea,.ark-network .ark-field select{width:100%;min-height:44px;padding:.6rem .75rem;border:1px solid hsl(var(--input));border-radius:.375rem;background:hsl(var(--card));color:hsl(var(--foreground));font-weight:400}
+.ark-network textarea{resize:vertical}
+.ark-network button{min-height:44px}
+.ark-network button:disabled{cursor:not-allowed}
+.ark-network .ark-field input:focus-visible,.ark-network .ark-field textarea:focus-visible,.ark-network .ark-field select:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
+.ark-network .ark-transfer{font-family:var(--font-heading);font-size:.7rem;overflow-wrap:anywhere}
+.ark-network .ark-message{white-space:pre-wrap;overflow-wrap:anywhere}
+.ark-network details>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
+@media print{.ark-network .ark-controls{display:none!important}}

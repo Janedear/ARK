@@ -1,0 +1,19 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const layers = [
+  ['01', 'Internet gateway', 'Built', 'Signed public packets go through the server over any working internet connection: mobile data, Wi-Fi, wired or satellite internet. Offline queues retry while this page is open. Satellite hardware and subscriptions are not supplied.'],
+  ['02', 'Local browser link', 'Experimental', 'Manually pair two open browsers on the same reachable Wi-Fi or hotspot. Exchange public bundles over a WebRTC data channel without an external signaling or relay service. Router isolation, browser policies and phone sleep can stop it. Not mesh or automatic discovery.'],
+  ['03', 'Carry-and-forward', 'Built', 'Copy a relay bundle into an existing message service, or save and pass the file using whatever your operating system supports: AirDrop, Quick Share, Bluetooth file transfer or removable media. These are user-operated transfers, not ARK radio integrations.'],
+  ['04', 'Grow during an outage', 'Built; device support varies', 'Pass the self-contained offline relay tool to another person. It contains no accounts, messages or private keys. On a browser that runs local HTML, they can create signed public packets and pass them on without internet or registration. A signed-in gateway can later submit those packets.'],
+  ['05', 'Native transport layer', 'Not built', 'Android nearby/Bluetooth/Wi-Fi Direct and iOS Multipeer Connectivity need separate native implementations, permissions and device testing. Reliable relaying in the background cannot be assumed on either platform.'],
+  ['06', 'Radio and local hubs', 'Not built', 'LoRa/Meshtastic bridges, independently hosted local hubs, satellite messaging adapters and SMS gateways require hardware or providers plus dedicated integration work. A copied web app alone does not replace its online services.'],
+  ['07', 'No usable electronics', 'Manual fallback', 'Agree on safe check-in locations and times; use paper, trained radio operators and established local emergency services. Do not send people into danger to carry a packet.']
+];
+export default function NetworkPlan() {
+  return <section className="ll-card space-y-5" aria-labelledby="network-plan-title">
+    <div><span className="ll-eyebrow">Availability plan</span><h2 id="network-plan-title">More paths, not false guarantees</h2><p className="ll-muted">Browser core implemented here. Real-device outage and interoperability checks are still required; this is not emergency dispatch.</p></div>
+    <ol className="space-y-5">{layers.map(([number, title, status, body]) => <li key={number} className="flex gap-4"><span className="font-heading text-muted-foreground text-sm pt-1">{number}</span><div><h3 className="font-semibold">{title} <span className="text-xs font-normal text-muted-foreground">· {status}</span></h3><p className="text-sm mt-1">{body}</p></div></li>)}</ol>
+    <div className="border-t pt-4 text-sm space-y-2"><p><strong>Trust boundary:</strong> broadcasts and acknowledgments are public, not encrypted. Signatures detect changes and identify a device key, not a verified person, location or true report. Never include medical details, exact home addresses or private contact information.</p><p>Packets expire after at most 72 hours; duplicates are identified by fingerprint. Channels are labels, not private groups. A gateway receipt means stored on the server. A peer receipt means stored on that peer. Only an explicit acknowledgment claims someone read the message; it never means help is coming.</p><p>Device copies are not encrypted at rest by ARK. Browser clearing, private mode, storage eviction, a dead battery or loss of this file can remove them. Browser storage and a standalone tool are not a backup of the whole app.</p><Link to="/FieldGuide" className="underline font-semibold">Open the printable no-internet field guide</Link></div>
+  </section>;
+}

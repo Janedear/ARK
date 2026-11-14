@@ -1,0 +1,73 @@
+{
+  "name": "NetworkPacket",
+  "type": "object",
+  "properties": {
+    "message_id": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "message",
+        "ack"
+      ],
+      "enumColors": [
+        "blue",
+        "green"
+      ]
+    },
+    "channel": {
+      "type": "string"
+    },
+    "reference_id": {
+      "type": "string"
+    },
+    "envelope_json": {
+      "type": "string",
+      "description": "Public signed relay envelope. Never includes a private key."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "received_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "relay_user_id": {
+      "type": "string",
+      "description": "Private gateway accountability metadata, never returned to the feed."
+    }
+  },
+  "required": [
+    "message_id",
+    "kind",
+    "channel",
+    "envelope_json",
+    "expires_at",
+    "received_at",
+    "relay_user_id"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

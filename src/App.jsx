@@ -19,6 +19,7 @@ import GuideArticle from '@/pages/GuideArticle';
 import PrintPacket from '@/pages/PrintPacket';
 import Resources from '@/pages/Resources';
 import Capabilities from '@/pages/Capabilities';
+import Network from '@/pages/Network';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
       <Route path="/PrintPacket" element={<LayoutWrapper currentPageName="PrintPacket"><PrintPacket /></LayoutWrapper>} />
       <Route path="/Resources" element={<LayoutWrapper currentPageName="Resources"><Resources /></LayoutWrapper>} />
       <Route path="/Capabilities" element={<LayoutWrapper currentPageName="Capabilities"><Capabilities /></LayoutWrapper>} />
+      <Route path="/Network" element={<LayoutWrapper currentPageName="Network"><Network /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}

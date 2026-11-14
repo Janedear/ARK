@@ -12,6 +12,7 @@ export const navigation = [
     { name: 'No-internet field guide', path: '/FieldGuide', page: 'FieldGuide', hint: 'Prepare a paper fallback' }
   ] },
   { label: 'Community', description: 'Nearby people and services.', items: [
+    { name: 'Open relay network', path: '/Network', page: 'Network', hint: 'Messages, offline queues, relay paths' },
     { name: 'Resources', path: '/Resources', page: 'Resources', hint: 'Water, food, shelter, charging' },
     { name: 'People & help', path: '/ResponseHub', page: 'ResponseHub', hint: 'Check in, ask, offer support' },
     { name: 'Incident register', path: '/Incidents', page: 'Incidents', hint: 'Report and track local disruption' }
@@ -26,6 +27,7 @@ export const navigation = [
   ] }
 ];
 export const guidance = {
+  Network: { who: 'Anyone sharing public reports or carrying them between people', next: 'Choose a channel → save a public message → check its receipt → use Relay paths or download the offline tool.', limit: 'Unencrypted public reports. Device signatures are not verified identity. No dispatch, native mesh or guaranteed delivery.' },
   Lifeline: { who: 'Anyone preparing a household or facing a disruption', next: 'Check the connection status → open the urgent block if someone is in danger → pick a task from the grid.', limit: 'ARK does not dispatch responders or call anyone for you. A saved snapshot is a copy, not live data.' },
   Capabilities: { who: 'Anyone deciding whether to rely on ARK', next: 'Read the status of each feature → disconnect and test the ones you care about.', limit: 'Statuses are conservative until a person tests them on a real phone.' },
   HouseholdPlan: { who: 'One household, one account', next: 'Save the plan → add contacts and one out-of-area relay → work through the supply checklist → print the packet.', limit: 'Records are private to this account, and admins can read all records. Use the town or neighbourhood, never a full street address.' },

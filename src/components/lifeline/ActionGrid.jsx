@@ -10,7 +10,8 @@ const tiles = [
   { to: '/ResponseHub', icon: Users, label: 'Family check-in', note: 'Tell your people you are safe' },
   { to: '/Resources', icon: MapPin, label: 'Find resources', note: 'Water, food, charging' },
   { to: '/HouseholdPlan', icon: ClipboardList, label: 'My plan', note: 'Contacts and supplies' },
-  { to: '/PrintPacket', icon: Printer, label: 'Print packet', note: 'Works with no power' }
+  { to: '/PrintPacket', icon: Printer, label: 'Print packet', note: 'Works with no power' },
+  { to: '/Network', icon: Users, label: 'Open relay network', note: 'Public messages and offline relay' }
 ];
 
 export default function ActionGrid() {
