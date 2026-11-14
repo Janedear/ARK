@@ -15,7 +15,7 @@ export default function Layout({ children, currentPageName }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={currentPageName === 'CrisisCoordination' ? 'field-shell' : 'min-h-screen bg-gray-50'}>
       {/* Top Banner */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-2 px-6 border-b-4 border-yellow-500">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

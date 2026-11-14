@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+:root, .dark {
+  --fo-bg: #E6ECE6;
+  --fo-surface: #F8FAF6;
+  --fo-ink: #203B32;
+  --fo-muted: #687A62;
+  --fo-line: #c3cfc0;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

@@ -1,19 +1,13 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { AlertTriangle, Plus, PlayCircle, Shield } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Badge } from "@/components/ui/badge";
-import { SEVERITY_BADGE as severityColors } from '@/components/incidents/incidentConfig';
-import SystemStatusGrid from '../components/crisis/SystemStatusGrid';
-import RecoveryQueue from '../components/crisis/RecoveryQueue';
+import FieldSystems from '@/components/crisis/FieldSystems';
+import FieldRecovery from '@/components/crisis/FieldRecovery';
+import FieldIncidentForm from '@/components/crisis/FieldIncidentForm';
+import FieldSystemDetail from '@/components/crisis/FieldSystemDetail';
+import '@/components/crisis/fieldOperations.css';
 
 export default function CrisisCoordination() {
   const [showIncidentDialog, setShowIncidentDialog] = useState(false);
@@ -125,233 +119,28 @@ export default function CrisisCoordination() {
 
   const activeIncidents = incidents.filter(i => i.status !== 'resolved');
 
+  const detailSystem = selectedSystem || systems[0];
+  const formProps = { form: incidentForm, setForm: setIncidentForm, onCancel: () => setShowIncidentDialog(false), onDeclare: () => createIncidentMutation.mutate(incidentForm) };
+  const regionNames = [...new Set(systems.map(s => s.region))];
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <AlertTriangle className="h-8 w-8 text-orange-600" />
-              Crisis Coordination Center
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Real-time incident response and system recovery coordination
-            </p>
+    <div className="field-page">
+      <header className="fo-mission"><div><h1>Crisis Coordination Center</h1><p>Real-time incident response and system recovery coordination</p></div><button className="fo-btn" onClick={() => setShowIncidentDialog(true)}>Declare Incident</button></header>
+      <div className="fo-wrap">
+        <aside className="fo-idx">{['Active Incidents Requiring Response', 'Recovery Queue', ...regionNames.map(r => r.replace(/_/g, ' ')), 'Declare New Incident', 'System Detail'].map((text, index) => <div key={text}><b>{String(index + 1).padStart(2, '0')}</b>{text}</div>)}</aside>
+        <div className="fo-main">
+          <FieldSystems systems={systems} onSystemClick={setSelectedSystem} />
+          <div className="fo-two fo-sec">
+            <section><h2 className="fo-h2"><i>01</i>Active Incidents Requiring Response</h2><div className="fo-card">{activeIncidents.map(incident => <div key={incident.id} className={`fo-inc ${incident.severity === 'high' ? 'fo-high-border' : ''}`}><div><div className="fo-it">{incident.title}</div><div className="fo-im">{incident.incident_type.replace(/_/g, ' ')} • {incident.affected_region.replace(/_/g, ' ')}</div></div><span className={`fo-bd fo-severity-${incident.severity}`}>{incident.severity}</span></div>)}</div></section>
+            <FieldRecovery tasks={tasks} systems={systems} onExecuteTask={task => executeTaskMutation.mutate(task)} />
           </div>
-
-          <Dialog open={showIncidentDialog} onOpenChange={setShowIncidentDialog}>
-            <DialogTrigger asChild>
-              <Button className="bg-red-600 hover:bg-red-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Declare Incident
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Declare New Incident</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label>Incident Title *</Label>
-                  <Input
-                    value={incidentForm.title}
-                    onChange={(e) => setIncidentForm({...incidentForm, title: e.target.value})}
-                    placeholder="Brief incident description"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Incident Type *</Label>
-                    <Select
-                      value={incidentForm.incident_type}
-                      onValueChange={(value) => setIncidentForm({...incidentForm, incident_type: value})}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="credential_compromise">Credential Compromise</SelectItem>
-                        <SelectItem value="malware">Malware Outbreak</SelectItem>
-                        <SelectItem value="ddos">DDoS Attack</SelectItem>
-                        <SelectItem value="supply_chain">Supply Chain Attack</SelectItem>
-                        <SelectItem value="insider_threat">Insider Threat</SelectItem>
-                        <SelectItem value="infrastructure_failure">Infrastructure Failure</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Severity *</Label>
-                    <Select
-                      value={incidentForm.severity}
-                      onValueChange={(value) => setIncidentForm({...incidentForm, severity: value})}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="critical">Critical</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Affected Region *</Label>
-                  <Select
-                    value={incidentForm.affected_region}
-                    onValueChange={(value) => setIncidentForm({...incidentForm, affected_region: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="region_a">Region A</SelectItem>
-                      <SelectItem value="region_b">Region B</SelectItem>
-                      <SelectItem value="region_c">Region C</SelectItem>
-                      <SelectItem value="region_d">Region D</SelectItem>
-                      <SelectItem value="multi_region">Multi-Region</SelectItem>
-                      <SelectItem value="national">National</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label>Description</Label>
-                  <Textarea
-                    value={incidentForm.description}
-                    onChange={(e) => setIncidentForm({...incidentForm, description: e.target.value})}
-                    placeholder="Detailed incident information (will be logged in audit trail)"
-                    rows={4}
-                  />
-                </div>
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
-                  <div className="font-semibold text-yellow-900">⚠️ Authority Notice</div>
-                  <div className="text-yellow-700 text-xs mt-1">
-                    Declaring an incident creates an immutable audit log entry and may trigger automated response protocols. Ensure you have appropriate authority.
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setShowIncidentDialog(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() => createIncidentMutation.mutate(incidentForm)}
-                    disabled={!incidentForm.title}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    Declare Incident
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <div className="fo-sp fo-sec">
+            <section><h2 className="fo-h2"><i>{String(regionNames.length + 3).padStart(2, '0')}</i>Declare New Incident</h2><FieldIncidentForm {...formProps} /></section>
+            <section><h2 className="fo-h2"><i>{String(regionNames.length + 4).padStart(2, '0')}</i>{detailSystem?.system_name || 'System Detail'}</h2><FieldSystemDetail system={detailSystem} systems={systems} /><div className="fo-brief"><img src="https://media.base44.com/images/public/697c6a76a32bbc3cd9c4736d/37447ca1a_generated_e51e3f2b.jpg" alt="Fine-line regional infrastructure drawing" /></div></section>
+          </div>
         </div>
-
-        {/* Active Incidents Summary */}
-        {activeIncidents.length > 0 && (
-          <Card className="border-orange-300">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
-                Active Incidents Requiring Response
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {activeIncidents.map(incident => (
-                  <div key={incident.id} className="p-3 border rounded-lg bg-white">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="font-semibold text-sm">{incident.title}</div>
-                        <div className="text-xs text-gray-500 mt-1 capitalize">
-                          {incident.incident_type.replace(/_/g, ' ')} • {incident.affected_region.replace(/_/g, ' ')}
-                        </div>
-                      </div>
-                      <Badge className={severityColors[incident.severity]}>
-                        {incident.severity}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Recovery Queue */}
-        <RecoveryQueue
-          tasks={tasks}
-          systems={systems}
-          onExecuteTask={(task) => executeTaskMutation.mutate(task)}
-        />
-
-        {/* System Status Grid */}
-        <SystemStatusGrid
-          systems={systems}
-          onSystemClick={setSelectedSystem}
-        />
-
-        {/* System Detail Modal */}
-        {selectedSystem && (
-          <Dialog open={!!selectedSystem} onOpenChange={() => setSelectedSystem(null)}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{selectedSystem.system_name}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <div className="text-gray-500">Type</div>
-                    <div className="font-medium capitalize">{selectedSystem.system_type.replace(/_/g, ' ')}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500">Region</div>
-                    <div className="font-medium capitalize">{selectedSystem.region.replace(/_/g, ' ')}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500">Status</div>
-                    <div className="font-medium capitalize">{selectedSystem.status}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500">Baseline Version</div>
-                    <div className="font-medium">{selectedSystem.baseline_version || 'N/A'}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500">Population Affected</div>
-                    <div className="font-medium">{selectedSystem.population_affected?.toLocaleString() || 'N/A'}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500">Recovery Time Estimate</div>
-                    <div className="font-medium">{selectedSystem.estimated_recovery_hours || 'N/A'} hours</div>
-                  </div>
-                </div>
-
-                {selectedSystem.dependencies?.length > 0 && (
-                  <div>
-                    <div className="text-gray-500 text-sm mb-1">Dependencies</div>
-                    <div className="flex flex-wrap gap-1">
-                      {selectedSystem.dependencies.map(depId => (
-                        <Badge key={depId} variant="outline" className="text-xs">
-                          {systems.find(s => s.id === depId)?.system_name || depId}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
       </div>
+      <Dialog open={showIncidentDialog} onOpenChange={setShowIncidentDialog}><DialogContent className="field-dialog"><DialogHeader><DialogTitle className="fo-h2">Declare New Incident</DialogTitle></DialogHeader><FieldIncidentForm {...formProps} prefix="dialog" /></DialogContent></Dialog>
+      {selectedSystem && <Dialog open={!!selectedSystem} onOpenChange={() => setSelectedSystem(null)}><DialogContent className="field-dialog"><DialogHeader><DialogTitle className="fo-h2">{selectedSystem.system_name}</DialogTitle></DialogHeader><FieldSystemDetail system={selectedSystem} systems={systems} /></DialogContent></Dialog>}
     </div>
   );
 }
