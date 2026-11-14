@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Download as DownloadIcon, Shield, Check, ArrowRight } from 'lucide-react';
 import { buildZip, downloadBlob } from '@/components/toolkit/zip';
 import { buildKitFiles, KIT_CONTENTS } from '@/components/kit/kitFiles';
+import GetArk from '@/components/kit/GetArk';
 import '@/components/lifeline/lifeline.css';
 
 export default function Download() {
@@ -32,6 +33,8 @@ export default function Download() {
       </div>
 
       <div className="ll-alert danger"><strong>For immediate danger, call 911</strong>ARK does not dispatch help or call anyone. Relay messages are public and unencrypted. Guidance is sourced from government agencies but not reviewed by a clinician. Keep paper copies — browser storage can be cleared.</div>
+
+      <GetArk />
 
       <section className="ll-card" style={{ marginTop: 18 }}>
         <h2>After downloading</h2>
