@@ -1,6 +1,6 @@
 export const navigation = [
   { label: 'Now', description: 'Start here, then act.', items: [
-    { name: 'Home', path: '/', page: 'Lifeline', hint: 'Status, urgent help, next steps' },
+    { name: 'Home', path: '/Home', page: 'Lifeline', hint: 'Status, urgent help, next steps' },
     { name: 'What actually works', path: '/Capabilities', page: 'Capabilities', hint: 'Honest feature status' }
   ] },
   { label: 'My household', description: 'Private to your account.', items: [

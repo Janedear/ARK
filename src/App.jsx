@@ -22,6 +22,7 @@ import Capabilities from '@/pages/Capabilities';
 import Network from '@/pages/Network';
 import OfflineMap from '@/pages/OfflineMap';
 import Toolkit from '@/pages/Toolkit';
+import Download from '@/pages/Download';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -55,7 +56,8 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/" element={
+      <Route path="/" element={<Download />} />
+      <Route path="/Home" element={
         <LayoutWrapper currentPageName="Lifeline">
           <Lifeline />
         </LayoutWrapper>

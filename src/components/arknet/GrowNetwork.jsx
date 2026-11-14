@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { Download, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import createRelayRuntime from '@/components/arknet/relayRuntime';
-import createNearbyTransport from '@/components/arknet/nearbyTransport';
-import standaloneController from '@/components/arknet/standaloneController';
-import standaloneTemplate from '@/components/arknet/standaloneTemplate';
+import buildRelayTool from '@/components/arknet/buildRelayTool';
 
 export default function GrowNetwork() {
   const [notice, setNotice] = useState(''), [busy, setBusy] = useState(false);
-  const buildTool = () => standaloneTemplate.replace('<!--ARK_SCRIPT-->', `<script>(${standaloneController.toString()})(${createRelayRuntime.toString()},${createNearbyTransport.toString()});<\/script>`);
+  const buildTool = buildRelayTool;
   const save = html => { const url = URL.createObjectURL(new Blob([html], { type: 'text/html' })); const link = document.createElement('a'); link.href = url; link.download = 'ARK-Offline-Relay.html'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
   const distribute = async share => {
     setBusy(true); setNotice('');
