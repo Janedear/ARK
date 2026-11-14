@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
+import { Badge } from "@/components/ui/badge";
+import { SEVERITY_BADGE as severityColors } from '@/components/incidents/incidentConfig';
 import SystemStatusGrid from '../components/crisis/SystemStatusGrid';
 import RecoveryQueue from '../components/crisis/RecoveryQueue';
 
@@ -48,7 +50,7 @@ export default function CrisisCoordination() {
       // Create incident
       const incident = await base44.entities.Incident.create({
         ...data,
-        status: 'investigating',
+        status: 'reported',
         declared_at: new Date().toISOString()
       });
 

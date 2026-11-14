@@ -89,7 +89,7 @@ export default function Dashboard() {
                     {totalCiviliansAffected.toLocaleString()} civilians potentially affected
                   </div>
                 </div>
-                <Link to={createPageUrl('CrisisCoordination')} className="ml-auto">
+                <Link to="/CrisisCoordination" className="ml-auto">
                   <Button className="bg-red-600 hover:bg-red-700">
                     Manage Response
                   </Button>
