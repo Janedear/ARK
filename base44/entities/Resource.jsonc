@@ -35,6 +35,14 @@
       "type": "string",
       "description": "Public location only. Never a private residence."
     },
+    "latitude": {
+      "type": "number",
+      "description": "Optional map position. Public locations only."
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Optional map position. Public locations only."
+    },
     "access_notes": {
       "type": "string",
       "description": "Hours, eligibility, limits, what to bring"

@@ -20,6 +20,7 @@ import PrintPacket from '@/pages/PrintPacket';
 import Resources from '@/pages/Resources';
 import Capabilities from '@/pages/Capabilities';
 import Network from '@/pages/Network';
+import OfflineMap from '@/pages/OfflineMap';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -65,6 +66,7 @@ const AuthenticatedApp = () => {
       <Route path="/Resources" element={<LayoutWrapper currentPageName="Resources"><Resources /></LayoutWrapper>} />
       <Route path="/Capabilities" element={<LayoutWrapper currentPageName="Capabilities"><Capabilities /></LayoutWrapper>} />
       <Route path="/Network" element={<LayoutWrapper currentPageName="Network"><Network /></LayoutWrapper>} />
+      <Route path="/Map" element={<LayoutWrapper currentPageName="OfflineMap"><OfflineMap /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}

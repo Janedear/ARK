@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import '@/components/lifeline/lifeline.css';
 
 const categories = ['water', 'food', 'shelter', 'medical', 'charging', 'supplies', 'information'];
-const blank = { name: '', category: 'water', area: '', address: '', access_notes: '', accessibility: '', contact: '', source_name: '' };
+const blank = { name: '', category: 'water', area: '', address: '', latitude: '', longitude: '', access_notes: '', accessibility: '', contact: '', source_name: '' };
 
 export default function Resources() {
   const [items, setItems] = useState([]);
@@ -26,7 +26,11 @@ export default function Resources() {
 
   const add = async e => {
     e.preventDefault();
-    await base44.entities.Resource.create({ ...form, status: 'unverified', last_verified: new Date().toISOString().slice(0, 10) });
+    const { latitude, longitude, ...rest } = form;
+    const hasPosition = latitude !== '' && longitude !== ''
+      && !Number.isNaN(Number(latitude)) && !Number.isNaN(Number(longitude));
+    const coords = hasPosition ? { latitude: Number(latitude), longitude: Number(longitude) } : {};
+    await base44.entities.Resource.create({ ...rest, ...coords, status: 'unverified', last_verified: new Date().toISOString().slice(0, 10) });
     setForm(blank);
     load();
   };
@@ -67,6 +71,10 @@ export default function Resources() {
         <div className="ll-two">
           <label className="ll-field"><span>Area</span><input value={form.area} onChange={e => setForm({ ...form, area: e.target.value })} /></label>
           <label className="ll-field"><span>Public address</span><input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} /></label>
+        </div>
+        <div className="ll-two">
+          <label className="ll-field"><span>Latitude (optional, for the map)</span><input inputMode="decimal" value={form.latitude} onChange={e => setForm({ ...form, latitude: e.target.value })} /></label>
+          <label className="ll-field"><span>Longitude (optional)</span><input inputMode="decimal" value={form.longitude} onChange={e => setForm({ ...form, longitude: e.target.value })} /></label>
         </div>
         <label className="ll-field"><span>Access notes</span><textarea value={form.access_notes} onChange={e => setForm({ ...form, access_notes: e.target.value })} /></label>
         <label className="ll-field"><span>Accommodation and accessibility</span><textarea value={form.accessibility} onChange={e => setForm({ ...form, accessibility: e.target.value })} /></label>

@@ -1,0 +1,55 @@
+.ark-map {
+  height: 62vh;
+  min-height: 320px;
+  width: 100%;
+  border: 1px solid var(--fo-line);
+  background: var(--fo-surface);
+  z-index: 0;
+}
+
+.ark-tile-gap {
+  background: repeating-linear-gradient(45deg, #dfe6dd, #dfe6dd 8px, #e8ede6 8px, #e8ede6 16px);
+}
+
+.ark-map .leaflet-control-attribution {
+  font-size: 10px;
+}
+
+.ark-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--fo-muted);
+}
+
+.ark-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: capitalize;
+}
+
+.ark-legend-item i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.ark-map-progress {
+  height: 6px;
+  background: var(--fo-line);
+  margin-top: 10px;
+}
+
+.ark-map-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--fo-ink);
+}
+
+@media (max-width: 700px) {
+  .ark-map { height: 54vh; }
+}
