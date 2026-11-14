@@ -1,89 +1,121 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { MapPin } from 'lucide-react';
+import useUserArea from '@/components/resources/useUserArea';
+import AreaSetup from '@/components/resources/AreaSetup';
+import ResourceCard from '@/components/resources/ResourceCard';
+import AddResourceForm from '@/components/resources/AddResourceForm';
+import { distanceMiles, hasPosition } from '@/lib/geo';
 import '@/components/lifeline/lifeline.css';
 
 const categories = ['water', 'food', 'shelter', 'medical', 'charging', 'supplies', 'information'];
-const blank = { name: '', category: 'water', area: '', address: '', latitude: '', longitude: '', access_notes: '', accessibility: '', contact: '', source_name: '' };
+const radii = [1, 5, 15, 30, 60];
+
+function areaMatches(resourceArea, userArea) {
+  if (!resourceArea || !userArea) return false;
+  const listed = resourceArea.toLowerCase().trim();
+  const town = userArea.split(',')[0].trim().toLowerCase();
+  return listed.includes(town) || town.includes(listed);
+}
 
 export default function Resources() {
+  const { user, coords, areaLabel, loading: areaLoading, save } = useUserArea();
   const [items, setItems] = useState([]);
-  const [cat, setCat] = useState('all');
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [form, setForm] = useState(blank);
   const [loading, setLoading] = useState(true);
+  const [cat, setCat] = useState('all');
+  const [radius, setRadius] = useState(15);
+  const [editingArea, setEditingArea] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const res = cat === 'all'
-      ? await base44.entities.Resource.list({ sort: '-created_date', limit: 100 })
-      : await base44.entities.Resource.filter({ category: cat }, { sort: '-created_date', limit: 100 });
+    const res = await base44.entities.Resource.list({ sort: '-created_date', limit: 300 });
     setItems(res.items || []);
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, [cat]);
-  useEffect(() => { base44.auth.me().then(u => setIsAdmin(u.role === 'admin')).catch(() => setIsAdmin(false)); }, []);
+  useEffect(() => { load(); }, []);
 
-  const add = async e => {
-    e.preventDefault();
-    const { latitude, longitude, ...rest } = form;
-    const hasPosition = latitude !== '' && longitude !== ''
-      && !Number.isNaN(Number(latitude)) && !Number.isNaN(Number(longitude));
-    const coords = hasPosition ? { latitude: Number(latitude), longitude: Number(longitude) } : {};
-    await base44.entities.Resource.create({ ...rest, ...coords, status: 'unverified', last_verified: new Date().toISOString().slice(0, 10) });
-    setForm(blank);
-    load();
+  const nearby = useMemo(() => {
+    const mine = items.filter(r => user && r.created_by_id === user.id);
+    const pool = coords ? items : mine;
+    return pool
+      .map(resource => ({
+        resource,
+        distance: coords && hasPosition(resource)
+          ? distanceMiles(coords, { lat: resource.latitude, lon: resource.longitude })
+          : null,
+      }))
+      .filter(({ resource, distance }) => {
+        if (cat !== 'all' && resource.category !== cat) return false;
+        if (!coords) return true;
+        if (distance != null) return distance <= radius;
+        return areaMatches(resource.area, areaLabel);
+      })
+      .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+  }, [items, user, coords, areaLabel, cat, radius]);
+
+  const addListing = async data => {
+    await base44.entities.Resource.create(data);
+    await load();
   };
+
+  const removeListing = async resource => {
+    if (!window.confirm(`Remove ${resource.name}? This cannot be undone.`)) return;
+    await base44.entities.Resource.delete(resource.id);
+    await load();
+  };
+
+  const canManage = resource => !!user && (user.id === resource.created_by_id || user.role === 'admin');
 
   return <div className="ll-page">
     <span className="ll-eyebrow">Community resources</span>
-    <h1 style={{ margin: '10px 0 8px' }}>Water, food, shelter, charging</h1>
-    <p className="ll-muted">Listings added by coordinators in this workspace. Each one shows who reported it and when it was last checked. Nothing here is live availability.</p>
+    <h1 style={{ margin: '10px 0 8px' }}>What is near you</h1>
+    <p className="ll-muted">Your own local list, built from your area and the places people around you have recorded. Each listing shows who reported it and when it was last checked. Nothing here is live availability.</p>
     <div className="ll-alert"><strong>Confirm before you travel</strong>Call ahead where possible. Conditions change fast, and a listing is not a guarantee that a site is open, stocked, or safe to reach.</div>
+
+    {areaLoading ? <p className="ll-muted">Loading your area…</p>
+      : (!coords || editingArea)
+        ? <div style={{ marginTop: 18 }}>
+          <AreaSetup
+            areaLabel={coords ? areaLabel : ''}
+            onSave={async area => { await save(area); setEditingArea(false); }}
+          />
+        </div>
+        : <div className="ll-item" style={{ marginTop: 18 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <div><MapPin size={15} style={{ marginRight: 6, verticalAlign: -2 }} /><b>{areaLabel}</b></div>
+            <button className="ll-btn" onClick={() => setEditingArea(true)}>Change area</button>
+          </div>
+          <div className="ll-eyebrow" style={{ marginTop: 6 }}>Only you can see this setting. It is not published.</div>
+        </div>}
 
     <div className="ll-tags" style={{ marginTop: 14 }}>
       <button onClick={() => setCat('all')} aria-pressed={cat === 'all'}>All</button>
       {categories.map(c => <button key={c} onClick={() => setCat(c)} aria-pressed={cat === c}>{c}</button>)}
     </div>
 
-    {loading ? <p className="ll-muted">Loading listings…</p> : items.length === 0
-      ? <p className="ll-muted">No listings in this category yet.</p>
-      : <div className="ll-list">{items.map(r => <div className="ll-item" key={r.id}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-          <b>{r.name}</b>
-          {r.status === 'verified' ? <span className="ll-chip ok">Verified</span> : r.status === 'closed' ? <span className="ll-chip">Closed</span> : <span className="ll-chip warn">Unverified</span>}
-        </div>
-        <div className="ll-muted">{[r.category, r.area, r.address].filter(Boolean).join(' · ')}</div>
-        {r.access_notes && <p className="ll-muted" style={{ marginTop: 6 }}>{r.access_notes}</p>}
-        {r.accessibility && <p className="ll-muted">Accessibility: {r.accessibility}</p>}
-        <div className="ll-eyebrow" style={{ marginTop: 8 }}>Source: {r.source_name || 'not recorded'} · Last checked: {r.last_verified || 'unknown'}</div>
-        {r.contact && <p className="ll-muted" style={{ marginTop: 4 }}>{r.contact}</p>}
-      </div>)}</div>}
+    {coords && <div className="ll-tags" style={{ marginTop: 8 }}>
+      {radii.map(m => <button key={m} onClick={() => setRadius(m)} aria-pressed={radius === m}>Within {m} mi</button>)}
+    </div>}
 
-    {isAdmin && <section className="ll-card" style={{ marginTop: 24 }}>
-      <h2>Add a listing (administrators)</h2>
-      <p className="ll-muted">Public locations only. Never publish a private residence or a vulnerable person's address.</p>
-      <form onSubmit={add}>
-        <div className="ll-two">
-          <label className="ll-field"><span>Name</span><input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></label>
-          <label className="ll-field"><span>Category</span><select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{categories.map(c => <option key={c} value={c}>{c}</option>)}</select></label>
+    {loading || areaLoading ? <p className="ll-muted">Loading listings…</p>
+      : nearby.length === 0
+        ? <div className="ll-card">
+          <h2>Nothing recorded near you yet</h2>
+          <p className="ll-muted" style={{ marginTop: 6 }}>
+            {coords
+              ? <>No listings within {radius} miles of {areaLabel}. Try widening the distance, or add the places you already know below — that is what makes this useful for the next person.</>
+              : <>Set your area above to see local listings, or add a place you know below. Without an area ARK only shows your own notes.</>}
+          </p>
         </div>
-        <div className="ll-two">
-          <label className="ll-field"><span>Area</span><input value={form.area} onChange={e => setForm({ ...form, area: e.target.value })} /></label>
-          <label className="ll-field"><span>Public address</span><input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} /></label>
-        </div>
-        <div className="ll-two">
-          <label className="ll-field"><span>Latitude (optional, for the map)</span><input inputMode="decimal" value={form.latitude} onChange={e => setForm({ ...form, latitude: e.target.value })} /></label>
-          <label className="ll-field"><span>Longitude (optional)</span><input inputMode="decimal" value={form.longitude} onChange={e => setForm({ ...form, longitude: e.target.value })} /></label>
-        </div>
-        <label className="ll-field"><span>Access notes</span><textarea value={form.access_notes} onChange={e => setForm({ ...form, access_notes: e.target.value })} /></label>
-        <label className="ll-field"><span>Accommodation and accessibility</span><textarea value={form.accessibility} onChange={e => setForm({ ...form, accessibility: e.target.value })} /></label>
-        <div className="ll-two">
-          <label className="ll-field"><span>Contact</span><input value={form.contact} onChange={e => setForm({ ...form, contact: e.target.value })} /></label>
-          <label className="ll-field"><span>Source</span><input value={form.source_name} onChange={e => setForm({ ...form, source_name: e.target.value })} /></label>
-        </div>
-        <button className="ll-btn">Add listing</button>
-      </form>
-    </section>}
+        : <div className="ll-list">{nearby.map(({ resource, distance }) => <ResourceCard
+          key={resource.id}
+          resource={resource}
+          distance={distance}
+          canManage={canManage(resource)}
+          onDelete={removeListing}
+        />)}</div>}
+
+    <AddResourceForm defaultArea={areaLabel} onAdded={addListing} />
   </div>;
 }

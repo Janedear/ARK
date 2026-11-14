@@ -80,6 +80,19 @@
         "gray"
       ],
       "default": "unverified"
+    },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "shared",
+        "private"
+      ],
+      "enumColors": [
+        "blue",
+        "gray"
+      ],
+      "default": "shared",
+      "description": "Shared listings appear for everyone near them. Private listings are only visible to the person who added them."
     }
   },
   "required": [
@@ -90,9 +103,10 @@
     "read": {
       "$or": [
         {
-          "user_condition": {
-            "role": "user"
-          }
+          "data.visibility": "shared"
+        },
+        {
+          "created_by_id": "{{user.id}}"
         },
         {
           "user_condition": {
@@ -102,19 +116,31 @@
       ]
     },
     "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "created_by_id": "{{user.id}}"
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }
