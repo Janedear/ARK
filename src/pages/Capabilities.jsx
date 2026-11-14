@@ -45,5 +45,12 @@ export default function Capabilities() {
       <p>Saving and reloading records has been exercised against the live database. Airplane-mode behaviour on a physical phone has not been observed, so offline rows above stay conservative until you run that test: open the app, then turn on airplane mode, then reload.</p>
       <p className="ll-muted">Medical and emergency content has not been reviewed by a qualified professional. Treat every article as draft.</p>
     </section>
+
+    <section className="ll-card" style={{ marginTop: 16 }}>
+      <h2>What happens if Lifeline itself is down</h2>
+      <p>Lifeline runs on Base44: its database, logins, file storage and hosting all live there, and Base44 does not support self-hosting. If that service is unreachable, this app is unreachable, no matter where a copy of the code is kept.</p>
+      <p>Keeping the code in a repository protects the code from being lost. It does not keep the app running, and a rebuild elsewhere would mean replacing the database, logins, storage and hosting.</p>
+      <p><b>Design consequence:</b> nobody should depend on Lifeline during an emergency. The printed packet is the only layer that keeps working when the app, the network and the power all fail. Print it, keep it with your kit, reprint after every change.</p>
+    </section>
   </div>;
 }
