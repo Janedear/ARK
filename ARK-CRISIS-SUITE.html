@@ -1,4 +1,62 @@
 <!DOCTYPE html>
+<!--
+  ARK Crisis Suite — Single-File Emergency Communication App
+  ==========================================================
+  Version : 1.0 (prototype)
+  License : MIT
+  Repo    : https://github.com/Janedear/ARK
+  Contact : hello@halosuite.ai
+
+  DESIGN INTENT — why this is a single HTML file
+  -----------------------------------------------
+  ARK is intentionally built as one self-contained HTML file with zero external
+  dependencies. This is not a limitation; it is the core architecture constraint:
+
+    1. OFFLINE-FIRST. The file must work when copied to a USB stick, opened from
+       a local filesystem, or served from an offline Raspberry Pi hub over Wi-Fi.
+       A build step producing multiple files adds failure modes (broken relative
+       paths, missing chunks). One file has exactly one failure mode: not present.
+
+    2. ZERO INSTALL. Recipients share it over Signal, AirDrop, email, or SD card.
+       A web app with a package.json cannot be shared this way.
+
+    3. DEPLOYABLE ANYWHERE. Drop it in an S3 bucket, a Caddy static root, a Pi's
+       home directory, or email it. No server-side rendering, no Node runtime.
+
+    4. AUDITABLE. Emergency software earns trust through inspectability. A single
+       HTML file can be read, reviewed, and forked by anyone with a text editor.
+
+  MODULES (in source order)
+  -------------------------
+  CSS            Lines ~52–443    Design system: tokens, layout, components
+  HTML           Lines ~444–693   Static shells: onboarding wizard, modals, nav
+  Tabs           Lines ~695–1600  Home, Messages, Medical, Map, Radio, Settings
+  DB             Lines ~1601–     IndexedDB wrapper (messages, resources)
+  Store          Lines ~...       localStorage wrapper
+  UI             Lines ~...       Tab switching, rendering, toast, modal helpers
+  Hub            Lines ~2082–     Hub sync, four-state connection pill, queue drain
+  Household      Lines ~...       Household plan, contacts
+  Guides         Lines ~...       Survival/medical guides
+  CPR            Lines ~...       CPR timer module
+  MapTool        Lines ~...       Offline map utilities
+  RadioTool      Lines ~...       Morse encoder, freq chart
+  ShareARK       Lines ~3790–     QR code + share flow
+  ARKQr          Lines ~3800–     Pure-JS Reed-Solomon QR encoder (versions 1–10, ECL M)
+  Init           Lines ~4008–     DOMContentLoaded bootstrap, PWA install prompt
+
+  HUB PROTOCOL: ARK-RELAY-1
+  -------------------------
+  Signed JSON packets (ECDSA P-256/SHA-256). Fields: v, kind, channel, alias,
+  text, ref, issued_at, expires_at, public_key, id (sha256 hex), signature
+  (base64url raw r||s 64 bytes). Full spec: PROTOCOL.md in this repository.
+
+  SECURITY MODEL
+  ---------------
+  - Signatures prove message integrity, NOT identity.
+  - Hub message board is public and unencrypted; treat it as a noticeboard.
+  - No delivery guarantee; "seen" count ≠ help is coming.
+  - ARK never spreads itself, runs hidden, or collects data without consent.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -2119,7 +2177,10 @@ const Hub = {
       Store.set('last_sync', new Date().toISOString());
       // Determine reach state from /api/status peers count
       try {
-        const sr = await fetch(this.url + '/api/status', {signal: new AbortController().signal});
+        const statusCtrl = new AbortController();
+        const statusTimer = setTimeout(() => statusCtrl.abort(), 5000);
+        const sr = await fetch(this.url + '/api/status', {signal: statusCtrl.signal});
+        clearTimeout(statusTimer);
         const st = sr.ok ? await sr.json() : null;
         const peers = st?.peers || 0;
         this.updateConnState(peers > 0 ? 'regional' : 'local');
