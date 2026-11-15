@@ -63,49 +63,60 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>ARK Crisis Suite — Offline Emergency Tool</title>
 <meta name="description" content="Complete offline emergency communication and survival tool. No internet required.">
-<meta name="theme-color" content="#0a0f1e">
+<meta name="theme-color" content="#0e1013">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* === RESET & BASE === */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px;-webkit-text-size-adjust:100%}
-body{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;overflow-x:hidden}
+body{font-family:"Geist","Geist Variable",system-ui,"Segoe UI",sans-serif;background:#0e1013;color:#f1f0eb;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 button{cursor:pointer;font:inherit;border:none;background:none}
 input,select,textarea{font:inherit;color:inherit}
-a{color:#ff6b2b;text-decoration:none}
-a:hover{text-decoration:underline}
+a{color:#dcbf78;text-decoration:none}
+a:hover{text-decoration:underline;color:#e8d09a}
 ul{list-style:none}
 img{max-width:100%}
 
-/* === COLOR TOKENS === */
+/* === COLOR TOKENS — HaloSuite dark palette === */
 :root{
-  --bg-primary:#0d1117;
-  --bg-secondary:#161b22;
-  --bg-card:#1c2128;
-  --bg-elevated:#21262d;
-  --border:#30363d;
-  --border-strong:#484f58;
-  --text-primary:#e6edf3;
-  --text-secondary:#8b949e;
-  --text-muted:#6e7681;
-  --accent:#ff6b2b;
-  --accent-dark:#c0392b;
-  --accent-glow:rgba(255,107,43,0.15);
-  --green:#3fb950;
-  --green-bg:rgba(63,185,80,0.1);
-  --yellow:#d29922;
-  --yellow-bg:rgba(210,153,34,0.1);
-  --red:#f85149;
-  --red-bg:rgba(248,81,73,0.1);
-  --blue:#58a6ff;
-  --blue-bg:rgba(88,166,255,0.1);
-  --purple:#bc8cff;
+  /* Surfaces — warm charcoal, not blue-gray */
+  --bg-primary:#0e1013;
+  --bg-secondary:#17191d;
+  --bg-card:#1f2229;
+  --bg-elevated:#24272c;
+  /* Borders */
+  --border:#34383f;
+  --border-strong:#4a4f58;
+  /* Text — warm off-white */
+  --text-primary:#f1f0eb;
+  --text-secondary:#c0c2c7;
+  --text-muted:#a4a8b0;
+  /* Accent — champagne gold (HaloSuite brand) */
+  --accent:#dcbf78;
+  --accent-dark:#c8a65d;
+  --accent-soft:#8a6a2c;
+  --accent-glow:rgba(220,191,120,0.14);
+  /* Semantic status — keep green/yellow/red meaningful */
+  --green:#7ad4b1;
+  --green-bg:rgba(122,212,177,0.1);
+  --yellow:#e5bd72;
+  --yellow-bg:rgba(229,189,114,0.1);
+  --red:#f39a9f;
+  --red-bg:rgba(243,154,159,0.1);
+  --blue:#9cacff;
+  --blue-bg:rgba(156,172,255,0.1);
+  --purple:#c8aaff;
   --radius-sm:6px;
   --radius-md:8px;
   --radius-lg:12px;
-  --shadow:0 1px 3px rgba(0,0,0,0.5);
-  --shadow-lg:0 8px 24px rgba(0,0,0,0.6);
+  --shadow:0 1px 3px rgba(0,0,0,0.6);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.7);
+  /* Typography — match HaloSuite motion */
+  --motion:160ms;
 }
 
 /* === LOW-POWER MODE === */
@@ -136,11 +147,11 @@ img{max-width:100%}
 /* 4-state connection pill */
 .conn-pill{display:inline-flex;align-items:center;gap:4px;padding:1px 7px 1px 5px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.03em;transition:background .3s,color .3s}
 .conn-pill::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background .3s}
-.conn-offline{background:rgba(255,255,255,.07);color:var(--text-muted)}.conn-offline::before{background:var(--text-muted)}
-.conn-local{background:rgba(37,196,97,.13);color:#25c461}.conn-local::before{background:#25c461}
-.conn-regional{background:rgba(220,191,120,.13);color:var(--accent)}.conn-regional::before{background:var(--accent)}
-.conn-extended{background:rgba(99,160,255,.13);color:#63a0ff}.conn-extended::before{background:#63a0ff}
-.conn-global{background:rgba(179,136,255,.14);color:#b388ff}.conn-global::before{background:#b388ff}
+.conn-offline{background:rgba(255,255,255,.06);color:var(--text-muted)}.conn-offline::before{background:var(--text-muted)}
+.conn-local{background:rgba(122,212,177,.13);color:var(--green)}.conn-local::before{background:var(--green)}
+.conn-regional{background:var(--accent-glow);color:var(--accent)}.conn-regional::before{background:var(--accent)}
+.conn-extended{background:rgba(156,172,255,.12);color:var(--blue)}.conn-extended::before{background:var(--blue)}
+.conn-global{background:rgba(200,170,255,.13);color:var(--purple)}.conn-global::before{background:var(--purple)}
 #status-bar .ark-brand{font-weight:700;color:var(--accent);font-size:14px;margin-right:4px}
 
 /* === NAV === */
@@ -156,7 +167,7 @@ img{max-width:100%}
   z-index:99;
 }
 #nav::-webkit-scrollbar{display:none}
-.nav-btn{
+.nav-btn{font-family:inherit;
   padding:10px 14px;
   font-size:13px;
   font-weight:500;
@@ -185,16 +196,16 @@ img{max-width:100%}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
   padding:9px 16px;border-radius:var(--radius-md);font-size:14px;font-weight:500;
-  transition:opacity .15s,transform .1s;
+  transition:background var(--motion) ease,color var(--motion) ease,border-color var(--motion) ease,opacity var(--motion) ease,transform .1s;
   cursor:pointer;
 }
 .btn:active{transform:scale(0.97)}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{opacity:.9}
+.btn-primary{background:var(--accent);color:#17191d;font-weight:600}
+.btn-primary:hover{background:var(--accent-dark)}
 .btn-secondary{background:var(--bg-elevated);border:1px solid var(--border-strong);color:var(--text-primary)}
-.btn-secondary:hover{background:var(--border)}
-.btn-green{background:var(--green);color:#0d1117}
-.btn-red{background:var(--red);color:#fff}
+.btn-secondary:hover{background:var(--border);border-color:var(--accent-dark)}
+.btn-green{background:var(--green);color:#0e1013}
+.btn-red{background:var(--red);color:#0e1013}
 .btn-sm{padding:6px 12px;font-size:13px;min-height:44px;min-width:44px}
 .btn-block{width:100%;display:flex}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-secondary)}
@@ -279,19 +290,19 @@ select.form-input{cursor:pointer}
 .msg-urgent{border-left:3px solid var(--red);padding-left:10px}
 .channel-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .ch-tab{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary);transition:all .15s}
-.ch-tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.ch-tab.active{background:var(--accent);border-color:var(--accent);color:#17191d;font-weight:600}
 .offline-queue-badge{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600}
 
 /* === GUIDE ARTICLES === */
 .guide-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
 .guide-cat-btn{padding:6px 14px;border-radius:20px;font-size:13px;cursor:pointer;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary);transition:all .15s}
-.guide-cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.guide-cat-btn.active{background:var(--accent);border-color:var(--accent);color:#17191d;font-weight:600}
 .guide-article{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:10px}
 .guide-title{font-size:16px;font-weight:700;margin-bottom:4px}
 .guide-summary{font-size:13px;color:var(--text-secondary);margin-bottom:12px;font-style:italic}
 .guide-steps{margin:10px 0 10px 0}
 .guide-steps li{padding:4px 0;padding-left:20px;position:relative;font-size:14px;line-height:1.6}
-.guide-steps li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:4px;width:16px;height:16px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.guide-steps li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:4px;width:16px;height:16px;border-radius:50%;background:var(--accent);color:#17191d;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .guide-steps{counter-reset:step;padding-left:0}
 .guide-section h4{font-size:14px;font-weight:600;margin:12px 0 6px;color:var(--accent)}
 .guide-section p{font-size:14px;line-height:1.6;margin-bottom:8px;color:var(--text-secondary)}
@@ -319,7 +330,7 @@ select.form-input{cursor:pointer}
 .map-pin:hover{transform:translate(-50%,-100%) scale(1.3)}
 .map-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
 .map-btn{padding:6px 12px;font-size:12px;border-radius:var(--radius-sm);background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;transition:all .15s}
-.map-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.map-btn.active{background:var(--accent);border-color:var(--accent);color:#17191d;font-weight:600}
 
 /* === RADIO === */
 .freq-table{width:100%;border-collapse:collapse;font-size:13px}
@@ -361,7 +372,7 @@ select.form-input{cursor:pointer}
 .checklist-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .checklist-item:last-child{border-bottom:none}
 .check-box{width:20px;height:20px;border-radius:4px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;background:var(--bg-elevated)}
-.check-box.checked{background:var(--green);border-color:var(--green);color:#0d1117;font-size:12px}
+.check-box.checked{background:var(--green);border-color:var(--green);color:#0e1013;font-size:12px}
 .check-label{font-size:14px;flex:1}
 .check-label.checked-text{text-decoration:line-through;color:var(--text-muted)}
 
@@ -497,7 +508,7 @@ select.form-input{cursor:pointer}
 .share-code{background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:monospace;font-size:12px;word-break:break-all;color:var(--text-secondary);margin:10px 0;cursor:text;user-select:all}
 .share-steps{margin:8px 0;padding-left:0;list-style:none;counter-reset:share-step}
 .share-steps li{padding:6px 0 6px 28px;position:relative;font-size:13px;color:var(--text-secondary);counter-increment:share-step}
-.share-steps li::before{content:counter(share-step);position:absolute;left:0;top:6px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:20px;text-align:center}
+.share-steps li::before{content:counter(share-step);position:absolute;left:0;top:6px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#17191d;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:20px;text-align:center}
 </style>
 </head>
 <body>
@@ -758,7 +769,7 @@ select.form-input{cursor:pointer}
   <div id="install-banner" class="card" style="display:none;background:var(--gold,#dcbf78);color:#000;border:none;margin-bottom:12px">
     <div style="font-weight:700;margin-bottom:4px">📲 Save ARK to Your Home Screen</div>
     <div class="font-sm mb-8">Install ARK for one-tap access — works fully offline, no app store needed.</div>
-    <button class="btn btn-primary btn-sm" onclick="installPWA()" style="background:#000;color:#fff">Install Now</button>
+    <button class="btn btn-primary btn-sm" onclick="installPWA()">Install Now</button>
   </div>
 
   <div class="offline-banner" id="offline-banner">
@@ -2923,9 +2934,9 @@ const MapTool = {
     ctx.clearRect(0, 0, W, H);
 
     // Background grid
-    ctx.fillStyle = '#1c2128';
+    ctx.fillStyle = '#24272c';
     ctx.fillRect(0, 0, W, H);
-    ctx.strokeStyle = '#30363d';
+    ctx.strokeStyle = '#34383f';
     ctx.lineWidth = 1;
     for (let x = 0; x < W; x += 50) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
@@ -2935,8 +2946,8 @@ const MapTool = {
     }
 
     // Compass rose
-    ctx.fillStyle = '#8b949e';
-    ctx.font = '12px Arial';
+    ctx.fillStyle = '#a4a8b0';
+    ctx.font = '12px "Geist",system-ui,sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('N', W - 20, 30);
     ctx.fillText('S', W - 20, H - 15);
@@ -2950,8 +2961,8 @@ const MapTool = {
       ctx.textAlign = 'center';
       ctx.fillText(icons[m.type] || '📌', m.x, m.y);
       if (m.label) {
-        ctx.font = '11px Arial';
-        ctx.fillStyle = '#e6edf3';
+        ctx.font = '11px "Geist",system-ui,sans-serif';
+        ctx.fillStyle = '#f1f0eb';
         ctx.fillText(m.label, m.x, m.y + 16);
       }
     });
