@@ -11,6 +11,7 @@ import { join, dirname, basename, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createStore, loadSigner, deviceOf, PROTOCOL } from './hub-core.mjs';
 import { startFileIndex } from './hub-files.mjs';
+import { zipKit } from './hub-zip.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const KIT = join(HERE, '..');
@@ -70,6 +71,7 @@ const routes = {
   'GET /api/messages': (req, res, url) => send(res, 200, store.messages(url.searchParams.get('channel') || '')),
   'GET /api/bundle': (req, res, url) => send(res, 200, store.bundle({ channel: url.searchParams.get('channel') || '', max: Math.max(1, Math.min(Math.floor(Number(url.searchParams.get('limit'))) || 40, 5000)) }), 'application/json; charset=utf-8', url.searchParams.has('download') ? { 'content-disposition': 'attachment; filename="ark-hub-bundle.json"' } : {}),
   'GET /files/manifest.json': (req, res) => send(res, 200, files.manifest()),
+  'GET /kit/full': async (req, res) => send(res, 200, await zipKit(KIT), 'application/zip', { 'content-disposition': 'attachment; filename="ARK-offline-kit.zip"' }),
   'GET /sign': (req, res) => send(res, 200, `<!doctype html><meta charset="utf-8"><title>Hub sign</title><body style="font:28px/1.4 Arial;text-align:center;padding:40px"><h1 style="font-size:56px">${esc(NAME)}</h1><p>No internet needed.</p><p>1. Join this Wi-Fi network:<br><b style="font-size:40px">________________</b></p><p>2. Open your web browser and type:</p>${addresses().map(a => `<p style="font-size:44px;font-weight:700">${esc(a)}</p>`).join('')}<p>Messages, first aid, maps and Wikipedia.</p><p style="font-size:20px">In danger? Call 911 if any phone works. This board is not monitored.</p></body>`, 'text/html; charset=utf-8'),
   'POST /api/post': async (req, res, url, ip) => {
     if (!allowed(ip)) return send(res, 429, { error: 'Too many posts from this phone. Wait 10 minutes.' });

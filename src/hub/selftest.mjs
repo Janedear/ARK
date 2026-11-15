@@ -1,9 +1,10 @@
 // Proves the hub's message format on this machine: encoding, verification, tampering,
 // duplicates, expiry, acknowledgments, persistence and corrupted storage.
 //   node selftest.mjs
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { zipKit } from './hub-zip.mjs';
 import { createStore, loadSigner, verify, PROTOCOL } from './hub-core.mjs';
 
 const dir = await mkdtemp(join(tmpdir(), 'ark-hub-test-'));
@@ -66,6 +67,15 @@ await check('packets survive a restart', async () => {
 await check('corrupted storage file does not crash the hub', async () => {
   await writeFile(join(dir, 'bad.json'), '{not json');
   if (await createStore(join(dir, 'bad.json')).load() !== 0) throw new Error('should start empty');
+});
+
+await check('hub can pack the whole kit to pass on', async () => {
+  const kit = join(dir, 'kit');
+  await mkdir(join(kit, 'hub', 'hub-data'), { recursive: true });
+  await writeFile(join(kit, 'START-HERE.html'), 'start');
+  await writeFile(join(kit, 'hub', 'hub-data', 'hub-key.json'), 'PRIVATE-KEY-MARKER');
+  const zip = await zipKit(kit);
+  if (zip.readUInt32LE(0) !== 0x04034b50 || !zip.includes('ARK-offline-kit/START-HERE.html') || zip.includes('PRIVATE-KEY-MARKER')) throw new Error('kit zip is incomplete or leaks the hub key');
 });
 
 for (const [status, name, detail] of results) console.log(status, name, detail ? `(${detail})` : '');
