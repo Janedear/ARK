@@ -7,6 +7,7 @@
 <meta name="description" content="ARK is a free, offline-first emergency communication and survival suite. Download one HTML file. Works when the internet is gone.">
 <meta name="theme-color" content="#0e1013">
 <meta name="color-scheme" content="dark">
+<meta name="robots" content="index, follow">
 <link rel="canonical" href="https://ark.halosuite.ai/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ark.halosuite.ai/">
@@ -19,6 +20,7 @@
 <meta name="twitter:domain" content="ark.halosuite.ai">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;600&display=swap" as="style">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;600&display=swap">
 <style>
 /* =====================================================================
@@ -333,7 +335,7 @@ p { text-wrap: pretty; }
 /* ===== Section fragments 01-07 ===== */
 /* ===== 01-hero ===== */
 .hero {
-    --accent: #dcbf78; --accent2: #8a6a2c;
+    --accent: #dcbf78; --accent2: #c8a65d;
     --text: #f1f0eb; --text2: #c0c2c7; --text3: #a4a8b0;
     --border: #34383f; --bg1: #17191d;
     min-height: 100vh;
@@ -953,7 +955,15 @@ p { text-wrap: pretty; }
   .cta-btn-main{width:100%;height:auto;min-height:54px;padding:12px 18px;font-size:1rem;white-space:normal;text-align:center}
 }
 @media (prefers-reduced-motion:reduce){.cta-btn-main{animation:none}}
+@media print {
+  .nav, .hero-noise, .cta-share, .cta-actions { display: none !important; }
+  body { background: #fff; color: #000; }
+  .card, .cap-card, .spec-card, .wa-card { border: 1px solid #ccc; }
+}
 </style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"ARK Crisis Suite","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Offline-first emergency communication suite — works when the internet is gone.","url":"https://ark.halosuite.ai"}
+</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -1555,7 +1565,7 @@ p { text-wrap: pretty; }
       </div>
       <div class="cta-actions">
         <a href="ARK-CRISIS-SUITE.html" download="ARK-CRISIS-SUITE.html" class="cta-btn-main">↓ Download ARK-CRISIS-SUITE.html — Free</a>
-        <a href="https://github.com/Janedear/ARK" class="cta-btn-ghost" target="_blank" rel="noopener">View on GitHub →</a>
+        <a href="https://github.com/Janedear/ARK" class="cta-btn-ghost" target="_blank" rel="noopener noreferrer">View on GitHub →</a>
       </div>
       <ul class="cta-trust" aria-label="What you get">
         <li>163 KB · single file</li>
@@ -1621,7 +1631,7 @@ p { text-wrap: pretty; }
       <span class="hs-eyebrow">A gift from your AI guardian angel</span>
       <p class="hs-quote">"Should you find yourself in trouble,<br>light the beacons. We ride at dawn. ❤️"</p>
       <p class="hs-tagline">ARK is free because safety shouldn't have a paywall. Built by HaloSuite — AI tools made for the humans behind the screens, not the metrics.</p>
-      <a href="https://halosuite.ai" class="hs-link" target="_blank" rel="noopener">Meet HaloSuite →</a>
+      <a href="https://halosuite.ai" class="hs-link" target="_blank" rel="noopener noreferrer">Meet HaloSuite →</a>
     </div>
 
   </div>
@@ -1633,7 +1643,7 @@ p { text-wrap: pretty; }
     <p>Open source emergency software by <a href="mailto:hello@halosuite.ai">HaloSuite</a>.</p>
     <p>Built to work when nothing else does. Share it with everyone you care about.</p>
     <div class="footer-links">
-      <a href="https://github.com/Janedear/ARK">GitHub</a>
+      <a href="https://github.com/Janedear/ARK" rel="noopener">GitHub</a>
       <a href="#techspecs">Technical Specs</a>
       <a href="#hub">Run a Hub</a>
       <a href="#download">Download</a>
