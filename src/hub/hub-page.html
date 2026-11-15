@@ -2,179 +2,2246 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ARK hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ARK Hub</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font:17px/1.5 -apple-system,"Segoe UI",Arial,sans-serif;background:#eef2ee;color:#1d2b25}
-header{background:#203B32;color:#fff;padding:14px 16px}
-header h1{margin:0;font-size:22px}
-header p{margin:2px 0 0;font-size:14px;opacity:.85}
-main{max-width:760px;margin:0 auto;padding:12px}
-h2{font-size:19px;margin:0 0 10px}
-.card{background:#fff;border:1px solid #c3cfc0;border-radius:8px;padding:14px;margin:12px 0}
-.red{border:2px solid #8a2c1c}
-.warn{background:#fbeccc;color:#6b4206;border-color:#e3c27d}
-.links{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:10px 14px;border-radius:6px;border:1px solid #203B32;background:#203B32;color:#fff;font:600 15px/1.2 inherit;text-decoration:none;text-align:center;cursor:pointer}
-.ghost{background:#fff;color:#203B32}
-label{display:block;font-weight:600;font-size:14px;margin:10px 0 4px}
-input,select,textarea{width:100%;min-height:46px;padding:10px;font:16px inherit;border:1px solid #8a9a86;border-radius:6px;background:#fff;color:#1d2b25}
-textarea{min-height:90px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
-.tabs .btn{min-height:40px;padding:6px 12px}
-.msg{border-top:1px solid #c3cfc0;padding:12px 0}
-.msg p{margin:4px 0;white-space:pre-wrap}
-.meta{font-size:13px;color:#4f5f49;word-break:break-all}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
-small{color:#4f5f49}
+/* ===== RESET & BASE ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#2d333b;
+  --border:#30363d;--border2:#444c56;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --accent:#58a6ff;--accent2:#1f6feb;
+  --green:#3fb950;--green-bg:#0f2e18;
+  --yellow:#d29922;--yellow-bg:#2e1f00;
+  --orange:#db6d28;--orange-bg:#2e1500;
+  --red:#f85149;--red-bg:#2e0d0d;
+  --black:#8b949e;--black-bg:#1c1c1c;
+  --channel-help:#f85149;--channel-safe:#3fb950;--channel-offers:#58a6ff;
+  --channel-missing:#d29922;--channel-general:#8b949e;--channel-resources:#db6d28;
+  --channel-medical:#e06caa;--channel-shelter:#a371f7;--channel-water:#39d8f5;--channel-power:#ffd700;
+  --font-size:16px;--radius:8px;--shadow:0 2px 8px rgba(0,0,0,.4);
+}
+.large-text{--font-size:19px}
+.small-text{--font-size:14px}
+html{font-size:var(--font-size)}
+body{background:var(--bg);color:var(--text);font:var(--font-size)/1.6 -apple-system,"Segoe UI",Arial,sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ===== HIGH CONTRAST MODE ===== */
+.hc{--bg:#000;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;--border:#666;--border2:#888;--text:#fff;--text2:#ddd;--text3:#bbb;--accent:#66b3ff}
+
+/* ===== STATUS BAR ===== */
+#statusBar{
+  position:sticky;top:0;z-index:100;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:8px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  font-size:.8rem;
+}
+#statusBar .hub-name{font-weight:700;font-size:.95rem;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat-pill{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:.75rem;color:var(--text2);white-space:nowrap}
+.stat-pill b{color:var(--text)}
+#alertBadge{border-radius:20px;padding:3px 10px;font-size:.75rem;font-weight:700;display:none}
+.alert-1{background:var(--green-bg);color:var(--green);border:1px solid var(--green)}
+.alert-2{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow)}
+.alert-3{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange)}
+.alert-4{background:var(--red-bg);color:var(--red);border:1px solid var(--red)}
+.alert-5{background:#111;color:#fff;border:2px solid #fff}
+#offlineIndicator{font-size:.7rem;padding:3px 8px;border-radius:20px;background:#2a0d0d;color:var(--red);border:1px solid var(--red);display:none}
+#offlineIndicator.visible{display:block}
+
+/* ===== ALERT BANNER ===== */
+#alertBanner{display:none;padding:14px 16px;text-align:center;font-weight:700;font-size:1.1rem;border-bottom:2px solid currentColor}
+
+/* ===== NAV TABS ===== */
+#navTabs{background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;white-space:nowrap;padding:0 8px}
+#navTabs::-webkit-scrollbar{display:none}
+.nav-tab{display:inline-block;padding:12px 16px;font-size:.85rem;font-weight:600;color:var(--text2);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;text-decoration:none;transition:color .15s}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ===== MAIN LAYOUT ===== */
+#main{max-width:960px;margin:0 auto;padding:16px;padding-bottom:80px}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ===== CARDS ===== */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+.card h2{font-size:1.1rem;margin-bottom:12px;color:var(--text)}
+.card h3{font-size:.95rem;margin-bottom:8px;color:var(--text)}
+.section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:10px}
+
+/* ===== ALERT WIDGET ===== */
+#alertWidget{border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:16px;border:2px solid var(--border)}
+#alertWidget .level-num{font-size:4rem;font-weight:900;line-height:1}
+#alertWidget .level-label{font-size:1.3rem;font-weight:700;margin:4px 0}
+#alertWidget .level-msg{font-size:.9rem;opacity:.85;margin-top:8px;white-space:pre-wrap}
+#alertWidget .level-time{font-size:.75rem;opacity:.6;margin-top:8px}
+.alert-widget-0{background:var(--bg3);border-color:var(--border);color:var(--text2)}
+.alert-widget-1{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.alert-widget-2{background:var(--yellow-bg);border-color:var(--yellow);color:var(--yellow)}
+.alert-widget-3{background:var(--orange-bg);border-color:var(--orange);color:var(--orange)}
+.alert-widget-4{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.alert-widget-5{background:#0a0a0a;border-color:#fff;color:#fff}
+
+/* ===== QUICK STATS GRID ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.stat-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:800;color:var(--accent);line-height:1}
+.stat-box .lbl{font-size:.75rem;color:var(--text2);margin-top:4px}
+
+/* ===== FORMS ===== */
+label{display:block;font-size:.8rem;font-weight:600;color:var(--text2);margin:12px 0 4px}
+input,select,textarea{
+  width:100%;padding:10px 12px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);font:inherit;font-size:.95rem;
+  transition:border-color .15s;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+textarea{min-height:80px;resize:vertical}
+select option{background:var(--bg3)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+@media(max-width:500px){.form-grid{grid-template-columns:1fr}}
+
+/* ===== HOSPITAL TAB ===== */
+.blood-cell{text-align:center;padding:6px 4px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;font-size:.8rem;font-weight:600;color:var(--text2)}
+.blood-input{width:100%;margin-top:4px;padding:4px;text-align:center;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:.85rem}
+.triage-card{padding:8px 10px;border-radius:6px;border-left:4px solid #888;background:var(--bg3);margin-bottom:6px;font-size:.82rem}
+.triage-card.RED{border-left-color:#c0392b;background:rgba(192,57,43,.08)}
+.triage-card.YELLOW{border-left-color:#e67e22;background:rgba(230,126,34,.08)}
+.triage-card.GREEN{border-left-color:#27ae60;background:rgba(39,174,96,.08)}
+.triage-card.BLACK{border-left-color:#555;background:rgba(50,50,50,.12)}
+.staff-row{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--bg3);border-radius:6px;margin-bottom:4px;font-size:.82rem}
+.ward-row{display:flex;gap:8px;align-items:center;padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:6px;font-size:.82rem}
+.ward-bar{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.ward-bar-fill{height:100%;border-radius:4px;transition:width .3s}
+/* ===== BUTTONS ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:40px;padding:8px 16px;border-radius:6px;border:1px solid var(--accent2);
+  background:var(--accent2);color:#fff;font:600 .9rem/1.2 inherit;
+  cursor:pointer;text-decoration:none;white-space:nowrap;transition:opacity .15s,background .15s;
+}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:transparent;border-color:var(--border2);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:transparent}
+.btn-danger{background:#8b1a1a;border-color:var(--red)}
+.btn-danger:hover{background:#a01f1f}
+.btn-success{background:#1a4731;border-color:var(--green)}
+.btn-warn{background:#3d2800;border-color:var(--yellow);color:var(--yellow)}
+.btn-sm{min-height:32px;padding:5px 12px;font-size:.8rem}
+.btn-xs{min-height:26px;padding:3px 8px;font-size:.75rem;border-radius:4px}
+.btn-emergency{background:var(--red);border-color:#ff0000;font-size:1rem;padding:14px 24px;animation:pulse-emergency 2s infinite}
+@keyframes pulse-emergency{0%,100%{box-shadow:0 0 0 0 rgba(248,81,73,.4)}50%{box-shadow:0 0 0 8px rgba(248,81,73,0)}}
+
+/* ===== STATUS MESSAGES ===== */
+.status-msg{font-size:.85rem;color:var(--text2);padding:4px 0}
+.status-msg.ok{color:var(--green)}
+.status-msg.err{color:var(--red)}
+
+/* ===== TOAST NOTIFICATIONS ===== */
+#toastContainer{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:320px}
+.toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 16px;font-size:.85rem;box-shadow:var(--shadow);animation:slideIn .2s ease;display:flex;align-items:flex-start;gap:10px}
+.toast-icon{font-size:1.1rem;flex-shrink:0}
+.toast-text{flex:1}
+.toast-close{background:none;border:none;color:var(--text3);cursor:pointer;padding:0;font-size:1rem;line-height:1}
+.toast.info{border-left:3px solid var(--accent)}
+.toast.success{border-left:3px solid var(--green)}
+.toast.warn{border-left:3px solid var(--yellow)}
+.toast.danger{border-left:3px solid var(--red)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ===== MESSAGES ===== */
+.channel-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.ch-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font:.8rem inherit;cursor:pointer;transition:all .15s}
+.ch-btn.active,.ch-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ch-btn[data-ch="help"].active{border-color:var(--channel-help);color:var(--channel-help)}
+.ch-btn[data-ch="safe"].active{border-color:var(--channel-safe);color:var(--channel-safe)}
+.ch-btn[data-ch="offers"].active{border-color:var(--channel-offers);color:var(--channel-offers)}
+.ch-btn[data-ch="missing"].active{border-color:var(--channel-missing);color:var(--channel-missing)}
+.ch-btn[data-ch="medical"].active{border-color:var(--channel-medical);color:var(--channel-medical)}
+.ch-btn[data-ch="shelter"].active{border-color:var(--channel-shelter);color:var(--channel-shelter)}
+.ch-btn[data-ch="water"].active{border-color:var(--channel-water);color:var(--channel-water)}
+.ch-btn[data-ch="power"].active{border-color:var(--channel-power);color:var(--channel-power)}
+
+.msg-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;transition:border-color .15s}
+.msg-card:hover{border-color:var(--border2)}
+.msg-card.urgent{border-color:var(--red);border-left-width:3px}
+.msg-card.help-ch{border-left:3px solid var(--channel-help)}
+.msg-card.safe-ch{border-left:3px solid var(--channel-safe)}
+.msg-card.offers-ch{border-left:3px solid var(--channel-offers)}
+.msg-card.missing-ch{border-left:3px solid var(--channel-missing)}
+.msg-card.medical-ch{border-left:3px solid var(--channel-medical)}
+.msg-card.shelter-ch{border-left:3px solid var(--channel-shelter)}
+.msg-card.water-ch{border-left:3px solid var(--channel-water)}
+.msg-card.power-ch{border-left:3px solid var(--channel-power)}
+.msg-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.msg-alias{font-weight:700;font-size:.95rem}
+.ch-badge{padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.ch-badge-help{background:rgba(248,81,73,.15);color:var(--channel-help)}
+.ch-badge-safe{background:rgba(63,185,80,.15);color:var(--channel-safe)}
+.ch-badge-offers{background:rgba(88,166,255,.15);color:var(--channel-offers)}
+.ch-badge-missing{background:rgba(210,153,34,.15);color:var(--channel-missing)}
+.ch-badge-general{background:rgba(139,148,158,.15);color:var(--channel-general)}
+.ch-badge-resources{background:rgba(219,109,40,.15);color:var(--channel-resources)}
+.ch-badge-medical{background:rgba(224,108,170,.15);color:var(--channel-medical)}
+.ch-badge-shelter{background:rgba(163,113,247,.15);color:var(--channel-shelter)}
+.ch-badge-water{background:rgba(57,216,245,.15);color:var(--channel-water)}
+.ch-badge-power{background:rgba(255,215,0,.15);color:var(--channel-power)}
+.urgent-badge{background:rgba(248,81,73,.2);color:var(--red);padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:700}
+.msg-text{font-size:.95rem;line-height:1.6;white-space:pre-wrap;margin-bottom:8px}
+.msg-meta{font-size:.75rem;color:var(--text3);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.msg-actions{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.time-rel{cursor:default}
+.search-box{position:relative;margin-bottom:12px}
+.search-box input{padding-left:36px}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+
+/* ===== RESOURCES ===== */
+.resource-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.resource-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.resource-card .res-name{font-weight:700;margin-bottom:4px}
+.resource-card .res-qty{font-size:1.5rem;font-weight:800;line-height:1}
+.resource-card .res-qty.high{color:var(--green)}
+.resource-card .res-qty.med{color:var(--yellow)}
+.resource-card .res-qty.low{color:var(--red)}
+.resource-card .res-meta{font-size:.78rem;color:var(--text2);margin-top:6px;line-height:1.5}
+.resource-card .res-actions{margin-top:8px;display:flex;gap:6px}
+
+/* ===== HOUSEHOLDS ===== */
+.household-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.hh-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.hh-card.status-ok{border-left:3px solid var(--green)}
+.hh-card.status-needs-help{border-left:3px solid var(--yellow)}
+.hh-card.status-critical{border-left:3px solid var(--red);border-top-color:var(--red)}
+.hh-name{font-weight:700;font-size:1rem}
+.hh-headcount{font-size:1.3rem;font-weight:700;color:var(--accent)}
+.hh-status-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:700}
+.hh-status-ok{background:var(--green-bg);color:var(--green)}
+.hh-status-needs-help{background:var(--yellow-bg);color:var(--yellow)}
+.hh-status-critical{background:var(--red-bg);color:var(--red)}
+.hh-meta{font-size:.8rem;color:var(--text2);margin-top:6px;line-height:1.5}
+.hh-needs{margin-top:6px;padding:6px 8px;background:var(--bg4);border-radius:4px;font-size:.82rem;color:var(--text)}
+
+/* ===== FILES ===== */
+.file-cat-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.file-row{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;margin-bottom:8px}
+.file-icon{font-size:1.4rem;flex-shrink:0}
+.file-info{flex:1;min-width:0}
+.file-name{font-weight:600;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-meta{font-size:.75rem;color:var(--text2)}
+.file-actions{flex-shrink:0;display:flex;gap:6px}
+
+/* ===== NETWORK/PEERS ===== */
+.peer-list{display:flex;flex-direction:column;gap:8px}
+.peer-row{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;align-items:center;gap:12px}
+.peer-status{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.peer-online{background:var(--green)}
+.peer-offline{background:var(--text3)}
+.peer-info{flex:1;min-width:0}
+.peer-url{font-size:.8rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qr-container{text-align:center;padding:16px;background:#fff;border-radius:var(--radius);display:inline-block;margin:12px auto}
+.qr-container img{display:block;margin:0 auto}
+
+/* ===== BUNDLE ===== */
+.bundle-instructions{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.bundle-instructions ol{padding-left:20px;line-height:2}
+.bundle-instructions li{font-size:.9rem;color:var(--text2)}
+
+/* ===== ADMIN ===== */
+.log-viewer{background:#050a0f;border:1px solid var(--border);border-radius:6px;padding:12px;font:12px/1.6 "SF Mono","Cascadia Code",monospace;color:#8ec07c;max-height:300px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+.stats-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.stats-table th{text-align:left;padding:8px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600}
+.stats-table td{padding:8px;border-bottom:1px solid var(--border)}
+.stats-table tr:last-child td{border-bottom:none}
+
+/* ===== PREVIEW MODAL ===== */
+#previewModal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+#previewModal.open{display:flex}
+.preview-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:20px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto}
+.preview-box h3{margin-bottom:12px;color:var(--text2);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
+
+/* ===== KEYBOARD SHORTCUT HINT ===== */
+.key-hint{font-size:.7rem;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:1px 5px;color:var(--text3);font-family:monospace}
+
+/* ===== UTILITY ===== */
+.hidden{display:none!important}
+.muted{color:var(--text2)}
+.danger{color:var(--red)}
+.success{color:var(--green)}
+.warn{color:var(--yellow)}
+.flex{display:flex;gap:8px;align-items:center}
+.flex-1{flex:1}
+.mt-8{margin-top:8px}
+.mt-16{margin-top:16px}
+.mb-8{margin-bottom:8px}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-state .empty-icon{font-size:3rem;margin-bottom:12px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+/* ===== PRINT STYLES ===== */
+@media print{
+  #statusBar,#navTabs,#toastContainer,.btn,.msg-actions,.ch-btn,.search-box{display:none!important}
+  body{background:#fff;color:#000}
+  .msg-card{border:1px solid #ccc;page-break-inside:avoid;margin-bottom:8px}
+  .tab-panel{display:block!important}
+}
+
+/* ===== ACCESSIBILITY / MOTION ===== */
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== OFFLINE BANNER ===== */
+#offlineBanner{display:none;background:#2a0909;color:var(--red);border-bottom:2px solid var(--red);padding:10px 16px;text-align:center;font-size:.85rem;font-weight:600;z-index:99}
+#offlineBanner.visible{display:block}
+
+/* ===== PENDING QUEUE NOTICE ===== */
+#pendingNotice{background:var(--yellow-bg);border:1px solid var(--yellow);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px;font-size:.83rem;color:var(--yellow);display:none}
+#pendingNotice.visible{display:flex;align-items:center;gap:10px}
+
+/* ===== ONBOARDING OVERLAY ===== */
+#onboarding{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px}
+.ob-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);max-width:460px;width:100%;padding:28px}
+.ob-box h2{font-size:1.4rem;margin-bottom:6px}
+.ob-box p{color:var(--text2);margin-bottom:18px;font-size:.88rem}
+.ob-steps{display:flex;flex-direction:column;gap:14px;margin-bottom:22px}
+.ob-step{display:flex;align-items:flex-start;gap:14px}
+.ob-num{width:36px;height:36px;border-radius:50%;background:var(--accent2);color:#fff;font-weight:700;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ob-step-text strong{display:block;font-size:.95rem}
+.ob-step-text span{font-size:.82rem;color:var(--text2)}
+
+/* ===== CAPACITY WARNING ===== */
+.capacity-warn{background:var(--yellow-bg);border:1px solid var(--yellow);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px;font-size:.85rem;color:var(--yellow)}
+.capacity-crit{background:var(--red-bg);border:1px solid var(--red);color:var(--red)}
+
+/* ===== BATTERY ===== */
+#batteryPill{display:none}
+.bat-low b{color:var(--red)}
+
+/* ===== LOW POWER MODE ===== */
+.low-power *{animation:none!important;transition:none!important}
+
+/* ===== BIG HELP BUTTON ===== */
+#quickHelpBtn{width:100%;min-height:60px;font-size:1.2rem;background:#8b1a1a;border-color:#ff0000;border-width:2px;margin-bottom:14px;animation:pulse-emergency 2s infinite}
 </style>
 </head>
 <body>
-<header><h1 id="name">ARK community hub</h1><p>Works with no internet. Everyone on this Wi-Fi sees the same board.</p></header>
-<main>
-  <div class="card red"><b>In danger? Call 911 if any phone works.</b> Emergency services do not watch this board, and nobody is guaranteed to read it.</div>
-  <div id="clock" class="card warn" hidden></div>
 
-  <div class="card">
-    <h2>Get the essentials</h2>
-    <div class="links">
-      <a class="btn" href="/kit/full">Save the whole ARK kit to pass on</a>
-      <a class="btn ghost" href="/kit/start-here">Start here</a>
-      <a class="btn ghost" href="/kit/guidance">First aid and survival</a>
-      <a class="btn ghost" href="/kit/meeting-point">Meeting point</a>
-      <a class="btn ghost" href="/kit/contacts">Emergency numbers</a>
-      <a class="btn ghost" href="/kit/relay">Save the offline message app</a>
-      <a class="btn ghost" href="#files">Apps, maps and Wikipedia</a>
+<!-- OFFLINE BANNER -->
+<div id="offlineBanner" role="alert" aria-live="assertive">
+  ⚡ OFFLINE — showing cached data · hub unreachable · retrying every 30s…
+  <span id="offlineSince"></span>
+</div>
+
+<!-- ONBOARDING OVERLAY (first visit only) -->
+<div id="onboarding" role="dialog" aria-modal="true" aria-label="Welcome to ARK Hub" style="display:none">
+  <div class="ob-box">
+    <h2>Welcome to ARK Hub</h2>
+    <p>Works with <strong>no internet</strong>. Everyone on this Wi-Fi shares the same board.</p>
+    <div class="ob-steps">
+      <div class="ob-step">
+        <div class="ob-num">1</div>
+        <div class="ob-step-text"><strong>Post a message</strong><span>Use the "Post" tab to tell others you are safe, need help, or have resources to share. No login needed.</span></div>
+      </div>
+      <div class="ob-step">
+        <div class="ob-num">2</div>
+        <div class="ob-step-text"><strong>Read the board</strong><span>See messages from everyone on this network. Messages expire automatically.</span></div>
+      </div>
+      <div class="ob-step">
+        <div class="ob-num">3</div>
+        <div class="ob-step-text"><strong>Carry messages</strong><span>Use the Bundle tab to export messages to a USB drive and carry them to other hubs without internet.</span></div>
+      </div>
     </div>
-    <p><small>Save the offline message app, then open it from your downloads. It keeps working after you leave this Wi-Fi. The whole kit (about 1 MB) includes this hub, so anyone with a laptop can start another one.</small></p>
+    <p style="font-size:.82rem;color:var(--red);background:#1a0a0a;border:1px solid var(--red);border-radius:4px;padding:8px;margin-bottom:16px">⚠ <b>Emergency services do not watch this board.</b> Call 911 or your local emergency number first.</p>
+    <button class="btn" style="width:100%" onclick="dismissOnboarding()">Got it — open the hub</button>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div id="statusBar">
+  <span class="hub-name" id="sbName">ARK Hub</span>
+  <span id="alertBadge">ALERT</span>
+  <span class="stat-pill"><b id="sbMsgs">–</b> messages</span>
+  <span class="stat-pill"><b id="sbPeers">–</b> peers</span>
+  <span class="stat-pill">up <b id="sbUptime">–</b></span>
+  <span id="offlineIndicator">● offline</span>
+  <span class="stat-pill" id="sbSync" title="Last sync">–</span>
+  <span class="stat-pill" id="batteryPill" title="Battery level">🔋 <b id="sbBat">–</b></span>
+</div>
+
+<!-- ALERT BANNER -->
+<div id="alertBanner"></div>
+
+<!-- NAV TABS -->
+<nav id="navTabs">
+  <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
+  <button class="nav-tab" data-tab="messages">Messages</button>
+  <button class="nav-tab" data-tab="compose">Post <span class="key-hint">N</span></button>
+  <button class="nav-tab" data-tab="resources">Resources</button>
+  <button class="nav-tab" data-tab="households">Households</button>
+  <button class="nav-tab" data-tab="files">Files</button>
+  <button class="nav-tab" data-tab="network">Network</button>
+  <button class="nav-tab" data-tab="bundle">Bundle</button>
+  <button class="nav-tab" data-tab="hospital">🏥 Hospital</button>
+  <button class="nav-tab" data-tab="admin">Admin</button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+
+<!-- ===== DASHBOARD TAB ===== -->
+<div class="tab-panel active" id="tab-dashboard">
+  <!-- Emergency quick-action -->
+  <button class="btn btn-danger" id="quickHelpBtn" aria-label="Post urgent help request to board">🆘 I NEED HELP — tap to post urgent message</button>
+
+  <div id="capacityWarnDash"></div>
+
+  <div class="card" style="border-color:#f85149;background:#1a0a0a;padding:12px 16px">
+    <b style="color:#f85149">⚠ Emergency services do not watch this board.</b>
+    Call 911 or your local emergency number if any phone works. Nobody is guaranteed to read messages here.
+  </div>
+
+  <div id="alertWidget" class="alert-widget-0">
+    <div class="level-num" id="awLevel">–</div>
+    <div class="level-label" id="awLabel">No active alert</div>
+    <div class="level-msg" id="awMsg"></div>
+    <div class="level-time" id="awTime"></div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-box"><div class="num" id="dsMsgs">–</div><div class="lbl">Messages</div></div>
+    <div class="stat-box"><div class="num" id="dsPeers">–</div><div class="lbl">Hub Peers</div></div>
+    <div class="stat-box"><div class="num" id="dsRes">–</div><div class="lbl">Resources</div></div>
+    <div class="stat-box"><div class="num" id="dsHH">–</div><div class="lbl">Households</div></div>
   </div>
 
   <div class="card">
-    <h2>Post to the board</h2>
-    <label for="alias">Your name or nickname</label><input id="alias" maxlength="40" autocomplete="nickname">
-    <label for="channel">Topic</label>
-    <select id="channel"><option value="help">I need help</option><option value="safe">I am safe</option><option value="offers">I can help or have supplies</option><option value="missing">Looking for someone</option><option value="general">General news</option></select>
-    <label for="text">Message</label>
-    <textarea id="text" maxlength="1000" placeholder="Short and specific, e.g. Need insulin for 1 adult, at the school gym"></textarea>
-    <label for="hours">Keep it up for</label>
-    <select id="hours"><option value="6">6 hours</option><option value="24" selected>24 hours</option><option value="72">3 days (the most allowed)</option></select>
-    <p><small>Everything here is public. Never post a home address or medical details you would not say out loud in the street.</small></p>
-    <div class="row"><button class="btn" id="post">Post</button><span id="postStatus" role="status"></span></div>
+    <h2>Recent Messages</h2>
+    <div id="dashRecent"><div class="empty-state"><div class="spinner"></div></div></div>
+    <div class="mt-8">
+      <button class="btn btn-ghost btn-sm" onclick="switchTab('messages')">View all messages →</button>
+    </div>
   </div>
 
   <div class="card">
-    <h2>Board</h2>
-    <div class="tabs" id="tabs"></div>
-    <div id="list"><p>Loading…</p></div>
+    <h2>Quick Links</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">
+      <a class="btn btn-ghost btn-sm" href="/kit/full">📦 Save full kit</a>
+      <a class="btn btn-ghost btn-sm" href="/kit/start-here">📄 Start here</a>
+      <a class="btn btn-ghost btn-sm" href="/kit/guidance">🏥 First aid</a>
+      <a class="btn btn-ghost btn-sm" href="/kit/meeting-point">📍 Meeting point</a>
+      <a class="btn btn-ghost btn-sm" href="/kit/contacts">📞 Emergency numbers</a>
+      <a class="btn btn-ghost btn-sm" href="/kit/relay">💾 Offline message app</a>
+      <a class="btn btn-ghost btn-sm" href="/sign" target="_blank">🖨 Print sign</a>
+      <button class="btn btn-ghost btn-sm" onclick="switchTab('files')">📂 Files library</button>
+    </div>
+  </div>
+</div><!-- /dashboard -->
+
+<!-- ===== MESSAGES TAB ===== -->
+<div class="tab-panel" id="tab-messages">
+  <div class="card">
+    <div class="channel-filter" id="msgChannelFilter">
+      <button class="ch-btn active" data-ch="">All</button>
+      <button class="ch-btn" data-ch="help">🆘 Help</button>
+      <button class="ch-btn" data-ch="safe">✅ Safe</button>
+      <button class="ch-btn" data-ch="offers">🤝 Offers</button>
+      <button class="ch-btn" data-ch="missing">🔍 Missing</button>
+      <button class="ch-btn" data-ch="general">📢 General</button>
+      <button class="ch-btn" data-ch="resources">📦 Resources</button>
+      <button class="ch-btn" data-ch="medical">🏥 Medical</button>
+      <button class="ch-btn" data-ch="shelter">🏠 Shelter</button>
+      <button class="ch-btn" data-ch="water">💧 Water</button>
+      <button class="ch-btn" data-ch="power">⚡ Power</button>
+    </div>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input id="msgSearch" type="search" placeholder="Search messages…" oninput="filterMessages()">
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span id="msgCount" class="muted" style="font-size:.8rem"></span>
+      <div class="flex" style="gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchTab('compose')">+ Post message</button>
+      </div>
+    </div>
+    <!-- Offline queue notice -->
+    <div id="pendingNotice" role="status">
+      <span>📤 <span id="pendingCount">0</span> message(s) queued offline — will send when hub is reachable.</span>
+      <button class="btn btn-ghost btn-xs" onclick="retryPending()">Retry now</button>
+    </div>
+    <div id="msgList"><div class="empty-state"><div class="spinner"></div></div></div>
+  </div>
+</div><!-- /messages -->
+
+<!-- ===== COMPOSE TAB ===== -->
+<div class="tab-panel" id="tab-compose">
+  <div class="card">
+    <h2>Post a Message</h2>
+    <p class="muted" style="font-size:.85rem;margin-bottom:16px">Everything posted here is public and visible to everyone on this network. Never include home addresses or sensitive personal details.</p>
+
+    <label for="cAlias">Your name or nickname</label>
+    <input id="cAlias" maxlength="40" autocomplete="nickname" placeholder="e.g. Maria, Unit 4B, Rescue Team A">
+
+    <label for="cChannel">Topic / Channel</label>
+    <select id="cChannel">
+      <option value="help">🆘 I need help</option>
+      <option value="safe">✅ I am safe</option>
+      <option value="offers">🤝 I can help / have supplies</option>
+      <option value="missing">🔍 Looking for someone</option>
+      <option value="general" selected>📢 General news</option>
+      <option value="resources">📦 Resources available</option>
+      <option value="medical">🏥 Medical</option>
+      <option value="shelter">🏠 Shelter</option>
+      <option value="water">💧 Water</option>
+      <option value="power">⚡ Power</option>
+    </select>
+
+    <label for="cText">Message</label>
+    <textarea id="cText" maxlength="1000" placeholder="Be specific. Good: 'Need insulin for 1 adult at the school gym, have 2 days supply left.' Not: 'Need help.'"></textarea>
+    <div style="text-align:right;font-size:.75rem;color:var(--text3);margin-top:3px"><span id="cCharCount">0</span>/1000</div>
+
+    <label for="cLocation">Your location (optional)</label>
+    <input id="cLocation" maxlength="120" placeholder="e.g. 123 Main St, north school building, shelter B">
+
+    <label for="cHours">Keep this message up for</label>
+    <select id="cHours">
+      <option value="6">6 hours</option>
+      <option value="24" selected>24 hours</option>
+      <option value="48">2 days</option>
+      <option value="72">3 days (maximum)</option>
+    </select>
+
+    <div class="flex mt-8" style="gap:12px">
+      <label style="display:flex;align-items:center;gap:8px;margin:0;cursor:pointer;font-weight:400">
+        <input type="checkbox" id="cUrgent" style="width:18px;height:18px;accent-color:var(--red)">
+        <span style="font-size:.9rem">Mark as <b style="color:var(--red)">URGENT</b></span>
+      </label>
+    </div>
+
+    <div class="row">
+      <button class="btn" id="cPreviewBtn">Preview</button>
+      <button class="btn btn-ghost" id="cPostBtn">Post to board</button>
+      <span id="cStatus" class="status-msg"></span>
+    </div>
+  </div>
+
+  <!-- Preview Modal -->
+  <div id="previewModal">
+    <div class="preview-box">
+      <h3>Preview — this is what others will see</h3>
+      <div id="previewContent"></div>
+      <div class="row mt-16">
+        <button class="btn" id="previewPost">Post this message</button>
+        <button class="btn btn-ghost" onclick="closePreview()">Edit</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /compose -->
+
+<!-- ===== RESOURCES TAB ===== -->
+<div class="tab-panel" id="tab-resources">
+  <div class="card">
+    <div class="flex" style="justify-content:space-between;margin-bottom:12px">
+      <h2 style="margin:0">Resource Inventory</h2>
+      <div class="flex" style="gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print</button>
+        <button class="btn btn-sm" onclick="toggleResForm()">+ Add item</button>
+      </div>
+    </div>
+    <div id="resForm" class="hidden" style="border:1px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:16px;background:var(--bg3)">
+      <h3>Add / Update Resource</h3>
+      <input type="hidden" id="resId">
+      <div class="form-grid">
+        <div>
+          <label for="resName">Item name</label>
+          <input id="resName" maxlength="80" placeholder="e.g. Bottled water">
+        </div>
+        <div>
+          <label for resCat>Category</label>
+          <select id="resCat">
+            <option value="water">💧 Water</option>
+            <option value="food">🥫 Food</option>
+            <option value="medical">🏥 Medical</option>
+            <option value="fuel">⛽ Fuel</option>
+            <option value="tools">🔧 Tools</option>
+            <option value="shelter">🏠 Shelter</option>
+            <option value="power">⚡ Power</option>
+            <option value="general">📦 General</option>
+          </select>
+        </div>
+        <div>
+          <label for="resQty">Quantity</label>
+          <input id="resQty" type="number" min="0" placeholder="0">
+        </div>
+        <div>
+          <label for="resUnit">Unit</label>
+          <input id="resUnit" maxlength="20" placeholder="e.g. liters, boxes, days">
+        </div>
+      </div>
+      <label for="resLocation">Location</label>
+      <input id="resLocation" maxlength="120" placeholder="e.g. Community center storage room B">
+      <label for="resContact">Contact person</label>
+      <input id="resContact" maxlength="80" placeholder="Name / radio call sign">
+      <div class="row">
+        <button class="btn btn-sm" id="resSaveBtn">Save</button>
+        <button class="btn btn-ghost btn-sm" onclick="cancelResForm()">Cancel</button>
+        <span id="resStatus" class="status-msg"></span>
+      </div>
+    </div>
+    <div id="resList"><div class="empty-state"><div class="spinner"></div></div></div>
+  </div>
+</div><!-- /resources -->
+
+<!-- ===== HOUSEHOLDS TAB ===== -->
+<div class="tab-panel" id="tab-households">
+  <div class="card">
+    <div class="flex" style="justify-content:space-between;margin-bottom:12px">
+      <h2 style="margin:0">Household Roster</h2>
+      <div class="flex" style="gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print</button>
+        <button class="btn btn-sm" onclick="toggleHHForm()">+ Register</button>
+      </div>
+    </div>
+    <div id="hhForm" class="hidden" style="border:1px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:16px;background:var(--bg3)">
+      <h3>Register Household</h3>
+      <input type="hidden" id="hhId">
+      <div class="form-grid">
+        <div>
+          <label for="hhName">Household name / identifier</label>
+          <input id="hhName" maxlength="80" placeholder="e.g. Smith family, Unit 4B">
+        </div>
+        <div>
+          <label for="hhHeadcount">Number of people</label>
+          <input id="hhHeadcount" type="number" min="1" value="1" placeholder="1">
+        </div>
+      </div>
+      <label for="hhLocation">Location</label>
+      <input id="hhLocation" maxlength="120" placeholder="e.g. 123 Oak St, shelter B tent 7">
+      <label for="hhStatus">Status</label>
+      <select id="hhStatus">
+        <option value="ok">✅ OK — no immediate needs</option>
+        <option value="needs-help">⚠️ Needs help</option>
+        <option value="critical">🆘 Critical — urgent help needed</option>
+      </select>
+      <label for="hhNeeds">Needs / notes</label>
+      <textarea id="hhNeeds" maxlength="300" placeholder="Describe any needs: medical, food, shelter, etc."></textarea>
+      <label for="hhContact">Contact / radio</label>
+      <input id="hhContact" maxlength="80" placeholder="Phone, radio channel, or note">
+      <div class="row">
+        <button class="btn btn-sm" id="hhSaveBtn">Save</button>
+        <button class="btn btn-ghost btn-sm" onclick="cancelHHForm()">Cancel</button>
+        <span id="hhStatus2" class="status-msg"></span>
+      </div>
+    </div>
+    <!-- Summary stats -->
+    <div id="hhStats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px"></div>
+    <div id="hhList"><div class="empty-state"><div class="spinner"></div></div></div>
+  </div>
+</div><!-- /households -->
+
+<!-- ===== FILES TAB ===== -->
+<div class="tab-panel" id="tab-files">
+  <div class="card">
+    <h2>File Library</h2>
+    <p class="muted" style="font-size:.85rem;margin-bottom:12px">Android: open a downloaded .apk file to install it. Open .zim files in the Kiwix app. Each SHA-256 fingerprint lets you verify a file against another copy.</p>
+    <div class="file-cat-tabs" id="fileCatTabs">
+      <button class="ch-btn active" data-cat="">All</button>
+      <button class="ch-btn" data-cat="guides">Guides</button>
+      <button class="ch-btn" data-cat="maps">Maps</button>
+      <button class="ch-btn" data-cat="data">Data</button>
+      <button class="ch-btn" data-cat="tools">Tools</button>
+      <button class="ch-btn" data-cat="media">Media</button>
+    </div>
+    <div id="fileList"><div class="empty-state"><div class="spinner"></div></div></div>
+  </div>
+</div><!-- /files -->
+
+<!-- ===== NETWORK TAB ===== -->
+<div class="tab-panel" id="tab-network">
+  <div class="card">
+    <h2>This Hub</h2>
+    <div id="hubAddresses" class="muted" style="font-size:.9rem;margin-bottom:12px"></div>
+    <div>
+      <p class="section-title">QR Code — scan to open this hub</p>
+      <div id="qrDisplay" style="text-align:center;padding:16px">
+        <div class="spinner"></div>
+      </div>
+    </div>
   </div>
 
   <div class="card">
-    <h2>Carry messages to other places</h2>
-    <p>Copy this board into the offline message app, or bring messages back from it.</p>
-    <div class="row"><button class="btn ghost" id="showBundle">Show the newest 40 messages to copy</button><a class="btn ghost" href="/api/bundle?limit=5000&amp;download=1">Download everything (for USB)</a></div>
-    <textarea id="bundleOut" readonly hidden></textarea>
-    <label for="bundleIn">Paste messages from the offline app</label>
-    <textarea id="bundleIn" placeholder='{"protocol":"ARK-RELAY-1","packets":[...]}'></textarea>
-    <div class="row"><button class="btn" id="import">Add to this hub</button><span id="importStatus" role="status"></span></div>
+    <div class="flex" style="justify-content:space-between;margin-bottom:12px">
+      <h2 style="margin:0">Connected Peers</h2>
+      <button class="btn btn-sm btn-ghost" onclick="loadPeers()">Refresh</button>
+    </div>
+    <div id="peerList"><div class="empty-state"><div class="spinner"></div></div></div>
+    <div class="divider"></div>
+    <h3>Add peer hub manually</h3>
+    <div class="flex mt-8">
+      <input id="peerUrlInput" placeholder="http://192.168.1.x:8080" class="flex-1">
+      <button class="btn btn-sm" onclick="addPeer()">Connect</button>
+    </div>
+    <span id="peerStatus" class="status-msg" style="display:block;margin-top:8px"></span>
+  </div>
+</div><!-- /network -->
+
+<!-- ===== BUNDLE TAB ===== -->
+<div class="tab-panel" id="tab-bundle">
+  <div class="bundle-instructions card">
+    <h2>USB Message Transfer</h2>
+    <p class="muted" style="font-size:.85rem;margin-bottom:12px">Carry messages between hubs with no internet connection. Use a USB drive, phone, or any device.</p>
+    <ol>
+      <li>Download a bundle from this hub</li>
+      <li>Copy it to a USB drive or your phone</li>
+      <li>Carry it to another hub and import it there</li>
+      <li>That hub now has all these messages</li>
+    </ol>
   </div>
 
-  <div class="card" id="files">
-    <h2>Apps, maps and Wikipedia</h2>
-    <div id="fileList"><p>Loading…</p></div>
-    <p><small>Android: open a downloaded .apk file to install it, and allow "install unknown apps" when asked. iPhones cannot install apps from here. Open .zim files in the Kiwix app. Each file shows a SHA-256 fingerprint you can compare with a copy you trust.</small></p>
+  <div class="card">
+    <h2>Export from this hub</h2>
+    <div class="row">
+      <a class="btn" href="/api/bundle?limit=5000&download=1">⬇ Download all messages (USB)</a>
+      <button class="btn btn-ghost" id="showBundleBtn">Show messages as text (copy)</button>
+    </div>
+    <textarea id="bundleOut" readonly class="hidden mt-8" style="min-height:120px;font-family:monospace;font-size:.8rem"></textarea>
   </div>
-</main>
+
+  <div class="card">
+    <h2>Import to this hub</h2>
+    <label for="bundleIn">Paste an ARK bundle here</label>
+    <textarea id="bundleIn" placeholder='{"protocol":"ARK-RELAY-1","packets":[...]}' style="min-height:120px;font-family:monospace;font-size:.8rem"></textarea>
+    <div class="row">
+      <button class="btn" id="importBtn">Import messages</button>
+      <span id="importStatus" class="status-msg"></span>
+    </div>
+  </div>
+</div><!-- /bundle -->
+
+<!-- ===== HOSPITAL COORDINATION TAB ===== -->
+<div class="tab-panel" id="tab-hospital">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+
+    <!-- Alert Level & Status -->
+    <div class="card" style="border-color:#e06caa">
+      <h2 style="color:#e06caa">🏥 Facility Status</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <div style="text-align:center;padding:12px;background:rgba(224,108,170,.1);border-radius:8px">
+          <div id="hospBedTotal" style="font-size:2rem;font-weight:700;color:#e06caa">—</div>
+          <div style="font-size:.8rem;color:var(--text2)">Total Beds</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:rgba(224,108,170,.1);border-radius:8px">
+          <div id="hospBedAvail" style="font-size:2rem;font-weight:700;color:#2d7a3a">—</div>
+          <div style="font-size:.8rem;color:var(--text2)">Available</div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div>
+          <label>Ward / Unit</label>
+          <input id="wardName" placeholder="e.g. Emergency, ICU, General" maxlength="60">
+        </div>
+        <div>
+          <label>Capacity</label>
+          <input id="wardCapacity" type="number" min="0" max="9999" placeholder="Total beds">
+        </div>
+        <div>
+          <label>Occupied</label>
+          <input id="wardOccupied" type="number" min="0" max="9999" placeholder="Current patients">
+        </div>
+        <div>
+          <label>Status</label>
+          <select id="wardStatus">
+            <option value="open">Open — Accepting</option>
+            <option value="limited">Limited — Critical Only</option>
+            <option value="full">Full — Diverting</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" onclick="addWard()" style="margin-top:8px;width:100%">Add Ward</button>
+      <div id="wardList" style="margin-top:12px"></div>
+    </div>
+
+    <!-- START Triage Log -->
+    <div class="card">
+      <h2>🚦 START Triage Log</h2>
+      <p style="font-size:.8rem;color:var(--text2);margin-bottom:8px">Record triage tags — <strong>NOT diagnosis</strong>. Patient IDs only, no personal information.</p>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn" onclick="logTriage('RED')" style="flex:1;background:#c0392b;border-color:#c0392b;color:#fff">🔴 RED<br><small>Immediate</small></button>
+        <button class="btn" onclick="logTriage('YELLOW')" style="flex:1;background:#e67e22;border-color:#e67e22;color:#fff">🟡 YELLOW<br><small>Delayed</small></button>
+        <button class="btn" onclick="logTriage('GREEN')" style="flex:1;background:#27ae60;border-color:#27ae60;color:#fff">🟢 GREEN<br><small>Minor</small></button>
+        <button class="btn" onclick="logTriage('BLACK')" style="flex:1;background:#2c2c2c;border-color:#666;color:#aaa">⬛ BLACK<br><small>Expectant</small></button>
+      </div>
+      <div id="triageModal" style="display:none;padding:12px;background:var(--bg2);border-radius:8px;margin-bottom:12px">
+        <label>Patient ID (anonymous token)</label>
+        <input id="triagePtId" placeholder="e.g. PT-001, John-Doe-Unknown" maxlength="40" style="margin-bottom:8px">
+        <label>Location found</label>
+        <input id="triageLocation" placeholder="e.g. Sector B, Entrance, Room 12" maxlength="80" style="margin-bottom:8px">
+        <label>Notes (injuries, needs)</label>
+        <textarea id="triageNotes" rows="2" maxlength="200" placeholder="Visible injuries, special needs..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn" onclick="submitTriage()" style="flex:1">Log Patient</button>
+          <button class="btn btn-outline" onclick="document.getElementById('triageModal').style.display='none';currentTriageTag=null">Cancel</button>
+        </div>
+      </div>
+      <div id="triageSummary" style="display:flex;gap:8px;margin-bottom:8px;font-size:.85rem">
+        <span style="color:#c0392b">🔴 <strong id="tcRed">0</strong></span>
+        <span style="color:#e67e22">🟡 <strong id="tcYellow">0</strong></span>
+        <span style="color:#27ae60">🟢 <strong id="tcGreen">0</strong></span>
+        <span style="color:#888">⬛ <strong id="tcBlack">0</strong></span>
+        <span style="color:var(--text2)">Total: <strong id="tcTotal">0</strong></span>
+      </div>
+      <div id="triageList" style="max-height:300px;overflow-y:auto"></div>
+    </div>
+
+    <!-- Blood & Medication Inventory -->
+    <div class="card">
+      <h2>🩸 Blood & Critical Supplies</h2>
+      <div style="margin-bottom:12px">
+        <strong style="font-size:.85rem;color:var(--text2)">BLOOD INVENTORY (units)</strong>
+        <div id="bloodGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px">
+          <div data-type="A+" class="blood-cell">A+<br><input type="number" class="blood-input" min="0" value="0"></div>
+          <div data-type="A-" class="blood-cell">A-<br><input type="number" class="blood-input" min="0" value="0"></div>
+          <div data-type="B+" class="blood-cell">B+<br><input type="number" class="blood-input" min="0" value="0"></div>
+          <div data-type="B-" class="blood-cell">B-<br><input type="number" class="blood-input" min="0" value="0"></div>
+          <div data-type="O+" class="blood-cell">O+<br><input type="number" class="blood-input" min="0" value="0"></div>
+          <div data-type="O-" class="blood-cell" style="border-color:#c0392b">O-<br><input type="number" class="blood-input" min="0" value="0"></div>
+          <div data-type="AB+" class="blood-cell">AB+<br><input type="number" class="blood-input" min="0" value="0"></div>
+          <div data-type="AB-" class="blood-cell">AB-<br><input type="number" class="blood-input" min="0" value="0"></div>
+        </div>
+        <button class="btn btn-outline" onclick="saveBloodInventory()" style="width:100%;margin-top:8px;font-size:.8rem">Save Blood Inventory</button>
+      </div>
+      <strong style="font-size:.85rem;color:var(--text2)">CRITICAL MEDICATIONS</strong>
+      <div id="medList" style="margin-top:8px;max-height:200px;overflow-y:auto"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input id="medName" placeholder="Medication name" maxlength="60" style="flex:2">
+        <input id="medQty" type="number" placeholder="Qty" min="0" style="flex:1">
+        <input id="medUnit" placeholder="unit" maxlength="20" style="flex:1">
+        <button class="btn" onclick="addMedication()">+</button>
+      </div>
+    </div>
+
+    <!-- Staff & Generator -->
+    <div class="card">
+      <h2>👥 Staff On-Site</h2>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input id="staffName" placeholder="Name / Role" maxlength="60" style="flex:2">
+        <select id="staffRole" style="flex:1">
+          <option>MD</option><option>RN</option><option>EMT</option>
+          <option>PA</option><option>Surgeon</option><option>Anesthesia</option>
+          <option>Admin</option><option>Security</option><option>Other</option>
+        </select>
+        <button class="btn" onclick="checkInStaff()">In</button>
+        <button class="btn btn-outline" onclick="checkOutStaff()">Out</button>
+      </div>
+      <div id="staffList" style="max-height:200px;overflow-y:auto;margin-bottom:16px"></div>
+
+      <h2>⚡ Generator Status</h2>
+      <div class="form-grid" style="margin-bottom:8px">
+        <div>
+          <label>Fuel Level (%)</label>
+          <input id="genFuel" type="number" min="0" max="100" placeholder="0-100">
+        </div>
+        <div>
+          <label>Est. Runtime (hrs)</label>
+          <input id="genRuntime" type="number" min="0" placeholder="Hours remaining">
+        </div>
+        <div>
+          <label>Status</label>
+          <select id="genStatus">
+            <option value="running">Running</option>
+            <option value="standby">Standby</option>
+            <option value="off">Off</option>
+            <option value="failed">FAILED</option>
+          </select>
+        </div>
+        <div>
+          <label>Notes</label>
+          <input id="genNotes" placeholder="Fuel source, next service..." maxlength="80">
+        </div>
+      </div>
+      <button class="btn" onclick="saveGeneratorStatus()" style="width:100%">Update Generator Status</button>
+      <div id="genDisplay" style="margin-top:8px;font-size:.85rem;color:var(--text2)"></div>
+    </div>
+
+    <!-- Mutual Aid -->
+    <div class="card" style="grid-column:1/-1">
+      <h2>📡 Mutual Aid Request</h2>
+      <p style="font-size:.85rem;color:var(--text2);margin-bottom:8px">Broadcast a request to all connected hubs and peers.</p>
+      <div class="form-grid">
+        <div>
+          <label>Facility Name</label>
+          <input id="maidFacility" placeholder="Your facility name" maxlength="60">
+        </div>
+        <div>
+          <label>Request Type</label>
+          <select id="maidType">
+            <option>Blood products</option><option>Medication</option>
+            <option>Medical staff</option><option>Equipment</option>
+            <option>Fuel/generator</option><option>Food/water</option>
+            <option>Patient transfer</option><option>Other</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1">
+          <label>Details</label>
+          <textarea id="maidDetails" rows="2" maxlength="300" placeholder="Specify what you need, quantity, urgency..."></textarea>
+        </div>
+      </div>
+      <button class="btn" style="margin-top:8px;background:var(--red);border-color:var(--red);color:#fff;width:100%" onclick="sendMutualAid()">📡 Broadcast Mutual Aid Request</button>
+    </div>
+
+  </div>
+</div><!-- /hospital -->
+
+<!-- ===== ADMIN TAB ===== -->
+<div class="tab-panel" id="tab-admin">
+  <div class="card" style="border-color:var(--red)">
+    <h2 style="color:var(--red)">Emergency Broadcast</h2>
+    <p class="muted" style="font-size:.85rem;margin-bottom:12px">Sets the alert level for everyone connected to this hub. Use only when genuinely needed.</p>
+    <div class="form-grid">
+      <div>
+        <label for="adminAlertLevel">Alert level</label>
+        <select id="adminAlertLevel">
+          <option value="1">1 — Normal (Green)</option>
+          <option value="2">2 — Elevated (Yellow)</option>
+          <option value="3">3 — High (Orange)</option>
+          <option value="4">4 — Critical (Red)</option>
+          <option value="5">5 — Maximum / Blackout</option>
+        </select>
+      </div>
+      <div>
+        <label for="adminAlertMsg">Alert message</label>
+        <input id="adminAlertMsg" maxlength="300" placeholder="Describe the situation">
+      </div>
+    </div>
+    <div class="row">
+      <button class="btn btn-emergency" id="broadcastBtn">🚨 Broadcast Alert</button>
+      <button class="btn btn-ghost btn-sm" id="clearAlertBtn">Clear alert</button>
+      <span id="alertStatus" class="status-msg"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Data Backup &amp; Restore</h2>
+    <p class="muted" style="font-size:.85rem;margin-bottom:10px">Export all hub data for safekeeping or migration to another hub.</p>
+    <div class="row">
+      <a class="btn btn-ghost btn-sm" href="/api/admin/backup" download="ark-backup.json">⬇ Download backup</a>
+      <label class="btn btn-ghost btn-sm" for="restoreFileInput" style="cursor:pointer">⬆ Restore from backup</label>
+      <input type="file" id="restoreFileInput" accept=".json" class="hidden" onchange="doRestoreFromFile(this)">
+      <span id="restoreStatus" class="status-msg"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Hub Statistics</h2>
+    <div id="adminStats"><div class="spinner"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Storage Capacity</h2>
+    <div id="adminCapacityBox"><div class="spinner"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="flex" style="justify-content:space-between;margin-bottom:12px">
+      <h2 style="margin:0">Maintenance</h2>
+    </div>
+    <div class="row">
+      <button class="btn btn-warn btn-sm" id="clearExpiredBtn">Clear expired messages</button>
+      <span id="clearStatus" class="status-msg"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="flex" style="justify-content:space-between;margin-bottom:12px">
+      <h2 style="margin:0">Log (last 50 lines)</h2>
+      <button class="btn btn-ghost btn-sm" onclick="loadLog()">Refresh</button>
+    </div>
+    <div id="logViewer" class="log-viewer">Loading…</div>
+  </div>
+
+  <div class="card">
+    <h2>Display Settings</h2>
+    <div class="row" style="flex-wrap:wrap;gap:12px">
+      <div>
+        <span class="section-title" style="display:block;margin-bottom:6px">Font size</span>
+        <div class="flex">
+          <button class="btn btn-ghost btn-sm" onclick="setFontSize('small')">Small</button>
+          <button class="btn btn-ghost btn-sm" onclick="setFontSize('medium')">Medium</button>
+          <button class="btn btn-ghost btn-sm" onclick="setFontSize('large')">Large</button>
+        </div>
+      </div>
+      <div>
+        <span class="section-title" style="display:block;margin-bottom:6px">Contrast</span>
+        <button class="btn btn-ghost btn-sm" id="hcToggle" onclick="toggleHC()">Toggle high contrast</button>
+      </div>
+      <div>
+        <span class="section-title" style="display:block;margin-bottom:6px">Auto-refresh</span>
+        <select id="refreshInterval" onchange="setRefreshInterval(this.value)" style="width:auto">
+          <option value="10000">10 seconds</option>
+          <option value="30000" selected>30 seconds</option>
+          <option value="60000">1 minute</option>
+          <option value="120000">2 min (low power)</option>
+          <option value="0">Off</option>
+        </select>
+      </div>
+      <div>
+        <span class="section-title" style="display:block;margin-bottom:6px">Power</span>
+        <button class="btn btn-ghost btn-sm" id="lpToggle" onclick="toggleLowPower()">Low power mode: OFF</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn btn-ghost btn-sm" onclick="clearLocalCache()">Clear cached messages</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearMyAlias()">Clear my saved name</button>
+      <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print current view</button>
+    </div>
+    <div class="mt-8">
+      <span class="section-title" style="display:block;margin-bottom:4px">Keyboard shortcuts</span>
+      <span class="muted" style="font-size:.82rem">
+        <span class="key-hint">N</span> New message &nbsp;
+        <span class="key-hint">R</span> Refresh &nbsp;
+        <span class="key-hint">1</span>–<span class="key-hint">9</span> Switch tabs
+      </span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Hub Time</h2>
+    <div id="adminTime" style="font-size:1.1rem;font-family:monospace"></div>
+  </div>
+</div><!-- /admin -->
+
+</div><!-- /main -->
+
+<!-- Toast container -->
+<div id="toastContainer"></div>
+
 <script>
-const $ = id => document.getElementById(id);
-const TOPICS = [['', 'All'], ['help', 'Need help'], ['safe', 'Safe'], ['offers', 'Can help'], ['missing', 'Looking for'], ['general', 'General']];
-const NAMES = Object.fromEntries(TOPICS);
-let topic = '', hubDevice = '';
-const el = (tag, text, cls) => { const n = document.createElement(tag); if (text != null) n.textContent = text; if (cls) n.className = cls; return n; };
-const api = async (path, body) => {
-  const res = await fetch(path, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {});
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'The hub refused that.');
-  return data;
-};
-const ago = iso => { const m = Math.round((Date.now() - Date.parse(iso)) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : Math.round(m / 60) + ' h ago'; };
-const size = b => b > 1e9 ? (b / 1e9).toFixed(1) + ' GB' : b > 1e6 ? (b / 1e6).toFixed(1) + ' MB' : Math.ceil(b / 1e3) + ' KB';
-const alias = () => $('alias').value.trim();
-$('alias').value = localStorage.getItem('ark-alias') || '';
-$('alias').onchange = () => localStorage.setItem('ark-alias', alias());
+'use strict';
+// ===== CONSTANTS =====
+const CHANNELS = [
+  {id:'',    label:'All',       icon:''},
+  {id:'help',   label:'Help',     icon:'🆘'},
+  {id:'safe',   label:'Safe',     icon:'✅'},
+  {id:'offers', label:'Offers',   icon:'🤝'},
+  {id:'missing',label:'Missing',  icon:'🔍'},
+  {id:'general',label:'General',  icon:'📢'},
+  {id:'resources',label:'Resources',icon:'📦'},
+  {id:'medical',label:'Medical',  icon:'🏥'},
+  {id:'shelter',label:'Shelter',  icon:'🏠'},
+  {id:'water',  label:'Water',    icon:'💧'},
+  {id:'power',  label:'Power',    icon:'⚡'},
+];
+const CH_MAP = Object.fromEntries(CHANNELS.map(c => [c.id, c]));
+const ALERT_LABELS = ['', 'Normal', 'Elevated', 'High', 'Critical', 'Maximum'];
+const TAB_KEYS = {'1':'dashboard','2':'messages','3':'compose','4':'resources','5':'households','6':'files','7':'network','8':'bundle','9':'admin'};
 
-function drawTabs() {
-  $('tabs').replaceChildren(...TOPICS.map(([value, label]) => {
-    const b = el('button', label, 'btn' + (value === topic ? '' : ' ghost'));
-    b.onclick = () => { topic = value; drawTabs(); refresh(); };
-    return b;
-  }));
+// ===== STATE =====
+let activeTab = 'dashboard';
+let msgChannel = '';
+let allMessages = [];
+let msgSearchTerm = '';
+let hubDevice = '';
+let lastSyncTime = null;
+let refreshTimer = null;
+let refreshMs = 30000;
+let isOnline = true;
+
+// ===== UTILS =====
+const $ = id => document.getElementById(id);
+const qs = sel => document.querySelector(sel);
+const el = (tag, props={}) => { const n = document.createElement(tag); Object.assign(n, props); return n; };
+
+function timeAgo(iso) {
+  const diff = Date.now() - Date.parse(iso);
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+  if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
+  return Math.floor(diff/86400000) + 'd ago';
 }
 
-async function refresh() {
+function fmtSize(b) {
+  if (b > 1e9) return (b/1e9).toFixed(1)+' GB';
+  if (b > 1e6) return (b/1e6).toFixed(1)+' MB';
+  if (b > 1e3) return Math.ceil(b/1e3)+' KB';
+  return b+' B';
+}
+
+function fmtUptime(secs) {
+  if (secs < 60) return secs+'s';
+  if (secs < 3600) return Math.floor(secs/60)+'m';
+  const h = Math.floor(secs/3600), m = Math.floor((secs%3600)/60);
+  return h+'h '+(m?m+'m':'');
+}
+
+// ===== API with 5s timeout + single retry =====
+const API_TIMEOUT_MS = 5000;
+async function api(path, body, noRetry=false) {
+  const ctrl = new AbortController();
+  const tid = setTimeout(()=>ctrl.abort(), API_TIMEOUT_MS);
   try {
-    const s = await api('/api/status');
-    $('name').textContent = s.name; document.title = s.name; hubDevice = s.hub_device;
-    const drift = Math.round((Date.now() - Date.parse(s.time)) / 60000);
-    $('clock').hidden = Math.abs(drift) < 5;
-    $('clock').textContent = 'This phone\u2019s clock is ' + Math.abs(drift) + ' minutes ' + (drift > 0 ? 'ahead of' : 'behind') + ' the hub (hub time ' + new Date(s.time).toLocaleString() + '). Messages from the offline app may be refused until one clock is corrected.';
-    const list = await api('/api/messages?channel=' + encodeURIComponent(topic));
-    const box = $('list'); box.replaceChildren();
-    if (!list.length) box.append(el('p', 'No messages here yet.'));
-    for (const m of list) {
-      const row = el('div', null, 'msg');
-      const origin = m.device === hubDevice ? 'posted on this hub' : 'carried in from device ' + m.device;
-      row.append(el('b', m.alias), el('p', m.text), el('div', (NAMES[m.channel] || m.channel) + ' \u00b7 ' + ago(m.issued_at) + ' \u00b7 ' + origin + ' \u00b7 ' + m.seen + ' saw it', 'meta'));
-      const seen = el('button', 'I saw this', 'btn ghost');
-      seen.onclick = async () => {
-        if (!alias()) { $('alias').focus(); return alert('Add your name at the top of the post form first.'); }
-        try { await api('/api/ack', { id: m.id, alias: alias() }); refresh(); } catch (e) { alert(e.message); }
-      };
-      row.append(seen); box.append(row);
+    const opts = body
+      ? { method:'POST', headers:{'content-type':'application/json','x-ark-client-time':Date.now().toString()}, body:JSON.stringify(body), signal:ctrl.signal }
+      : { headers:{'x-ark-client-time':Date.now().toString()}, signal:ctrl.signal };
+    const res = await fetch(path, opts);
+    clearTimeout(tid);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Server error '+res.status);
+    return data;
+  } catch(e) {
+    clearTimeout(tid);
+    if (!noRetry && e.name !== 'AbortError') {
+      await new Promise(r=>setTimeout(r,1000));
+      return api(path, body, true);
     }
-  } catch {
-    $('list').replaceChildren(el('p', 'Lost contact with the hub. Check you are still on its Wi-Fi.'));
+    throw e;
   }
 }
 
+// ===== TOAST =====
+function toast(msg, type='info', duration=4000) {
+  const icons = {info:'ℹ️', success:'✅', warn:'⚠️', danger:'🚨'};
+  const t = el('div'); t.className = 'toast '+type;
+  t.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ️'}</span><span class="toast-text">${escHtml(msg)}</span><button class="toast-close" onclick="this.parentElement.remove()">×</button>`;
+  $('toastContainer').prepend(t);
+  if (duration) setTimeout(() => t.remove(), duration);
+}
+
+function escHtml(s) { return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]); }
+const esc = escHtml; // alias used by hospital functions
+
+// ===== TABS =====
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  const panel = $('tab-'+id);
+  if (!panel) return;
+  panel.classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => { if(t.dataset.tab===id) t.classList.add('active'); });
+  activeTab = id;
+  localStorage.setItem('ark-active-tab', id);
+  if (id==='messages') loadMessages();
+  if (id==='resources') loadResources();
+  if (id==='households') loadHouseholds();
+  if (id==='hospital') loadHospital();
+  if (id==='files') loadFiles();
+  if (id==='network') { loadPeers(); loadQR(); }
+  if (id==='admin') { loadAdminStats(); loadAdminCapacity(); loadLog(); startAdminClock(); }
+}
+
+// ===== ALIAS PERSISTENCE =====
+function getAlias() {
+  return $('cAlias').value.trim();
+}
+function saveAlias() {
+  if(getAlias()) localStorage.setItem('ark-alias', getAlias());
+}
+$('cAlias').value = localStorage.getItem('ark-alias') || '';
+$('cAlias').addEventListener('blur', saveAlias);
+
+// ===== STATUS BAR =====
+function setOnline(online) {
+  if (online !== isOnline) {
+    isOnline = online;
+    if (!online) toast('Lost connection to hub. Working offline.', 'warn');
+    else toast('Reconnected to hub.', 'success');
+  }
+  $('offlineIndicator').classList.toggle('visible', !online);
+}
+
+async function updateStatusBar() {
+  try {
+    const s = await api('/api/status');
+    hubDevice = s.hub_device || '';
+    $('sbName').textContent = s.name || 'ARK Hub';
+    document.title = s.name || 'ARK Hub';
+    $('sbMsgs').textContent = s.packets ?? '–';
+    $('sbPeers').textContent = s.peers ?? '–';
+    lastSyncTime = new Date();
+    $('sbSync').textContent = 'synced '+timeAgo(lastSyncTime.toISOString());
+
+    // Alert badge
+    const ab = $('alertBadge');
+    if (s.alert_level && s.alert_level > 0) {
+      ab.style.display = 'inline-block';
+      ab.className = 'alert-'+s.alert_level;
+      ab.textContent = 'ALERT '+s.alert_level;
+    } else {
+      ab.style.display = 'none';
+    }
+
+    // Alert banner
+    updateAlertBanner(s.alert_level, s.alert_color, s.alert_message);
+    setOnlineExtended(true);
+  } catch {
+    setOnlineExtended(false);
+  }
+}
+
+function updateAlertBanner(level, color, message) {
+  const banner = $('alertBanner');
+  if (level && level > 0) {
+    banner.style.display = 'block';
+    banner.style.background = (color || '#c82000') + '22';
+    banner.style.color = color || '#c82000';
+    banner.style.borderColor = color || '#c82000';
+    banner.textContent = `ALERT LEVEL ${level} — ${message || ALERT_LABELS[level] || ''}`;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// ===== DASHBOARD =====
+async function loadDashboard() {
+  try {
+    const [status, alert, resData, hhData, msgs] = await Promise.all([
+      api('/api/status'),
+      api('/api/alert'),
+      api('/api/resources').catch(()=>([]))  ,
+      api('/api/households').catch(()=>([]))  ,
+      api('/api/messages?channel=').catch(()=>([]))  ,
+    ]);
+
+    hubDevice = status.hub_device || '';
+    $('dsMsgs').textContent = status.packets ?? '–';
+    $('dsPeers').textContent = status.peers ?? '–';
+    $('dsRes').textContent = Array.isArray(resData) ? resData.length : '–';
+    $('dsHH').textContent = Array.isArray(hhData) ? hhData.length : '–';
+
+    // Uptime from health
+    try {
+      const h = await api('/api/health');
+      $('sbUptime').textContent = fmtUptime(h.uptime_seconds);
+    } catch {}
+
+    // Alert widget
+    const cur = alert.current;
+    const aw = $('alertWidget');
+    aw.className = 'alert-widget-' + (cur ? cur.level : 0);
+    $('awLevel').textContent = cur ? cur.level : '–';
+    $('awLabel').textContent = cur ? ALERT_LABELS[cur.level] || 'Alert' : 'No active alert';
+    $('awMsg').textContent = cur ? (cur.message || '') : '';
+    $('awTime').textContent = cur ? 'Issued '+timeAgo(cur.issued_at)+' — '+new Date(cur.issued_at).toLocaleString() : '';
+
+    // Recent messages (top 5)
+    const box = $('dashRecent');
+    box.innerHTML = '';
+    const recent = Array.isArray(msgs) ? msgs.slice(0,5) : [];
+    if (!recent.length) {
+      box.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>No messages yet.</p></div>';
+    } else {
+      recent.forEach(m => { box.appendChild(buildMsgCard(m, true)); });
+    }
+  } catch (e) {
+    console.error('Dashboard load error:', e);
+  }
+}
+
+// ===== MESSAGES =====
+async function loadMessages() {
+  $('msgList').innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+  try {
+    allMessages = await api('/api/messages?channel='+encodeURIComponent(msgChannel));
+    if(!msgChannel) cacheMessages(allMessages); // cache all-channel results
+    renderMessages();
+  } catch {
+    // Fall back to cache
+    const cached = msgChannel ? [] : loadCachedMessages();
+    if(cached.length) {
+      allMessages = cached;
+      renderMessages();
+      $('msgList').insertAdjacentHTML('afterbegin','<div style="background:var(--yellow-bg);border:1px solid var(--yellow);border-radius:6px;padding:8px;margin-bottom:10px;font-size:.83rem;color:var(--yellow)">⚠ Offline — showing '+cached.length+' cached messages</div>');
+    } else {
+      $('msgList').innerHTML = '<div class="empty-state"><p class="danger">Lost contact with hub. No cached messages available.</p></div>';
+    }
+  }
+}
+
+function filterMessages() {
+  msgSearchTerm = $('msgSearch').value.trim().toLowerCase();
+  renderMessages();
+}
+
+function renderMessages() {
+  const filtered = allMessages.filter(m => {
+    if (!msgSearchTerm) return true;
+    return m.text.toLowerCase().includes(msgSearchTerm) || m.alias.toLowerCase().includes(msgSearchTerm);
+  });
+  const box = $('msgList');
+  box.innerHTML = '';
+  $('msgCount').textContent = filtered.length + ' message' + (filtered.length!==1?'s':'');
+  if (!filtered.length) {
+    box.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>No messages match.</p></div>';
+    return;
+  }
+  filtered.forEach(m => box.appendChild(buildMsgCard(m, false)));
+}
+
+function buildMsgCard(m, compact) {
+  const ch = CH_MAP[m.channel] || {id:m.channel, label:m.channel, icon:'📌'};
+  const div = el('div');
+  div.className = 'msg-card '+(m.channel?m.channel+'-ch':'');
+  const hdr = el('div'); hdr.className = 'msg-header';
+  const alias = el('span'); alias.className='msg-alias'; alias.textContent=m.alias;
+  const badge = el('span'); badge.className='ch-badge ch-badge-'+(m.channel||'general'); badge.textContent=(ch.icon?ch.icon+' ':'')+ch.label;
+  hdr.append(alias, badge);
+  if (m.urgent) { const ub=el('span');ub.className='urgent-badge';ub.textContent='URGENT';hdr.append(ub); }
+  div.append(hdr);
+  const txt = el('p'); txt.className='msg-text'; txt.textContent=m.text; div.append(txt);
+  if (m.location) {
+    const loc = el('div'); loc.style.cssText='font-size:.8rem;color:var(--text2);margin-bottom:6px'; loc.textContent='📍 '+m.location; div.append(loc);
+  }
+  const meta = el('div'); meta.className='msg-meta';
+  const trel = el('span'); trel.className='time-rel'; trel.title=new Date(m.issued_at).toLocaleString(); trel.textContent=timeAgo(m.issued_at);
+  const src = el('span'); src.textContent = m.device===hubDevice?'this hub':'device '+m.device.slice(0,6);
+  const seenCount = el('span'); seenCount.textContent = (m.seen||0)+' saw it';
+  meta.append(trel, src, seenCount);
+  div.append(meta);
+  if (!compact) {
+    const actions = el('div'); actions.className='msg-actions';
+    const ackBtn = el('button'); ackBtn.className='btn btn-ghost btn-xs'; ackBtn.textContent='👁 I saw this';
+    ackBtn.onclick = () => ackMessage(m.id, ackBtn);
+    actions.append(ackBtn);
+    div.append(actions);
+  }
+  return div;
+}
+
+async function ackMessage(id, btn) {
+  const alias = getAlias();
+  if (!alias) { switchTab('compose'); toast('Enter your name in the Post tab first.', 'warn'); return; }
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    await api('/api/ack', { id, alias });
+    btn.textContent = '✓ Noted';
+    toast('Acknowledged.', 'success', 2000);
+  } catch(e) {
+    btn.disabled=false; btn.textContent='👁 I saw this';
+    toast(e.message, 'warn');
+  }
+}
+
+// Channel filter
+document.getElementById('msgChannelFilter').addEventListener('click', e => {
+  const btn = e.target.closest('.ch-btn');
+  if (!btn) return;
+  document.querySelectorAll('#msgChannelFilter .ch-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  msgChannel = btn.dataset.ch || '';
+  loadMessages();
+});
+
+// ===== COMPOSE =====
+$('cText').addEventListener('input', () => { $('cCharCount').textContent = $('cText').value.length; });
+
+$('cPreviewBtn').addEventListener('click', () => {
+  const alias = getAlias(), text=$('cText').value.trim(), channel=$('cChannel').value;
+  if (!alias||!text) { toast('Add your name and message first.', 'warn'); return; }
+  const ch = CH_MAP[channel]||{label:channel,icon:'📌'};
+  const loc = $('cLocation').value.trim();
+  const urgent = $('cUrgent').checked;
+  const preview = buildMsgCard({
+    id:'preview', alias, text, channel, location:loc, urgent,
+    issued_at:new Date().toISOString(), expires_at:'', seen:0,
+    device: hubDevice,
+  }, false);
+  $('previewContent').innerHTML='';
+  $('previewContent').append(preview);
+  $('previewModal').classList.add('open');
+});
+
+function closePreview() { $('previewModal').classList.remove('open'); }
+$('previewModal').addEventListener('click', e => { if(e.target===$('previewModal'))closePreview(); });
+$('previewPost').addEventListener('click', () => { closePreview(); postMessage(); });
+$('cPostBtn').addEventListener('click', postMessage);
+
+async function postMessage() {
+  const alias = getAlias(), text=$('cText').value.trim();
+  if (!alias||!text) { $('cStatus').className='status-msg err'; $('cStatus').textContent='Add your name and a message.'; return; }
+  saveAlias();
+  $('cPostBtn').disabled=true; $('cPreviewBtn').disabled=true;
+  $('cStatus').className='status-msg'; $('cStatus').textContent='Posting…';
+  const loc = $('cLocation').value.trim();
+  const finalText = loc ? text + (text.includes('📍')?'':'\n📍 '+loc) : text;
+  const postBody = {alias, channel: $('cChannel').value, text: finalText.slice(0,1000), hours: $('cHours').value};
+  try {
+    if(!isOnline) throw new Error('offline');
+    const r = await api('/api/post', postBody);
+    $('cStatus').className='status-msg ok'; $('cStatus').textContent='Posted! That does not mean anyone has read it yet.';
+    $('cText').value=''; $('cLocation').value=''; $('cUrgent').checked=false; $('cCharCount').textContent='0';
+    toast('Message posted to '+($('cChannel').options[$('cChannel').selectedIndex].text), 'success');
+    if(r.clock_warning) toast(r.clock_warning,'warn');
+    if(activeTab==='messages') loadMessages();
+  } catch(e) {
+    if(!isOnline || e.message==='offline') {
+      queueMessage(postBody);
+      $('cStatus').className='status-msg'; $('cStatus').textContent='Saved — will post when hub is reachable.';
+      $('cText').value=''; $('cLocation').value=''; $('cCharCount').textContent='0';
+    } else {
+      $('cStatus').className='status-msg err'; $('cStatus').textContent=e.message;
+      toast(e.message,'danger');
+    }
+  }
+  $('cPostBtn').disabled=false; $('cPreviewBtn').disabled=false;
+}
+
+// ===== RESOURCES =====
+let resFormVisible = false;
+function toggleResForm() { resFormVisible=!resFormVisible; $('resForm').classList.toggle('hidden',!resFormVisible); if(resFormVisible) $('resId').value=''; }
+function cancelResForm() { resFormVisible=false; $('resForm').classList.add('hidden'); clearResForm(); }
+function clearResForm() { ['resId','resName','resQty','resUnit','resLocation','resContact'].forEach(id=>{$(id).value='';}); $('resCat').value='general'; $('resStatus').textContent=''; }
+
+$('resSaveBtn').addEventListener('click', async()=>{
+  const name=$('resName').value.trim();
+  if(!name){$('resStatus').className='status-msg err';$('resStatus').textContent='Name required.';return;}
+  $('resSaveBtn').disabled=true;
+  try {
+    await api('/api/resources',{id:$('resId').value||undefined,name,qty:$('resQty').value,unit:$('resUnit').value,location:$('resLocation').value,contact:$('resContact').value,category:$('resCat').value});
+    cancelResForm(); loadResources(); toast('Resource saved.','success');
+  } catch(e){$('resStatus').className='status-msg err';$('resStatus').textContent=e.message;}
+  $('resSaveBtn').disabled=false;
+});
+
+async function loadResources() {
+  try {
+    const list = await api('/api/resources');
+    const box=$('resList'); box.innerHTML='';
+    if(!list.length){box.innerHTML='<div class="empty-state"><div class="empty-icon">📦</div><p>No resources logged yet.</p></div>';return;}
+    const grid=el('div');grid.className='resource-grid';
+    for(const r of list) grid.appendChild(buildResCard(r));
+    box.append(grid);
+  } catch {}
+}
+
+function buildResCard(r) {
+  const qtyClass = r.qty>20?'high':r.qty>5?'med':'low';
+  const catIcons={water:'💧',food:'🥫',medical:'🏥',fuel:'⛽',tools:'🔧',shelter:'🏠',power:'⚡',general:'📦'};
+  const c=el('div');c.className='resource-card';
+  c.innerHTML=`<div class="res-name">${catIcons[r.category]||'📦'} ${escHtml(r.name)}</div><div class="res-qty ${qtyClass}">${r.qty} <span style="font-size:.9rem;font-weight:400">${escHtml(r.unit)}</span></div><div class="res-meta">${r.location?'📍 '+escHtml(r.location)+'<br>':''} ${r.contact?'👤 '+escHtml(r.contact)+'<br>':''}<span class="muted" style="font-size:.7rem">Updated ${timeAgo(r.updated_at)}</span></div>`;
+  const actions=el('div');actions.className='res-actions';
+  const editBtn=el('button');editBtn.className='btn btn-ghost btn-xs';editBtn.textContent='Edit';
+  editBtn.onclick=()=>editRes(r);
+  const delBtn=el('button');delBtn.className='btn btn-xs btn-danger';delBtn.textContent='Remove';
+  delBtn.onclick=()=>deleteRes(r.id);
+  actions.append(editBtn,delBtn);c.append(actions);
+  return c;
+}
+
+function editRes(r) {
+  resFormVisible=true; $('resForm').classList.remove('hidden');
+  $('resId').value=r.id; $('resName').value=r.name; $('resQty').value=r.qty;
+  $('resUnit').value=r.unit; $('resLocation').value=r.location; $('resContact').value=r.contact;
+  $('resCat').value=r.category||'general';
+  $('resForm').scrollIntoView({behavior:'smooth'});
+}
+
+async function deleteRes(id) {
+  if(!confirm('Remove this resource?')) return;
+  try { await api('/api/resources/delete',{id}); loadResources(); toast('Resource removed.','success'); } catch(e) { toast(e.message,'danger'); }
+}
+
+// ===== HOUSEHOLDS =====
+let hhFormVisible=false;
+function toggleHHForm(){hhFormVisible=!hhFormVisible;$('hhForm').classList.toggle('hidden',!hhFormVisible);if(hhFormVisible)$('hhId').value='';}
+function cancelHHForm(){hhFormVisible=false;$('hhForm').classList.add('hidden');clearHHForm();}
+function clearHHForm(){['hhId','hhName','hhHeadcount','hhLocation','hhNeeds','hhContact'].forEach(id=>{$(id).value=''});$('hhHeadcount').value='1';$('hhStatus').value='ok';$('hhStatus2').textContent='';}
+
+$('hhSaveBtn').addEventListener('click', async()=>{
+  const name=$('hhName').value.trim();
+  if(!name){$('hhStatus2').className='status-msg err';$('hhStatus2').textContent='Name required.';return;}
+  $('hhSaveBtn').disabled=true;
+  try {
+    await api('/api/households',{id:$('hhId').value||undefined,name,headcount:$('hhHeadcount').value,location:$('hhLocation').value,status:$('hhStatus').value,needs:$('hhNeeds').value,contact:$('hhContact').value});
+    cancelHHForm(); loadHouseholds(); toast('Household saved.','success');
+  } catch(e){$('hhStatus2').className='status-msg err';$('hhStatus2').textContent=e.message;}
+  $('hhSaveBtn').disabled=false;
+});
+
+async function loadHouseholds() {
+  try {
+    const list=await api('/api/households');
+    const box=$('hhList'); box.innerHTML='';
+    // Stats
+    const hhStats=$('hhStats'); hhStats.innerHTML='';
+    const total=list.reduce((s,h)=>s+h.headcount,0);
+    const critical=list.filter(h=>h.status==='critical').length;
+    const needsHelp=list.filter(h=>h.status==='needs-help').length;
+    if(list.length){
+      hhStats.innerHTML=`<div class="stat-pill"><b>${list.length}</b> households</div><div class="stat-pill"><b>${total}</b> people</div>${critical?`<div class="stat-pill" style="border-color:var(--red);color:var(--red)"><b>${critical}</b> critical</div>`:''} ${needsHelp?`<div class="stat-pill" style="border-color:var(--yellow);color:var(--yellow)"><b>${needsHelp}</b> need help</div>`:''}`;
+    }
+    if(!list.length){box.innerHTML='<div class="empty-state"><div class="empty-icon">🏘</div><p>No households registered yet.</p></div>';return;}
+    const grid=el('div');grid.className='household-grid';
+    for(const h of list.sort((a,b)=>a.status==='critical'?-1:b.status==='critical'?1:0)) grid.appendChild(buildHHCard(h));
+    box.append(grid);
+  } catch {}
+}
+
+function buildHHCard(h) {
+  const c=el('div');c.className='hh-card status-'+h.status;
+  c.innerHTML=`<div class="flex" style="justify-content:space-between;margin-bottom:6px"><div class="hh-name">${escHtml(h.name)}</div><span class="hh-status-badge hh-status-${h.status}">${h.status==='ok'?'✅ OK':h.status==='needs-help'?'⚠️ Needs help':'🆘 Critical'}</span></div><div class="hh-headcount">${h.headcount} <span style="font-size:.9rem;font-weight:400;color:var(--text2)">people</span></div><div class="hh-meta">${h.location?'📍 '+escHtml(h.location)+'<br>':''}${h.contact?'👤 '+escHtml(h.contact)+'<br>':''}</div>${h.needs?`<div class="hh-needs">${escHtml(h.needs)}</div>`:''}`;
+  const actions=el('div');actions.style.marginTop='8px';actions.style.display='flex';actions.style.gap='6px';
+  const editBtn=el('button');editBtn.className='btn btn-ghost btn-xs';editBtn.textContent='Edit';editBtn.onclick=()=>editHH(h);
+  const delBtn=el('button');delBtn.className='btn btn-xs btn-danger';delBtn.textContent='Remove';delBtn.onclick=()=>deleteHH(h.id);
+  actions.append(editBtn,delBtn);c.append(actions);
+  return c;
+}
+
+function editHH(h) {
+  hhFormVisible=true;$('hhForm').classList.remove('hidden');
+  $('hhId').value=h.id;$('hhName').value=h.name;$('hhHeadcount').value=h.headcount;
+  $('hhLocation').value=h.location;$('hhStatus').value=h.status;$('hhNeeds').value=h.needs;$('hhContact').value=h.contact||'';
+  $('hhForm').scrollIntoView({behavior:'smooth'});
+}
+
+async function deleteHH(id) {
+  if(!confirm('Remove this household?')) return;
+  try { await api('/api/households/delete',{id}); loadHouseholds(); toast('Household removed.','success'); } catch(e){toast(e.message,'danger');}
+}
+
+// ===== FILES =====
+let fileCatFilter='';
+let allFiles=[];
+
+document.getElementById('fileCatTabs').addEventListener('click', e=>{
+  const btn=e.target.closest('.ch-btn');if(!btn)return;
+  document.querySelectorAll('#fileCatTabs .ch-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  fileCatFilter=btn.dataset.cat||'';
+  renderFiles();
+});
+
 async function loadFiles() {
-  const m = await api('/files/manifest.json').catch(() => ({ files: [] }));
-  const box = $('fileList'); box.replaceChildren();
-  if (!m.files.length) box.append(el('p', 'No library files on this hub yet.'));
-  for (const f of m.files) {
-    const row = el('div', null, 'msg'), link = el('a', f.name);
-    link.href = '/files/' + encodeURIComponent(f.name);
-    row.append(link, el('div', size(f.bytes) + ' \u00b7 ' + (f.sha256 ? 'SHA-256 ' + f.sha256 : 'fingerprint still being worked out'), 'meta'));
+  $('fileList').innerHTML='<div class="empty-state"><div class="spinner"></div></div>';
+  try {
+    const m=await api('/files/manifest.json');
+    allFiles=m.files||[];
+    renderFiles();
+  } catch {
+    $('fileList').innerHTML='<div class="empty-state"><p class="danger">Could not load file library.</p></div>';
+  }
+}
+
+function getFileIcon(name) {
+  const ext=(name.split('.').pop()||'').toLowerCase();
+  const icons={html:'🌐',htm:'🌐',txt:'📄',md:'📄',pdf:'📋',zip:'🗜',gz:'🗜',apk:'📱',zim:'📚',jpg:'🖼',jpeg:'🖼',png:'🖼',gif:'🖼',svg:'🖼',mp4:'🎬',mp3:'🎵',ogg:'🎵',webm:'🎬',csv:'📊',json:'📊',xml:'📊',bin:'⚙',exe:'⚙',dmg:'💿'};
+  return icons[ext]||'📁';
+}
+
+function renderFiles() {
+  const filtered=fileCatFilter?allFiles.filter(f=>f.category===fileCatFilter):allFiles;
+  const box=$('fileList'); box.innerHTML='';
+  if(!filtered.length){box.innerHTML='<div class="empty-state"><div class="empty-icon">📂</div><p>No files '+(fileCatFilter?'in this category':'in the library')+'.</p></div>';return;}
+  for(const f of filtered){
+    const row=el('div');row.className='file-row';
+    const icon=el('span');icon.className='file-icon';icon.textContent=getFileIcon(f.name);
+    const info=el('div');info.className='file-info';
+    const fname=el('div');fname.className='file-name';fname.textContent=f.name;
+    const fmeta=el('div');fmeta.className='file-meta';
+    fmeta.textContent=fmtSize(f.bytes)+(f.downloads?' · '+f.downloads+' downloads':'')+' · '+(f.sha256?'SHA-256 '+f.sha256.slice(0,16)+'…':'computing hash…');
+    info.append(fname,fmeta);
+    const actions=el('div');actions.className='file-actions';
+    const dl=el('a');dl.className='btn btn-ghost btn-xs';dl.href='/files/'+encodeURIComponent(f.name);dl.download=f.name;dl.textContent='⬇ Download';
+    actions.append(dl);
+    row.append(icon,info,actions);
     box.append(row);
   }
 }
 
-$('post').onclick = async () => {
-  if (!alias() || !$('text').value.trim()) return ($('postStatus').textContent = 'Add your name and a message.');
-  $('post').disabled = true; $('postStatus').textContent = 'Posting…';
+// ===== NETWORK/PEERS =====
+async function loadPeers() {
+  $('peerList').innerHTML='<div class="empty-state"><div class="spinner"></div></div>';
   try {
-    await api('/api/post', { alias: alias(), channel: $('channel').value, text: $('text').value, hours: $('hours').value });
-    $('text').value = ''; $('postStatus').textContent = 'Posted on this hub. That does not mean anyone has read it yet.';
-    refresh();
-  } catch (e) { $('postStatus').textContent = e.message; }
-  $('post').disabled = false;
-};
-$('showBundle').onclick = async () => {
-  const out = $('bundleOut');
-  try { out.value = JSON.stringify(await api('/api/bundle?limit=40')); }
-  catch { out.value = 'Lost contact with the hub. Check you are still on its Wi-Fi.'; }
-  out.hidden = false; out.focus(); out.select();
-};
-$('import').onclick = async () => {
-  try {
-    const r = await api('/api/bundle', JSON.parse($('bundleIn').value));
-    $('importStatus').textContent = r.added + ' new, ' + r.duplicate + ' already here, ' + r.rejected.length + ' refused' + (r.rejected[0] ? ' (' + r.rejected[0].reason + ')' : '') + '.';
-    $('bundleIn').value = ''; refresh();
-  } catch (e) { $('importStatus').textContent = e instanceof SyntaxError ? 'That text is not a complete ARK bundle. Copy all of it.' : e.message; }
-};
+    const list=await api('/api/peers');
+    const box=$('peerList'); box.innerHTML='';
+    if(!list.length){box.innerHTML='<div class="empty-state"><div class="empty-icon">🌐</div><p>No peers known. Add one below or wait for peers to announce themselves.</p></div>';return;}
+    for(const p of list){
+      const row=el('div');row.className='peer-row';
+      const dot=el('span');dot.className='peer-status '+(p.online?'peer-online':'peer-offline');
+      const info=el('div');info.className='peer-info';
+      info.innerHTML=`<div style="font-weight:600">${escHtml(p.name)}</div><div class="peer-url">${escHtml(p.url)}</div><div class="muted" style="font-size:.75rem">${p.online?'online':'offline'} · last seen ${p.last_seen?timeAgo(p.last_seen):'never'} · ${p.message_count||0} msgs</div>`;
+      row.append(dot,info);
+      box.append(row);
+    }
+  } catch {
+    $('peerList').innerHTML='<div class="empty-state"><p class="danger">Could not load peers.</p></div>';
+  }
+}
 
-drawTabs(); refresh(); loadFiles();
-setInterval(refresh, 15000);
+async function addPeer() {
+  const url=$('peerUrlInput').value.trim();
+  if(!url){$('peerStatus').className='status-msg err';$('peerStatus').textContent='Enter a URL.';return;}
+  try {
+    await api('/api/peer-announce',{url,name:url});
+    $('peerUrlInput').value='';
+    $('peerStatus').className='status-msg ok';$('peerStatus').textContent='Peer added.';
+    loadPeers(); toast('Peer added.','success');
+  } catch(e){$('peerStatus').className='status-msg err';$('peerStatus').textContent=e.message;}
+}
+
+async function loadQR() {
+  try {
+    const r=await api('/api/qr');
+    $('hubAddresses').innerHTML=r.addresses.map(a=>`<b>${escHtml(a)}</b>`).join('<br>')||'No network addresses found.';
+    const img=el('img');img.src=r.qr;img.alt='QR code for '+r.url;img.style.cssText='max-width:220px;image-rendering:pixelated;border:4px solid white;border-radius:4px';
+    const wrap=el('div');wrap.className='qr-container';wrap.append(img);
+    const url=el('p');url.style.cssText='font-size:.85rem;margin-top:8px;word-break:break-all';url.textContent=r.url;
+    wrap.append(url);
+    $('qrDisplay').innerHTML='';
+    $('qrDisplay').append(wrap);
+  } catch {
+    $('qrDisplay').innerHTML='<p class="muted">Could not load QR code.</p>';
+  }
+}
+
+// ===== BUNDLE =====
+$('showBundleBtn').addEventListener('click', async()=>{
+  const out=$('bundleOut');
+  try {
+    const b=await api('/api/bundle?limit=40');
+    out.value=JSON.stringify(b);
+    out.classList.remove('hidden'); out.focus(); out.select();
+  } catch { out.value='Lost contact with hub.'; out.classList.remove('hidden'); }
+});
+
+$('importBtn').addEventListener('click', async()=>{
+  const text=$('bundleIn').value.trim();
+  if(!text){$('importStatus').className='status-msg err';$('importStatus').textContent='Paste a bundle first.';return;}
+  $('importBtn').disabled=true; $('importStatus').className='status-msg'; $('importStatus').textContent='Importing…';
+  try {
+    const r=await api('/api/bundle',JSON.parse(text));
+    $('importStatus').className='status-msg ok';
+    $('importStatus').textContent=r.added+' new, '+r.duplicate+' already here, '+r.rejected.length+' refused'+(r.rejected[0]?' ('+r.rejected[0].reason+')':'')+'.'
+    $('bundleIn').value='';
+    toast(r.added+' messages imported.','success');
+  } catch(e){
+    $('importStatus').className='status-msg err';
+    $('importStatus').textContent=e instanceof SyntaxError?'That is not a complete ARK bundle — copy all of it.':e.message;
+  }
+  $('importBtn').disabled=false;
+});
+
+// ===== ADMIN =====
+async function loadAdminStats() {
+  $('adminStats').innerHTML='<div class="spinner"></div>';
+  try {
+    const s=await api('/api/admin/stats');
+    const rows=[
+      ['Hub name', escHtml(s.hub_name)],
+      ['Hub device ID', s.hub_device],
+      ['Uptime', fmtUptime(s.uptime_seconds)],
+      ['Messages (total)', s.message_stats?.total??'–'],
+      ['Resources', s.resource_count],
+      ['Households', s.household_count],
+      ['Known peers', s.peer_count],
+      ['Rate limit', s.rate_limit+' req / 10 min / IP'],
+      ['Message TTL', s.ttl_hours+'h'],
+      ['Alert level', s.alert?s.alert.level+' — '+escHtml(s.alert.message):'None'],
+    ];
+    const tbl=el('table');tbl.className='stats-table';
+    rows.forEach(([k,v])=>{
+      const tr=el('tr');
+      tr.innerHTML=`<th>${k}</th><td>${v}</td>`;
+      tbl.append(tr);
+    });
+    $('adminStats').innerHTML='';
+    $('adminStats').append(tbl);
+
+    if(s.message_stats?.by_channel && Object.keys(s.message_stats.by_channel).length){
+      const h3=el('h3');h3.style.marginTop='16px';h3.textContent='Messages by channel';
+      const tbl2=el('table');tbl2.className='stats-table';
+      const hdr=el('tr');hdr.innerHTML='<th>Channel</th><th>Count</th>';tbl2.append(hdr);
+      for(const [ch,cnt] of Object.entries(s.message_stats.by_channel)){
+        const tr=el('tr');tr.innerHTML=`<td>${escHtml(ch)}</td><td>${cnt}</td>`;tbl2.append(tr);
+      }
+      $('adminStats').append(h3,tbl2);
+    }
+
+    if(s.message_stats?.top_aliases?.length){
+      const h3=el('h3');h3.style.marginTop='16px';h3.textContent='Top posters';
+      const tbl3=el('table');tbl3.className='stats-table';
+      const hdr=el('tr');hdr.innerHTML='<th>Name</th><th>Posts</th>';tbl3.append(hdr);
+      for(const a of s.message_stats.top_aliases){
+        const tr=el('tr');tr.innerHTML=`<td>${escHtml(a.alias)}</td><td>${a.count}</td>`;tbl3.append(tr);
+      }
+      $('adminStats').append(h3,tbl3);
+    }
+  } catch(e){ $('adminStats').textContent='Could not load stats: '+e.message; }
+}
+
+async function loadLog() {
+  $('logViewer').textContent='Loading…';
+  try {
+    const r=await api('/api/admin/log');
+    $('logViewer').textContent=(r.lines||[]).join('\n')||'(empty)';
+    $('logViewer').scrollTop=$('logViewer').scrollHeight;
+  } catch {
+    $('logViewer').textContent='Could not load log.';
+  }
+}
+
+$('broadcastBtn').addEventListener('click', async()=>{
+  const level=$('adminAlertLevel').value, msg=$('adminAlertMsg').value.trim();
+  if(!confirm('Set alert level '+level+'? This will be shown to all connected users.')) return;
+  try {
+    await api('/api/alert',{level,message:msg});
+    $('alertStatus').className='status-msg ok'; $('alertStatus').textContent='Alert set.';
+    toast('Alert level '+level+' broadcast.','danger');
+    updateStatusBar();
+  } catch(e){ $('alertStatus').className='status-msg err'; $('alertStatus').textContent=e.message; }
+});
+
+$('clearAlertBtn').addEventListener('click', async()=>{
+  try {
+    await api('/api/alert/clear');
+    $('alertStatus').className='status-msg ok'; $('alertStatus').textContent='Alert cleared.';
+    updateStatusBar();
+    toast('Alert cleared.','success');
+  } catch(e){ $('alertStatus').className='status-msg err'; $('alertStatus').textContent=e.message; }
+});
+
+$('clearExpiredBtn').addEventListener('click', async()=>{
+  try {
+    const r=await api('/api/admin/clear-expired');
+    $('clearStatus').className='status-msg ok'; $('clearStatus').textContent=r.removed+' expired messages removed.';
+    toast(r.removed+' expired messages cleared.','success');
+  } catch(e){ $('clearStatus').className='status-msg err'; $('clearStatus').textContent=e.message; }
+});
+
+function setFontSize(s) {
+  document.documentElement.classList.remove('large-text','small-text');
+  if(s==='large') document.documentElement.classList.add('large-text');
+  if(s==='small') document.documentElement.classList.add('small-text');
+  localStorage.setItem('ark-fontsize',s);
+}
+
+function toggleHC() {
+  document.body.classList.toggle('hc');
+  localStorage.setItem('ark-hc', document.body.classList.contains('hc')?'1':'0');
+}
+
+function setRefreshInterval(ms) {
+  refreshMs=Number(ms);
+  if(refreshTimer) clearInterval(refreshTimer);
+  if(refreshMs>0) refreshTimer=setInterval(doRefresh, refreshMs);
+  localStorage.setItem('ark-refresh',ms);
+}
+
+let adminClockTimer=null;
+function startAdminClock() {
+  if(adminClockTimer) clearInterval(adminClockTimer);
+  const tick=()=>{ $('adminTime').textContent=new Date().toLocaleString()+' (hub time: approximately the same if synced)'; };
+  tick(); adminClockTimer=setInterval(tick,1000);
+}
+
+// ===== DISPLAY PREFERENCES (restore) =====
+(()=>{
+  const fs=localStorage.getItem('ark-fontsize');
+  if(fs) setFontSize(fs);
+  if(localStorage.getItem('ark-hc')==='1') document.body.classList.add('hc');
+  const ri=localStorage.getItem('ark-refresh');
+  if(ri) { const sel=$('refreshInterval'); if(sel) {sel.value=ri; refreshMs=Number(ri);} }
+})();
+
+// ===== ONBOARDING =====
+function dismissOnboarding() {
+  $('onboarding').style.display='none';
+  try { localStorage.setItem('ark-onboarded','1'); } catch {}
+}
+(()=>{
+  try {
+    if(localStorage.getItem('ark-onboarded')!=='1') {
+      $('onboarding').style.display='flex';
+    }
+  } catch {}
+})();
+
+// ===== OFFLINE STATE =====
+let offlineSince = null;
+function setOnlineExtended(online) {
+  setOnline(online);
+  $('offlineBanner').classList.toggle('visible', !online);
+  if(!online && !offlineSince) {
+    offlineSince = new Date();
+    $('offlineSince').textContent = ' (since '+offlineSince.toLocaleTimeString()+')';
+  } else if(online) {
+    offlineSince = null;
+    $('offlineSince').textContent = '';
+    retryPending();
+  }
+}
+
+// ===== PENDING MESSAGE QUEUE =====
+const PENDING_KEY = 'ark-pending-msgs';
+const MSG_CACHE_KEY = 'ark-msg-cache';
+let pendingMessages = [];
+(()=>{
+  try { pendingMessages = JSON.parse(localStorage.getItem(PENDING_KEY)||'[]'); } catch { pendingMessages=[]; }
+  updatePendingUI();
+})();
+function savePendingQueue() {
+  try { localStorage.setItem(PENDING_KEY, JSON.stringify(pendingMessages)); } catch {}
+  updatePendingUI();
+}
+function updatePendingUI() {
+  const notice = $('pendingNotice');
+  if(pendingMessages.length) {
+    notice.classList.add('visible');
+    $('pendingCount').textContent = pendingMessages.length;
+  } else {
+    notice.classList.remove('visible');
+  }
+}
+function queueMessage(body) {
+  pendingMessages.push({...body, queued_at:new Date().toISOString()});
+  savePendingQueue();
+  toast('Offline — message saved to send queue.','warn');
+}
+async function retryPending() {
+  if(!pendingMessages.length) return;
+  const toSend = [...pendingMessages];
+  for(const msg of toSend) {
+    try {
+      await api('/api/post', msg, true);
+      pendingMessages = pendingMessages.filter(m=>m!==msg);
+      toast('Queued message sent.','success');
+    } catch {}
+  }
+  savePendingQueue();
+  if(activeTab==='messages') loadMessages();
+}
+
+// ===== BATTERY =====
+(async()=>{
+  try {
+    if(!navigator.getBattery) return;
+    const bat = await navigator.getBattery();
+    const updateBat = ()=>{
+      const pct = Math.round(bat.level*100);
+      $('sbBat').textContent = pct+'%';
+      $('batteryPill').style.display='inline-block';
+      if(pct<20) {
+        $('sbBat').parentElement.classList.add('bat-low');
+        toast('Battery low ('+pct+'%) — consider enabling low power mode.','warn');
+      } else {
+        $('sbBat').parentElement.classList.remove('bat-low');
+      }
+    };
+    updateBat();
+    bat.addEventListener('levelchange', updateBat);
+    bat.addEventListener('chargingchange', updateBat);
+  } catch {}
+})();
+
+// ===== LOW POWER MODE =====
+let lowPowerMode = false;
+(()=>{
+  if(localStorage.getItem('ark-lp')==='1') { lowPowerMode=true; document.body.classList.add('low-power'); }
+})();
+function toggleLowPower() {
+  lowPowerMode = !lowPowerMode;
+  document.body.classList.toggle('low-power', lowPowerMode);
+  $('lpToggle').textContent = 'Low power mode: '+(lowPowerMode?'ON':'OFF');
+  localStorage.setItem('ark-lp', lowPowerMode?'1':'0');
+  if(lowPowerMode) { setRefreshInterval(120000); toast('Low power mode on — refresh every 2 min, animations off.','info'); }
+  else { setRefreshInterval(refreshMs||30000); toast('Low power mode off.','info'); }
+}
+
+// ===== EMERGENCY HELP BUTTON =====
+$('quickHelpBtn').addEventListener('click', ()=>{
+  const alias = getAlias() || 'Anonymous';
+  if(!confirm('Post "🆘 I NEED URGENT HELP" to the help channel as "'+alias+'"?')) return;
+  const body = {alias, channel:'help', text:'🆘 I NEED URGENT HELP — please respond. Posted via quick-help button.', hours:'24'};
+  if(isOnline) {
+    api('/api/post', body).then(()=>{
+      toast('Urgent help message posted.','danger',6000);
+      if(activeTab==='messages') loadMessages();
+    }).catch(e=>toast(e.message,'danger'));
+  } else {
+    queueMessage(body);
+  }
+});
+
+// ===== CAPACITY WARNING on dashboard =====
+async function checkCapacity() {
+  try {
+    const c = await api('/api/admin/capacity', null, true);
+    const pct = c.messages?.pct||0;
+    const box = $('capacityWarnDash');
+    if(pct>=80 && box) {
+      box.className = 'capacity-warn'+(pct>=95?' capacity-crit':'');
+      box.style.display='block';
+      box.textContent = '⚠ Storage at '+pct+'% — '+(pct>=95?'CRITICAL: oldest messages will be dropped soon.':'Clear expired messages in Admin to free space.')+' ('+c.messages.count+'/'+c.messages.limit+' messages)';
+    }
+  } catch {}
+}
+
+// ===== BACKUP/RESTORE =====
+async function doRestoreFromFile(input) {
+  const file = input.files[0]; if(!file) return;
+  if(!confirm('Restore from '+file.name+'? This will merge data into this hub.')) return;
+  try {
+    const text = await file.text();
+    const r = await api('/api/admin/restore', JSON.parse(text));
+    $('restoreStatus').className='status-msg ok';
+    $('restoreStatus').textContent='Restored: '+(r.messages?.added||0)+' messages, '+r.resources+' resources, '+r.households+' households.';
+    toast('Restore complete.','success');
+  } catch(e) {
+    $('restoreStatus').className='status-msg err';
+    $('restoreStatus').textContent=e instanceof SyntaxError?'Invalid backup file.':e.message;
+  }
+  input.value='';
+}
+
+// ===== CAPACITY IN ADMIN =====
+async function loadAdminCapacity() {
+  const box = $('adminCapacityBox'); if(!box) return;
+  try {
+    const c = await api('/api/admin/capacity');
+    const pct = c.messages?.pct||0;
+    const barColor = pct>=90?'var(--red)':pct>=70?'var(--yellow)':'var(--green)';
+    box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--bg3);border-radius:6px">
+      <div style="min-width:80px;font-size:.85rem">Messages</div>
+      <div style="flex:1;height:10px;background:var(--bg4);border-radius:5px;overflow:hidden"><div style="height:100%;border-radius:5px;width:${pct}%;background:${barColor}"></div></div>
+      <div style="font-size:.82rem;white-space:nowrap">${c.messages.count}/${c.messages.limit} (${pct}%)</div>
+    </div>${pct>=80?'<div class="capacity-warn'+(pct>=95?' capacity-crit':'')+'">'+pct+'% full — '+(pct>=95?'CRITICAL: oldest messages will be auto-deleted.':'Clear expired messages in Maintenance.')+'</div>':''}`;
+  } catch { box.textContent='Could not load capacity.'; }
+}
+
+// ===== OFFLINE MESSAGE CACHE =====
+function cacheMessages(msgs) {
+  try { localStorage.setItem(MSG_CACHE_KEY, JSON.stringify(msgs)); } catch {}
+}
+function loadCachedMessages() {
+  try { return JSON.parse(localStorage.getItem(MSG_CACHE_KEY)||'[]'); } catch { return []; }
+}
+
+// ===== PRIVACY =====
+function clearLocalCache() {
+  try { localStorage.removeItem(MSG_CACHE_KEY); localStorage.removeItem(PENDING_KEY); } catch {}
+  pendingMessages=[]; allMessages=[]; updatePendingUI();
+  toast('Local cached data cleared.','success');
+}
+function clearMyAlias() {
+  try { localStorage.removeItem('ark-alias'); } catch {}
+  $('cAlias').value='';
+  toast('Your saved name cleared.','success');
+}
+
+// ===== KEYBOARD SHORTCUTS =====
+document.addEventListener('keydown', e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
+  if(e.key==='n'||e.key==='N'){e.preventDefault();switchTab('compose');$('cAlias').focus();}
+  else if(e.key==='r'||e.key==='R'){e.preventDefault();doRefresh();}
+  else if(TAB_KEYS[e.key]){e.preventDefault();switchTab(TAB_KEYS[e.key]);}
+});
+
+// ===== MAIN REFRESH CYCLE =====
+// ===== HOSPITAL COORDINATION =====
+// In-memory hospital state (persisted to localStorage)
+const HOSP_KEY = 'ark-hospital';
+function hospLoad() {
+  try { return JSON.parse(localStorage.getItem(HOSP_KEY) || 'null') || {wards:[],triage:[],meds:[],blood:{},staff:[],gen:{fuel:null,runtime:null,status:'off',notes:''}}; } catch(e) { return {wards:[],triage:[],meds:[],blood:{},staff:[],gen:{fuel:null,runtime:null,status:'off',notes:''}}; }
+}
+function hospSave(h) { try { localStorage.setItem(HOSP_KEY, JSON.stringify(h)); } catch(e) {} }
+let hospState = hospLoad();
+
+let currentTriageTag = null;
+
+function logTriage(tag) {
+  currentTriageTag = tag;
+  try { document.getElementById('triageModal').style.display = 'block'; document.getElementById('triagePtId').focus(); } catch(e){}
+}
+
+function submitTriage() {
+  try {
+    const ptId = (document.getElementById('triagePtId').value||'').trim();
+    const loc = (document.getElementById('triageLocation').value||'').trim();
+    const notes = (document.getElementById('triageNotes').value||'').trim();
+    if (!ptId) { toast('Patient ID required','warn'); return; }
+    const record = { id: Date.now(), tag: currentTriageTag, ptId, loc, notes, ts: new Date().toISOString() };
+    hospState.triage.unshift(record);
+    hospSave(hospState);
+    document.getElementById('triageModal').style.display = 'none';
+    document.getElementById('triagePtId').value = '';
+    document.getElementById('triageLocation').value = '';
+    document.getElementById('triageNotes').value = '';
+    currentTriageTag = null;
+    renderTriageList();
+    toast('Triage record logged.','success');
+  } catch(e) { toast('Error: '+e.message,'danger'); }
+}
+
+function renderTriageList() {
+  try {
+    const counts = {RED:0,YELLOW:0,GREEN:0,BLACK:0};
+    hospState.triage.forEach(r=>{ if(counts[r.tag]!==undefined) counts[r.tag]++; });
+    ['Red','Yellow','Green','Black'].forEach(c=>{ const el=document.getElementById('tc'+c); if(el) el.textContent=counts[c.toUpperCase()]||0; });
+    const tot=document.getElementById('tcTotal'); if(tot) tot.textContent=hospState.triage.length;
+    const list=document.getElementById('triageList');
+    if(!list) return;
+    if(!hospState.triage.length){ list.innerHTML='<p style="color:var(--text2);font-size:.82rem">No triage records.</p>'; return; }
+    list.innerHTML=hospState.triage.slice(0,50).map(r=>`
+      <div class="triage-card ${r.tag}">
+        <strong>${r.tag}</strong> — ${esc(r.ptId)} ${r.loc?'@ '+esc(r.loc):''}<br>
+        ${r.notes?`<span style="color:var(--text2)">${esc(r.notes)}</span><br>`:''}
+        <span style="color:var(--text2)">${new Date(r.ts).toLocaleTimeString()}</span>
+        <button class="btn btn-outline" style="padding:2px 8px;font-size:.75rem;float:right;min-height:0" onclick="deleteTriage(${r.id})">✕</button>
+      </div>`).join('');
+  } catch(e) {}
+}
+
+function deleteTriage(id) {
+  hospState.triage = hospState.triage.filter(r=>r.id!==id);
+  hospSave(hospState);
+  renderTriageList();
+}
+
+function addWard() {
+  try {
+    const name=(document.getElementById('wardName').value||'').trim();
+    const cap=parseInt(document.getElementById('wardCapacity').value)||0;
+    const occ=parseInt(document.getElementById('wardOccupied').value)||0;
+    const status=document.getElementById('wardStatus').value;
+    if(!name){ toast('Ward name required','warn'); return; }
+    const existing=hospState.wards.findIndex(w=>w.name.toLowerCase()===name.toLowerCase());
+    if(existing>=0) hospState.wards[existing]={name,cap,occ,status,ts:new Date().toISOString()};
+    else hospState.wards.push({name,cap,occ,status,ts:new Date().toISOString()});
+    hospSave(hospState);
+    document.getElementById('wardName').value='';
+    document.getElementById('wardCapacity').value='';
+    document.getElementById('wardOccupied').value='';
+    renderWards();
+    toast('Ward updated.','success');
+  } catch(e){ toast(e.message,'danger'); }
+}
+
+function renderWards() {
+  try {
+    const list=document.getElementById('wardList'); if(!list) return;
+    const totalBeds=hospState.wards.reduce((s,w)=>s+w.cap,0);
+    const totalOcc=hospState.wards.reduce((s,w)=>s+w.occ,0);
+    const avail=Math.max(0,totalBeds-totalOcc);
+    const tEl=document.getElementById('hospBedTotal'); if(tEl) tEl.textContent=totalBeds||'—';
+    const aEl=document.getElementById('hospBedAvail'); if(aEl){ aEl.textContent=avail||'—'; aEl.style.color=avail>0?'#2d7a3a':'#c0392b'; }
+    if(!hospState.wards.length){ list.innerHTML=''; return; }
+    const statusColor={open:'#27ae60',limited:'#e67e22',full:'#c0392b',closed:'#888'};
+    list.innerHTML=hospState.wards.map((w,i)=>{
+      const pct=w.cap?Math.round(w.occ/w.cap*100):0;
+      const barColor=pct>90?'#c0392b':pct>70?'#e67e22':'#27ae60';
+      return `<div class="ward-row">
+        <div style="flex:0 0 100px;font-weight:600">${esc(w.name)}</div>
+        <div class="ward-bar"><div class="ward-bar-fill" style="width:${Math.min(100,pct)}%;background:${barColor}"></div></div>
+        <span style="font-size:.8rem;min-width:70px">${w.occ}/${w.cap} (${pct}%)</span>
+        <span style="color:${statusColor[w.status]||'#888'};font-size:.75rem;min-width:60px">${w.status.toUpperCase()}</span>
+        <button class="btn btn-outline" style="padding:2px 8px;font-size:.75rem;min-height:0" onclick="removeWard(${i})">✕</button>
+      </div>`;
+    }).join('');
+  } catch(e){}
+}
+
+function removeWard(i) {
+  hospState.wards.splice(i,1);
+  hospSave(hospState);
+  renderWards();
+}
+
+function saveBloodInventory() {
+  try {
+    document.querySelectorAll('#bloodGrid .blood-cell').forEach(cell=>{
+      const type=cell.dataset.type;
+      const val=parseInt(cell.querySelector('.blood-input').value)||0;
+      if(type) hospState.blood[type]=val;
+    });
+    hospSave(hospState);
+    toast('Blood inventory saved.','success');
+  } catch(e){ toast(e.message,'danger'); }
+}
+
+function loadBloodInventory() {
+  try {
+    document.querySelectorAll('#bloodGrid .blood-cell').forEach(cell=>{
+      const type=cell.dataset.type;
+      const inp=cell.querySelector('.blood-input');
+      if(type&&inp) inp.value=hospState.blood[type]||0;
+    });
+  } catch(e){}
+}
+
+function addMedication() {
+  try {
+    const name=(document.getElementById('medName').value||'').trim();
+    const qty=parseInt(document.getElementById('medQty').value)||0;
+    const unit=(document.getElementById('medUnit').value||'').trim()||'units';
+    if(!name){ toast('Medication name required','warn'); return; }
+    const ex=hospState.meds.findIndex(m=>m.name.toLowerCase()===name.toLowerCase());
+    if(ex>=0) hospState.meds[ex]={name,qty,unit};
+    else hospState.meds.push({name,qty,unit});
+    hospSave(hospState);
+    document.getElementById('medName').value='';
+    document.getElementById('medQty').value='';
+    renderMedList();
+    toast('Medication updated.','success');
+  } catch(e){ toast(e.message,'danger'); }
+}
+
+const DEFAULT_MEDS=['Epinephrine','Morphine','Fentanyl','Propofol','Midazolam','Norepinephrine','Insulin','Dextrose 50%','Normal Saline','Lactated Ringer\'s','Amoxicillin','Ceftriaxone','Metronidazole','Ondansetron','Metoprolol','Aspirin','Heparin','Tranexamic Acid','Naloxone','Activated Charcoal'];
+
+function renderMedList() {
+  try {
+    const list=document.getElementById('medList'); if(!list) return;
+    // Seed defaults if meds empty on first load
+    if(!hospState.meds.length) { hospState.meds=DEFAULT_MEDS.map(n=>({name:n,qty:0,unit:'units'})); hospSave(hospState); }
+    if(!hospState.meds.length){ list.innerHTML='<p style="color:var(--text2);font-size:.8rem">No medications tracked.</p>'; return; }
+    list.innerHTML=hospState.meds.map((m,i)=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px;background:var(--bg3);border-radius:4px;margin-bottom:3px;font-size:.8rem">
+        <span>${esc(m.name)}</span>
+        <span style="color:${m.qty===0?'#c0392b':m.qty<5?'#e67e22':'var(--text2)'};">${m.qty} ${esc(m.unit)}</span>
+        <button class="btn btn-outline" style="padding:1px 6px;font-size:.72rem;min-height:0" onclick="removeMed(${i})">✕</button>
+      </div>`).join('');
+  } catch(e){}
+}
+
+function removeMed(i) { hospState.meds.splice(i,1); hospSave(hospState); renderMedList(); }
+
+function checkInStaff() {
+  try {
+    const name=(document.getElementById('staffName').value||'').trim();
+    const role=document.getElementById('staffRole').value;
+    if(!name){ toast('Name required','warn'); return; }
+    hospState.staff=hospState.staff.filter(s=>s.name.toLowerCase()!==name.toLowerCase());
+    hospState.staff.unshift({name,role,checkin:new Date().toISOString(),status:'in'});
+    hospSave(hospState);
+    document.getElementById('staffName').value='';
+    renderStaffList();
+    toast(name+' checked in.','success');
+  } catch(e){ toast(e.message,'danger'); }
+}
+
+function checkOutStaff() {
+  try {
+    const name=(document.getElementById('staffName').value||'').trim();
+    if(!name){ toast('Name required','warn'); return; }
+    const idx=hospState.staff.findIndex(s=>s.name.toLowerCase()===name.toLowerCase());
+    if(idx>=0){ hospState.staff[idx].status='out'; hospState.staff[idx].checkout=new Date().toISOString(); }
+    hospSave(hospState);
+    document.getElementById('staffName').value='';
+    renderStaffList();
+    toast(name+' checked out.','success');
+  } catch(e){ toast(e.message,'danger'); }
+}
+
+function renderStaffList() {
+  try {
+    const list=document.getElementById('staffList'); if(!list) return;
+    const active=hospState.staff.filter(s=>s.status==='in');
+    if(!active.length){ list.innerHTML='<p style="color:var(--text2);font-size:.8rem">No staff checked in.</p>'; return; }
+    list.innerHTML=active.map(s=>`
+      <div class="staff-row">
+        <span><strong>${esc(s.name)}</strong> <span style="color:var(--text2)">${esc(s.role)}</span></span>
+        <span style="color:var(--text2)">${new Date(s.checkin).toLocaleTimeString()}</span>
+      </div>`).join('');
+  } catch(e){}
+}
+
+function saveGeneratorStatus() {
+  try {
+    hospState.gen={
+      fuel: parseInt(document.getElementById('genFuel').value)||null,
+      runtime: parseInt(document.getElementById('genRuntime').value)||null,
+      status: document.getElementById('genStatus').value,
+      notes: (document.getElementById('genNotes').value||'').trim(),
+      ts: new Date().toISOString()
+    };
+    hospSave(hospState);
+    renderGeneratorStatus();
+    toast('Generator status saved.','success');
+  } catch(e){ toast(e.message,'danger'); }
+}
+
+function renderGeneratorStatus() {
+  try {
+    const d=document.getElementById('genDisplay'); if(!d) return;
+    const g=hospState.gen;
+    if(!g||!g.ts){ d.innerHTML=''; return; }
+    const statusColor={running:'#27ae60',standby:'#e67e22',off:'#888',failed:'#c0392b'};
+    d.innerHTML=`Status: <strong style="color:${statusColor[g.status]||'#888'}">${(g.status||'').toUpperCase()}</strong> | Fuel: <strong>${g.fuel!=null?g.fuel+'%':'—'}</strong> | Runtime: <strong>${g.runtime!=null?g.runtime+' hrs':'—'}</strong>${g.notes?' | '+esc(g.notes):''}`;
+  } catch(e){}
+}
+
+async function sendMutualAid() {
+  try {
+    const facility=(document.getElementById('maidFacility').value||'').trim();
+    const type=document.getElementById('maidType').value;
+    const details=(document.getElementById('maidDetails').value||'').trim();
+    if(!facility||!details){ toast('Facility and details required','warn'); return; }
+    const text=`🏥 MUTUAL AID REQUEST — ${facility}: [${type}] ${details}`;
+    await api('/api/messages',{text,channel:'medical',alias:facility||'Hospital',urgent:true});
+    document.getElementById('maidDetails').value='';
+    toast('Mutual aid broadcast sent to medical channel.','success');
+  } catch(e){ toast('Send failed: '+e.message,'danger'); }
+}
+
+function loadHospital() {
+  hospState = hospLoad();
+  renderWards();
+  renderTriageList();
+  loadBloodInventory();
+  renderMedList();
+  renderStaffList();
+  renderGeneratorStatus();
+}
+
+async function doRefresh() {
+  await updateStatusBar();
+  if(activeTab==='dashboard') await loadDashboard();
+  else if(activeTab==='messages') await loadMessages();
+  else if(activeTab==='resources') await loadResources();
+  else if(activeTab==='households') await loadHouseholds();
+  else if(activeTab==='hospital') loadHospital();
+}
+
+// ===== NAV TAB CLICKS =====
+document.querySelectorAll('.nav-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
+});
+
+// ===== BOOT SEQUENCE =====
+(async()=>{
+  // Restore last active tab
+  const savedTab=localStorage.getItem('ark-active-tab');
+  if(savedTab) switchTab(savedTab);
+
+  // Initial load
+  await updateStatusBar();
+  await loadDashboard();
+
+  // Start periodic refresh
+  if(refreshMs>0) {
+    refreshTimer=setInterval(doRefresh, refreshMs);
+  }
+
+  // Update status bar more frequently
+  setInterval(updateStatusBar, 10000);
+
+  // Update relative timestamps every minute
+  setInterval(()=>{
+    document.querySelectorAll('.time-rel').forEach(el=>{
+      const iso=el.title;
+      if(iso) el.textContent=timeAgo(iso);
+    });
+    if(lastSyncTime) $('sbSync').textContent='synced '+timeAgo(lastSyncTime.toISOString());
+  }, 60000);
+
+  // Retry pending messages every 30s when online
+  setInterval(()=>{ if(isOnline&&pendingMessages.length) retryPending(); }, 30000);
+
+  // Check capacity on startup
+  checkCapacity();
+})();
 </script>
 </body>
 </html>

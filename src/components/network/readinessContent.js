@@ -1,8 +1,0 @@
-export const hubSteps = [
-  ['Establish a safe local point', 'Use a safe, accessible location approved by the relevant local authority where available. Name a coordinator and backup. Do not advertise sensitive locations or send anyone into danger.'],
-  ['Accept people without an account', 'Use an optional name or local reference code, a safe callback method, the need, time and consent to share it. Keep paper rosters protected. Do not withhold urgent assistance for missing ID or connectivity.'],
-  ['Agree on a communications rhythm', 'Write down primary and backup contact methods, check-in times and an overdue-contact procedure. Use existing authorized radio channels or other working links; never assume this app provides them.'],
-  ['Make every report traceable', 'Record a locally unique report ID, origin, date/time and timezone, observation versus unverified report, urgency, destination and requested action. Keep sensitive details out of open radio messages.'],
-  ['Assign and acknowledge', 'Record who accepted a task and its next check-in. Confirm receipt. If there is no acknowledgement, mark it undelivered rather than assuming action is underway. Use known independent contacts to verify consequential instructions.'],
-  ['Reconcile when links return', 'An authorized operator checks for duplicate reports, records the source and original timestamp, and resolves conflicting updates before entering them online. Keep originals; never treat the newest message as automatically authoritative.']
-];
