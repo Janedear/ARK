@@ -43,9 +43,19 @@ async function hubCall(path, body) {
 export async function pushPackets(packets) {
   if (!hubUrl()) return call({ action: 'push', packets });
   const result = await hubCall('/api/bundle', { protocol: 'ARK-RELAY-1', packets });
-  // Stored, already there, or permanently refused: none of these should stay queued.
-  result.rejected.forEach(item => console.log('hub refused packet', item.id, item.reason));
-  return { accepted: packets.map(packet => ({ id: packet.id })) };
+  // A hub may reject individual packets while accepting the rest. Never acknowledge
+  // a rejected packet as stored: doing so silently discards undelivered messages.
+  if (!result || !Array.isArray(result.rejected)) {
+    throw new Error('Hub returned an invalid storage receipt; keep the local queue.');
+  }
+  const rejectedIds = new Set(result.rejected.map(item => item.id));
+  for (const item of result.rejected) {
+    console.warn('hub refused packet', item.id, item.reason);
+  }
+  return {
+    accepted: packets.filter(packet => !rejectedIds.has(packet.id)).map(packet => ({ id: packet.id })),
+    rejected: result.rejected,
+  };
 }
 
 export async function fetchFeed(channel) {
