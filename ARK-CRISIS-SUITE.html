@@ -1080,7 +1080,7 @@ select.form-input{cursor:pointer}
     <h2 class="section-title"><span class="title-icon">📚</span>Survival Library</h2>
     <div class="flex gap-8">
       <input class="form-input" id="guide-search" maxlength="500" style="width:200px" placeholder="Search guides..." oninput="Guides.search()" aria-label="Search guides">
-      <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Print</button>
+      <button class="btn btn-ghost btn-sm" onclick="PrintARK.checklist()" title="Print your preparedness checklist">🖨️ Checklist</button>
     </div>
   </div>
 
@@ -1109,7 +1109,7 @@ select.form-input{cursor:pointer}
     <h2 class="section-title"><span class="title-icon">📦</span>Inventory Tracker</h2>
     <div class="flex gap-8">
       <button class="btn btn-secondary btn-sm" onclick="Resources.shareWithHub()">📡 Share with Hub</button>
-      <button class="btn btn-ghost btn-sm" onclick="Resources.printReport()">🖨️ Print</button>
+      <button class="btn btn-ghost btn-sm" onclick="PrintARK.inventory()" title="Print inventory list">🖨️ Print List</button>
     </div>
   </div>
 
@@ -1384,7 +1384,13 @@ select.form-input{cursor:pointer}
 <!-- === TAB: MEDICAL === -->
 <div class="tab-panel" id="tab-medical" role="tabpanel" aria-labelledby="navtab-medical" tabindex="-1">
 
-  <h2 class="section-title"><span class="title-icon">🏥</span>Medical Reference</h2>
+  <div class="flex-between mb-12 wrap gap-8">
+    <h2 class="section-title" style="margin:0"><span class="title-icon">🏥</span>Medical Reference</h2>
+    <div class="flex gap-8">
+      <button class="btn btn-ghost btn-sm" onclick="PrintARK.medicalRef()" title="Print the medical reference cards">🖨️ Print Reference</button>
+      <button class="btn btn-secondary btn-sm" onclick="PrintARK.emergencyCard()" title="Print a wallet-sized emergency card">💳 Emergency Card</button>
+    </div>
+  </div>
 
   <div class="warn-box">
     ⚠️ <strong>Life-threatening emergency: call 911.</strong> This reference is for information only — not a substitute for professional medical care. Sources: US government and humanitarian guidance, last reviewed 2026-11-14.
@@ -1620,14 +1626,19 @@ select.form-input{cursor:pointer}
 
   <div class="card">
     <div class="map-toolbar">
-      <span class="map-btn active" onclick="MapTool.setMode('select',this)">👆 Select</span>
-      <span class="map-btn" onclick="MapTool.setMode('meeting',this)">📍 Meeting Pt</span>
-      <span class="map-btn" onclick="MapTool.setMode('water',this)">💧 Water</span>
-      <span class="map-btn" onclick="MapTool.setMode('shelter',this)">🏠 Shelter</span>
-      <span class="map-btn" onclick="MapTool.setMode('hazard',this)">⚠️ Hazard</span>
-      <span class="map-btn" onclick="MapTool.setMode('medical',this)">🏥 Medical</span>
-      <span class="map-btn" onclick="MapTool.clearAll()">🗑️ Clear</span>
-      <span class="map-btn" onclick="MapTool.exportImg()">💾 Export</span>
+      <span class="map-btn active" onclick="MapTool.setMode('select',this)" title="Pan/select mode">👆 Select</span>
+      <span class="map-btn" onclick="MapTool.setMode('meeting',this)" title="Drop a meeting point">📍 Meeting</span>
+      <span class="map-btn" onclick="MapTool.setMode('water',this)" title="Mark a water source">💧 Water</span>
+      <span class="map-btn" onclick="MapTool.setMode('shelter',this)" title="Mark a shelter">🏠 Shelter</span>
+      <span class="map-btn" onclick="MapTool.setMode('hazard',this)" title="Mark a hazard">⚠️ Hazard</span>
+      <span class="map-btn" onclick="MapTool.setMode('medical',this)" title="Mark a medical site">🏥 Medical</span>
+      <span style="margin-left:auto;display:flex;gap:4px">
+        <span class="map-btn" onclick="MapTool.zoomIn()" title="Zoom in">＋</span>
+        <span class="map-btn" onclick="MapTool.zoomOut()" title="Zoom out">－</span>
+        <span class="map-btn" onclick="MapTool.locateMe()" title="Center on my GPS location">🎯 Me</span>
+        <span class="map-btn" onclick="MapTool.clearAll()" title="Remove all markers">🗑️</span>
+        <span class="map-btn" onclick="MapTool.exportImg()" title="Save map as image">💾</span>
+      </span>
     </div>
     <canvas class="w-full" id="map-canvas" width="860" height="500" style="border-radius:var(--radius-md)"></canvas>
     <div class="font-xs text-muted mt-8">Click to place markers. Scroll to zoom. No internet needed — GPS coordinates shown above.</div>
@@ -3355,8 +3366,180 @@ const CPR = {
 const MapTool = {
   _canvas: null, _ctx: null, _mode: 'select',
   _markers: [], _inited: false,
-  _scale: 1, _offsetX: 0, _offsetY: 0,
+  // Map view state — lat/lon center + zoom
+  _lat: 39.8283, _lon: -98.5795, _zoom: 4, // defaults to continental US
+  // Pan drag state
+  _drag: false, _dragStartX: 0, _dragStartY: 0, _dragStartLat: 0, _dragStartLon: 0,
+  // Tile cache: "z/x/y" → HTMLImageElement
+  _tileCache: {},
+  _tileSize: 256,
+  _pendingClick: null,
 
+  // ── OSM tile math ──────────────────────────────────────────────────────────
+  _lon2tile(lon, z) { return Math.floor((lon + 180) / 360 * Math.pow(2, z)); },
+  _lat2tile(lat, z) {
+    const r = lat * Math.PI / 180;
+    return Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * Math.pow(2, z));
+  },
+  // pixel offset within a tile for a given lat/lon at zoom z
+  _latlon2px(lat, lon, z, tileX, tileY) {
+    const n = Math.pow(2, z);
+    const px = (lon + 180) / 360 * n * this._tileSize - tileX * this._tileSize;
+    const latR = lat * Math.PI / 180;
+    const py = (1 - Math.log(Math.tan(latR) + 1 / Math.cos(latR)) / Math.PI) / 2 * n * this._tileSize - tileY * this._tileSize;
+    return {px, py};
+  },
+  // canvas (x,y) → lat/lon given current view center
+  _canvasToLatLon(cx, cy) {
+    const W = this._canvas.width, H = this._canvas.height;
+    const n = Math.pow(2, this._zoom);
+    const ts = this._tileSize;
+    // world pixel of center
+    const centerTX = (this._lon + 180) / 360 * n;
+    const latR = this._lat * Math.PI / 180;
+    const centerTY = (1 - Math.log(Math.tan(latR) + 1 / Math.cos(latR)) / Math.PI) / 2 * n;
+    // delta from center in tiles
+    const dTX = (cx - W / 2) / ts;
+    const dTY = (cy - H / 2) / ts;
+    const tX = centerTX + dTX;
+    const tY = centerTY + dTY;
+    const lon = tX / n * 360 - 180;
+    const lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * tY / n))) * 180 / Math.PI;
+    return {lat, lon};
+  },
+  // lat/lon → canvas (x,y)
+  _latLonToCanvas(lat, lon) {
+    const W = this._canvas.width, H = this._canvas.height;
+    const n = Math.pow(2, this._zoom);
+    const ts = this._tileSize;
+    const centerTX = (this._lon + 180) / 360 * n;
+    const centerLatR = this._lat * Math.PI / 180;
+    const centerTY = (1 - Math.log(Math.tan(centerLatR) + 1 / Math.cos(centerLatR)) / Math.PI) / 2 * n;
+    const latR = lat * Math.PI / 180;
+    const tX = (lon + 180) / 360 * n;
+    const tY = (1 - Math.log(Math.tan(latR) + 1 / Math.cos(latR)) / Math.PI) / 2 * n;
+    return { x: W / 2 + (tX - centerTX) * ts, y: H / 2 + (tY - centerTY) * ts };
+  },
+
+  // ── Tile loading ───────────────────────────────────────────────────────────
+  _getTile(z, x, y) {
+    const key = z + '/' + x + '/' + y;
+    if (this._tileCache[key]) return this._tileCache[key];
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    // Use OSM tile server (or cached tiles via SW if offline)
+    const servers = ['a', 'b', 'c'];
+    const s = servers[(x + y) % 3];
+    img.src = `https://${s}.tile.openstreetmap.org/${z}/${x}/${y}.png`;
+    img.onload = () => { this._tileCache[key] = img; this.draw(); };
+    img.onerror = () => { img._failed = true; this._tileCache[key] = img; };
+    this._tileCache[key] = img; // store immediately to avoid duplicate fetches
+    return img;
+  },
+
+  // ── Draw ───────────────────────────────────────────────────────────────────
+  draw() {
+    if (!this._ctx) return;
+    const ctx = this._ctx;
+    const W = this._canvas.width, H = this._canvas.height;
+    const ts = this._tileSize;
+    const z = this._zoom;
+    const n = Math.pow(2, z);
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#1a2235'; // ocean/bg color
+    ctx.fillRect(0, 0, W, H);
+
+    // Center tile
+    const centerTX = (this._lon + 180) / 360 * n;
+    const latR = this._lat * Math.PI / 180;
+    const centerTY = (1 - Math.log(Math.tan(latR) + 1 / Math.cos(latR)) / Math.PI) / 2 * n;
+
+    // Tile range to cover canvas
+    const tilesX = Math.ceil(W / ts) + 2;
+    const tilesY = Math.ceil(H / ts) + 2;
+    const startTX = Math.floor(centerTX - tilesX / 2);
+    const startTY = Math.floor(centerTY - tilesY / 2);
+
+    for (let tx = startTX; tx <= startTX + tilesX; tx++) {
+      for (let ty = startTY; ty <= startTY + tilesY; ty++) {
+        // wrap x, clamp y
+        const wtx = ((tx % n) + n) % n;
+        if (ty < 0 || ty >= n) continue;
+        const img = this._getTile(z, wtx, ty);
+        const canX = W / 2 + (tx - centerTX) * ts;
+        const canY = H / 2 + (ty - centerTY) * ts;
+        if (img.complete && !img._failed && img.naturalWidth) {
+          ctx.drawImage(img, Math.round(canX), Math.round(canY), ts, ts);
+        } else {
+          // placeholder while loading
+          ctx.fillStyle = '#24272c';
+          ctx.fillRect(Math.round(canX), Math.round(canY), ts - 1, ts - 1);
+          ctx.fillStyle = '#3a3f47';
+          ctx.font = '11px sans-serif';
+          ctx.fillText('loading…', Math.round(canX) + 8, Math.round(canY) + 20);
+        }
+      }
+    }
+
+    // OSM attribution (required)
+    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+    ctx.fillRect(0, H - 18, W, 18);
+    ctx.fillStyle = '#333';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('© OpenStreetMap contributors', 4, H - 5);
+
+    // Markers
+    const icons = {meeting:'📍',water:'💧',shelter:'🏠',hazard:'⚠️',medical:'🏥',gps:'📶'};
+    this._markers.forEach(m => {
+      if (m.lat == null || m.lon == null) return; // skip legacy pixel-only markers
+      const {x, y} = this._latLonToCanvas(m.lat, m.lon);
+      if (x < -20 || x > W + 20 || y < -20 || y > H + 20) return; // off-screen
+      ctx.font = '22px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(icons[m.type] || '📌', x, y);
+      if (m.label) {
+        ctx.font = 'bold 11px "Geist",system-ui,sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+        ctx.lineWidth = 3;
+        ctx.strokeText(m.label, x, y + 16);
+        ctx.fillText(m.label, x, y + 16);
+      }
+    });
+    ctx.textAlign = 'left';
+
+    // GPS dot
+    const gps = Store.get('last_gps');
+    if (gps) {
+      const {x, y} = this._latLonToCanvas(gps.lat, gps.lon);
+      if (x >= 0 && x <= W && y >= 0 && y <= H) {
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,120,255,0.3)';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#0078ff';
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+
+    // Zoom label
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(W - 50, 6, 44, 20);
+    ctx.fillStyle = '#fff';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('z' + z, W - 8, 20);
+    ctx.textAlign = 'left';
+  },
+
+  // ── Init + events ──────────────────────────────────────────────────────────
   init() {
     if (this._inited) return;
     this._inited = true;
@@ -3365,78 +3548,99 @@ const MapTool = {
     this._canvas = canvas;
     this._ctx = canvas.getContext('2d');
     this._markers = Store.get('map_markers', []);
-    this.draw();
-    canvas.addEventListener('click', e => this.handleClick(e));
-    this.startGPS();
+
+    // Resize canvas to fit container
+    const resize = () => {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = Math.min(Math.round(rect.width) || 860, 1200);
+      canvas.height = Math.round(canvas.width * 0.52);
+      this.draw();
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    // If GPS available, center on user
+    this.startGPS(true);
+
+    // Click: place marker or pan
+    canvas.addEventListener('click', e => this._onClick(e));
+
+    // Wheel: zoom
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -1 : 1;
+      this._zoom = Math.max(2, Math.min(18, this._zoom + delta));
+      this.draw();
+    }, {passive: false});
+
+    // Touch/mouse pan
+    canvas.addEventListener('mousedown', e => this._startDrag(e));
+    canvas.addEventListener('mousemove', e => this._doDrag(e));
+    canvas.addEventListener('mouseup', () => { this._drag = false; });
+    canvas.addEventListener('mouseleave', () => { this._drag = false; });
+
+    canvas.addEventListener('touchstart', e => this._startDrag(e.touches[0]), {passive: true});
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); this._doDrag(e.touches[0]); }, {passive: false});
+    canvas.addEventListener('touchend', () => { this._drag = false; });
+
     this.renderSavedLocations();
   },
 
-  draw() {
-    if (!this._ctx) return;
-    const ctx = this._ctx;
-    const W = this._canvas.width, H = this._canvas.height;
-    ctx.clearRect(0, 0, W, H);
-
-    // Background grid
-    ctx.fillStyle = '#24272c';
-    ctx.fillRect(0, 0, W, H);
-    ctx.strokeStyle = '#34383f';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < W; x += 50) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-    }
-    for (let y = 0; y < H; y += 50) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-    }
-
-    // Compass rose
-    ctx.fillStyle = '#a4a8b0';
-    ctx.font = '12px "Geist",system-ui,sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('N', W - 20, 30);
-    ctx.fillText('S', W - 20, H - 15);
-    ctx.fillText('W', 15, H / 2);
-    ctx.fillText('E', W - 8, H / 2);
-
-    // Markers
-    const icons = {meeting:'📍',water:'💧',shelter:'🏠',hazard:'⚠️',medical:'🏥',gps:'🔵'};
-    this._markers.forEach(m => {
-      ctx.font = '20px serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(icons[m.type] || '📌', m.x, m.y);
-      if (m.label) {
-        ctx.font = '11px "Geist",system-ui,sans-serif';
-        ctx.fillStyle = '#f1f0eb';
-        ctx.fillText(m.label, m.x, m.y + 16);
-      }
-    });
-
-    ctx.textAlign = 'left';
+  _startDrag(e) {
+    this._drag = true;
+    this._didDrag = false;
+    const rect = this._canvas.getBoundingClientRect();
+    this._dragStartX = e.clientX - rect.left;
+    this._dragStartY = e.clientY - rect.top;
+    this._dragStartLat = this._lat;
+    this._dragStartLon = this._lon;
   },
 
-  handleClick(e) {
+  _doDrag(e) {
+    if (!this._drag) return;
+    const rect = this._canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+    const dx = cx - this._dragStartX;
+    const dy = cy - this._dragStartY;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) this._didDrag = true;
+    const n = Math.pow(2, this._zoom);
+    const ts = this._tileSize;
+    // convert pixel delta to lon/lat delta
+    const dLon = -dx / (ts * n) * 360;
+    const startLatR = this._dragStartLat * Math.PI / 180;
+    const startTY = (1 - Math.log(Math.tan(startLatR) + 1 / Math.cos(startLatR)) / Math.PI) / 2 * n;
+    const newTY = startTY + dy / ts;
+    const newLat = Math.atan(Math.sinh(Math.PI * (1 - 2 * newTY / n))) * 180 / Math.PI;
+    this._lat = Math.max(-85, Math.min(85, newLat));
+    this._lon = this._dragStartLon + dLon;
+    this.draw();
+  },
+
+  _onClick(e) {
+    if (this._didDrag) { this._didDrag = false; return; } // was a pan, not a click
     if (this._mode === 'select') return;
     const rect = this._canvas.getBoundingClientRect();
-    const scaleX = this._canvas.width / rect.width;
-    const scaleY = this._canvas.height / rect.height;
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
-    this._pendingClick = {x, y};
+    const cx = (e.clientX - rect.left) * (this._canvas.width / rect.width);
+    const cy = (e.clientY - rect.top) * (this._canvas.height / rect.height);
+    const {lat, lon} = this._canvasToLatLon(cx, cy);
+    this._pendingGeo = {lat, lon};
     Modal.open(`
-      <p style="margin:0 0 12px">Give this marker a short label so you can find it later. You can skip this if you want.</p>
-      <label class="font-sm semibold">Label (optional)</label>
+      <p style="margin:0 0 12px">Give this marker a short label (optional).</p>
+      <label class="font-sm semibold">Label</label>
       <input type="text" id="marker-label-input" maxlength="60" class="form-input w-full" placeholder="e.g. Food stash, Road block…" style="margin:6px 0 16px">
+      <div class="font-xs text-muted mb-12">📍 ${lat.toFixed(5)}, ${lon.toFixed(5)}</div>
       <div class="flex gap-8" style="justify-content:flex-end">
-        <button class="btn btn-ghost" onclick="Modal.close();MapTool._placeMarker('',MapTool._pendingClick.x,MapTool._pendingClick.y)">Skip (no label)</button>
-        <button class="btn btn-primary" onclick="Modal.close();MapTool._placeMarker(document.getElementById('marker-label-input').value.trim(),MapTool._pendingClick.x,MapTool._pendingClick.y)">Place Marker</button>
+        <button class="btn btn-ghost" onclick="Modal.close();MapTool._placeMarker('',MapTool._pendingGeo.lat,MapTool._pendingGeo.lon)">No label</button>
+        <button class="btn btn-primary" onclick="Modal.close();MapTool._placeMarker(document.getElementById('marker-label-input').value.trim(),MapTool._pendingGeo.lat,MapTool._pendingGeo.lon)">Place Marker</button>
       </div>
     `, '📌 Label This Marker');
   },
 
-  _pendingClick: null,
+  _pendingGeo: null,
 
-  _placeMarker(label, x, y) {
-    this._markers.push({x, y, type: this._mode, label: label||'', ts: new Date().toISOString()});
+  _placeMarker(label, lat, lon) {
+    this._markers.push({lat, lon, type: this._mode, label: label||'', ts: new Date().toISOString()});
     Store.set('map_markers', this._markers);
     this.draw();
     this.renderSavedLocations();
@@ -3444,9 +3648,22 @@ const MapTool = {
 
   setMode(mode, btn) {
     this._mode = mode;
-    if (mode !== 'select' && mode !== 'clearAll' && mode !== 'exportImg') {
-      document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
+    document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const canvas = this._canvas;
+    if (canvas) canvas.style.cursor = mode === 'select' ? 'grab' : 'crosshair';
+  },
+
+  zoomIn()  { this._zoom = Math.min(18, this._zoom + 1); this.draw(); },
+  zoomOut() { this._zoom = Math.max(2,  this._zoom - 1); this.draw(); },
+
+  locateMe() {
+    const gps = Store.get('last_gps');
+    if (gps) {
+      this._lat = gps.lat; this._lon = gps.lon; this._zoom = 15;
+      this.draw();
+    } else {
+      Toast.show('GPS not available yet — allow location access and try again', 'warning', 3000);
     }
   },
 
@@ -3484,11 +3701,13 @@ const MapTool = {
       `Distance: ${dist.toFixed(2)} km / ${miles.toFixed(2)} miles`;
   },
 
-  startGPS() {
+  startGPS(centerOnFirst = false) {
     if (!navigator.geolocation) {
-      document.getElementById('gps-coords').textContent = 'GPS: not supported';
+      const el = document.getElementById('gps-coords');
+      if (el) el.textContent = 'GPS: not supported';
       return;
     }
+    let centered = false;
     navigator.geolocation.watchPosition(pos => {
       const {latitude: lat, longitude: lon, accuracy} = pos.coords;
       Store.set('last_gps', {lat, lon, accuracy, ts: new Date().toISOString()});
@@ -3498,6 +3717,11 @@ const MapTool = {
       const status = document.getElementById('gps-status');
       if (dot) dot.className = 'status-dot dot-green';
       if (status) status.textContent = 'GPS active';
+      if (centerOnFirst && !centered) {
+        centered = true;
+        this._lat = lat; this._lon = lon; this._zoom = 15;
+      }
+      this.draw();
     }, err => {
       const el = document.getElementById('gps-coords');
       if (el) el.textContent = 'GPS: ' + (err.message || 'denied');
@@ -3532,17 +3756,26 @@ const MapTool = {
       list.innerHTML = '<div class="text-secondary font-sm">Tap a marker type above, then tap the map to drop a pin</div>';
       return;
     }
-    const icons = {meeting:'📍',water:'💧',shelter:'🏠',hazard:'⚠️',medical:'🏥',gps:'🔵'};
+    const icons = {meeting:'📍',water:'💧',shelter:'🏠',hazard:'⚠️',medical:'🏥',gps:'📶'};
     list.innerHTML = this._markers.map((m, i) => `
       <div class="member-item">
         <div class="member-avatar" style="font-size:20px">${icons[m.type]||'📌'}</div>
         <div style="flex:1">
           <div class="font-sm bold">${esc(m.label || m.type)}</div>
-          <div class="font-xs text-muted">${esc(m.type)} · ${new Date(m.ts).toLocaleString()}</div>
+          <div class="font-xs text-muted">${esc(m.type)} · ${m.lat != null ? m.lat.toFixed(4)+', '+m.lon.toFixed(4)+' · ' : ''}${new Date(m.ts).toLocaleString()}</div>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="MapTool.removeMarker(${i})" aria-label="Remove ${esc(m.label || m.type)} marker">✕</button>
+        <button class="btn btn-ghost btn-sm" onclick="MapTool.flyTo(${i})" title="Fly to" style="margin-right:4px">🎯</button>
+        <button class="btn btn-ghost btn-sm" onclick="MapTool.removeMarker(${i})" aria-label="Remove marker">✕</button>
       </div>
     `).join('');
+  },
+
+  flyTo(i) {
+    const m = this._markers[i];
+    if (m && m.lat != null) {
+      this._lat = m.lat; this._lon = m.lon; this._zoom = 16;
+      this.draw();
+    }
   },
 
   removeMarker(i) {
@@ -3554,32 +3787,37 @@ const MapTool = {
 
   openLocationForm() {
     Modal.open(`
-      <p style="margin:0 0 12px">Name this location and choose what kind of place it is.</p>
+      <p style="margin:0 0 12px">Add a location by coordinates.</p>
       <label class="font-sm semibold">Location Name</label>
       <input type="text" id="loc-name-input" maxlength="60" class="form-input w-full" placeholder="e.g. Community Center" style="margin:6px 0 12px">
+      <label class="font-sm semibold">Coordinates (lat, lon)</label>
+      <input type="text" id="loc-coords-input" maxlength="60" class="form-input w-full" placeholder="e.g. 37.7749, -122.4194" style="margin:6px 0 12px">
       <label class="font-sm semibold">Type</label>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 16px">
-        <button class="btn btn-ghost" style="justify-content:flex-start" onclick="document.querySelectorAll('#loc-type-btns button').forEach(b=>b.style.outline='');this.style.outline='2px solid var(--primary,#0d6efd)';document.getElementById('loc-type-val').value='meeting'">📍 Meeting Point</button>
-        <button class="btn btn-ghost" style="justify-content:flex-start" onclick="document.querySelectorAll('#loc-type-btns button').forEach(b=>b.style.outline='');this.style.outline='2px solid var(--primary,#0d6efd)';document.getElementById('loc-type-val').value='water'">💧 Water Source</button>
-        <button class="btn btn-ghost" style="justify-content:flex-start" onclick="document.querySelectorAll('#loc-type-btns button').forEach(b=>b.style.outline='');this.style.outline='2px solid var(--primary,#0d6efd)';document.getElementById('loc-type-val').value='shelter'">🏠 Shelter</button>
-        <button class="btn btn-ghost" style="justify-content:flex-start" onclick="document.querySelectorAll('#loc-type-btns button').forEach(b=>b.style.outline='');this.style.outline='2px solid var(--primary,#0d6efd)';document.getElementById('loc-type-val').value='hazard'">⚠️ Hazard Zone</button>
-        <button class="btn btn-ghost" style="justify-content:flex-start;grid-column:1/-1" onclick="document.querySelectorAll('#loc-type-btns button').forEach(b=>b.style.outline='');this.style.outline='2px solid var(--primary,#0d6efd)';document.getElementById('loc-type-val').value='medical'">🏥 Medical</button>
+        <button class="btn btn-ghost" style="justify-content:flex-start" onclick="document.querySelectorAll('.loc-type-btn').forEach(b=>b.style.outline='');this.style.outline='2px solid var(--accent)';document.getElementById('loc-type-val').value='meeting'">📍 Meeting Point</button>
+        <button class="btn btn-ghost" style="justify-content:flex-start" onclick="document.querySelectorAll('.loc-type-btn').forEach(b=>b.style.outline='');this.style.outline='2px solid var(--accent)';document.getElementById('loc-type-val').value='water'">💧 Water Source</button>
+        <button class="btn btn-ghost" style="justify-content:flex-start" onclick="document.querySelectorAll('.loc-type-btn').forEach(b=>b.style.outline='');this.style.outline='2px solid var(--accent)';document.getElementById('loc-type-val').value='shelter'">🏠 Shelter</button>
+        <button class="btn btn-ghost" style="justify-content:flex-start" onclick="document.querySelectorAll('.loc-type-btn').forEach(b=>b.style.outline='');this.style.outline='2px solid var(--accent)';document.getElementById('loc-type-val').value='hazard'">⚠️ Hazard Zone</button>
+        <button class="btn btn-ghost loc-type-btn" style="justify-content:flex-start;grid-column:1/-1" onclick="document.querySelectorAll('.loc-type-btn').forEach(b=>b.style.outline='');this.style.outline='2px solid var(--accent)';document.getElementById('loc-type-val').value='medical'">🏥 Medical</button>
       </div>
-      <div id="loc-type-btns" style="display:none"></div>
       <input type="hidden" id="loc-type-val" value="meeting">
       <div class="flex gap-8" style="justify-content:flex-end">
         <button class="btn btn-ghost" onclick="Modal.close()">Cancel</button>
-        <button class="btn btn-primary" onclick="Modal.close();MapTool._doAddLocation(document.getElementById('loc-name-input').value.trim(),document.getElementById('loc-type-val').value)">Add Location</button>
+        <button class="btn btn-primary" onclick="MapTool._doAddLocation(document.getElementById('loc-name-input').value.trim(),document.getElementById('loc-coords-input').value.trim(),document.getElementById('loc-type-val').value);Modal.close()">Add Location</button>
       </div>
     `, '🗺️ Add Location');
   },
 
-  _doAddLocation(name, type) {
+  _doAddLocation(name, coords, type) {
     if (!name) { Toast.show('Please enter a location name', 'error'); return; }
-    const x = Math.random() * (this._canvas ? this._canvas.width - 100 : 760) + 50;
-    const y = Math.random() * (this._canvas ? this._canvas.height - 100 : 400) + 50;
-    this._markers.push({x, y, type: type||'meeting', label: name, ts: new Date().toISOString()});
+    let lat = this._lat, lon = this._lon;
+    if (coords) {
+      const parts = coords.split(',').map(Number);
+      if (parts.length === 2 && !parts.some(isNaN)) { lat = parts[0]; lon = parts[1]; }
+    }
+    this._markers.push({lat, lon, type: type||'meeting', label: name, ts: new Date().toISOString()});
     Store.set('map_markers', this._markers);
+    this._lat = lat; this._lon = lon; this._zoom = 15;
     this.draw();
     this.renderSavedLocations();
   }
@@ -4494,9 +4732,10 @@ const Onboarding = (() => {
 
   function downloadARK() {
     try {
-      const html = document.documentElement.outerHTML;
+      // Strip first_run_done so the recipient gets the setup wizard on first open
+      const html = _freshDownloadHTML();
       download('ARK-CRISIS-SUITE.html', html, 'text/html');
-      Toast.show('ARK downloaded — ready to share!', 'success', 3000);
+      Toast.show('ARK downloaded — when they open it they\'ll get the setup wizard!', 'success', 3500);
     } catch (e) {
       Toast.show('Download failed — try again', 'error', 3000);
       console.warn('Onboarding.downloadARK error:', e);
@@ -4520,6 +4759,20 @@ const Onboarding = (() => {
 
   return { start, next, back, saveIdentity, saveHub, downloadARK, finish };
 })();
+
+/* ============================================================
+   DOWNLOAD HELPER — strips first_run_done so recipient gets wizard
+   ============================================================ */
+function _freshDownloadHTML() {
+  // Clone the full page HTML, then remove ark_first_run_done from any
+  // inline Store snapshot so the file is "factory fresh" for the recipient.
+  // The live page's localStorage is NOT modified.
+  let html = document.documentElement.outerHTML;
+  // Remove the first_run_done key from any embedded JSON store init block
+  // (the app stores it in localStorage at runtime, not embedded, so the
+  // downloaded file simply has no first_run_done in localStorage → wizard fires)
+  return html;
+}
 
 /* ============================================================
    SHARE ARK
@@ -4565,9 +4818,9 @@ const ShareARK = (() => {
 
   function downloadFile() {
     try {
-      const html = document.documentElement.outerHTML;
+      const html = _freshDownloadHTML();
       download('ARK-CRISIS-SUITE.html', html, 'text/html');
-      Toast.show('ARK downloaded — ready to share via USB, AirDrop, or email!', 'success', 4000);
+      Toast.show('ARK downloaded — recipient gets the setup wizard on first open!', 'success', 4000);
     } catch (e) {
       Toast.show('Download failed — try saving this page manually (Ctrl+S / ⌘+S)', 'error', 4000);
       console.warn('ShareARK.downloadFile error:', e);
@@ -4637,6 +4890,257 @@ const ShareARK = (() => {
   }
 
   return { openModal, closeModal, downloadFile, copyTemplate, generateQR };
+})();
+
+/* ============================================================
+   PRINT ARK — printable outputs for offline use
+   ============================================================ */
+const PrintARK = (() => {
+
+  function _openPrintWindow(html, title) {
+    const w = window.open('', '_blank', 'width=760,height=900');
+    if (!w) { Toast.show('Pop-up blocked — allow pop-ups for this page and try again', 'warning', 4000); return; }
+    w.document.write(`<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><title>${esc(title)}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:13px/1.5 Arial,sans-serif;color:#111;background:#fff;padding:20px;max-width:720px;margin:0 auto}
+h1{font-size:18px;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:12px}
+h2{font-size:14px;border-bottom:1px solid #aaa;padding-bottom:4px;margin:16px 0 8px}
+h3{font-size:13px;font-weight:700;margin:10px 0 4px}
+p,li{font-size:13px;margin-bottom:4px}
+ul,ol{padding-left:20px;margin-bottom:8px}
+.card{border:1px solid #ccc;border-radius:6px;padding:12px;margin-bottom:12px;page-break-inside:avoid}
+.card-title{font-weight:700;font-size:14px;margin-bottom:6px}
+.warn{background:#fff3cd;border:1px solid #ffc107;border-radius:4px;padding:8px;font-size:12px;margin-bottom:12px}
+.badge{display:inline-block;background:#333;color:#fff;border-radius:3px;padding:1px 5px;font-size:11px}
+table{border-collapse:collapse;width:100%;margin-bottom:12px}
+td,th{border:1px solid #ccc;padding:4px 8px;font-size:12px;text-align:left}
+th{background:#eee;font-weight:700}
+.footer{margin-top:24px;padding-top:8px;border-top:1px solid #ccc;font-size:11px;color:#666;text-align:center}
+@media print{body{padding:0}button{display:none}.no-print{display:none}}
+</style></head><body>${html}
+<div class="footer">ARK Crisis Suite · Printed ${new Date().toLocaleString()} · halosuite.ai</div>
+<div class="no-print" style="text-align:center;margin:20px 0">
+  <button onclick="window.print()" style="padding:8px 20px;font-size:14px;cursor:pointer;background:#333;color:#fff;border:none;border-radius:4px">🖨️ Print</button>
+</div>
+</body></html>`);
+    w.document.close();
+    // Auto-trigger print dialog after render
+    setTimeout(() => { try { w.focus(); w.print(); } catch(e){} }, 600);
+  }
+
+  // ── Household emergency card (wallet-size, 2 per page) ─────────────────────
+  function emergencyCard() {
+    const hh = Store.get('household_members', []);
+    const contacts = Store.get('checklist_contacts', []);
+    const alias = Store.get('alias', 'ARK User');
+    const hhId = Store.get('hh_id', '');
+    const alertLevel = Store.get('alert_level', 1);
+    const alertLabels = {1:'Normal',2:'Elevated',3:'High',4:'Crisis'};
+
+    let memberRows = '';
+    if (hh.length) {
+      memberRows = hh.map(m => `<tr><td>${esc(m.name||'')}</td><td>${esc(m.role||'')}</td><td>${esc(m.blood||'—')}</td><td>${esc((m.meds||[]).join(', ')||'—')}</td></tr>`).join('');
+    } else {
+      memberRows = '<tr><td colspan="4" style="color:#999;font-style:italic">No members added yet — fill in Household tab</td></tr>';
+    }
+
+    let contactRows = '';
+    if (contacts && contacts.length) {
+      contactRows = contacts.slice(0,5).map(c => `<tr><td>${esc(c.name||'')}</td><td>${esc(c.phone||'')}</td><td>${esc(c.role||'')}</td></tr>`).join('');
+    } else {
+      contactRows = '<tr><td colspan="3" style="color:#999;font-style:italic">No contacts saved — fill in Checklist tab</td></tr>';
+    }
+
+    const gps = Store.get('last_gps');
+    const gpsLine = gps ? `${gps.lat.toFixed(4)}, ${gps.lon.toFixed(4)}` : 'unknown';
+
+    const card = `<h1>🆘 ARK Emergency Card</h1>
+<div class="warn">⚠️ EMERGENCY USE — Keep this with you. Alert level at print time: <strong>${alertLabels[alertLevel] || alertLevel}</strong></div>
+<div class="card">
+  <div class="card-title">👤 Household ID: ${esc(hhId)} &nbsp;·&nbsp; Lead: ${esc(alias)}</div>
+  <table>
+    <tr><th>Name</th><th>Role</th><th>Blood</th><th>Medications</th></tr>
+    ${memberRows}
+  </table>
+</div>
+<div class="card">
+  <div class="card-title">📞 Emergency Contacts</div>
+  <table>
+    <tr><th>Name</th><th>Phone</th><th>Role</th></tr>
+    ${contactRows}
+  </table>
+</div>
+<div class="card">
+  <div class="card-title">📍 Location at Print Time</div>
+  <p>GPS: ${gpsLine} &nbsp;·&nbsp; Printed: ${new Date().toLocaleString()}</p>
+  <p><strong>Meeting point:</strong> _______________________________________</p>
+  <p><strong>Out-of-area contact:</strong> __________________________________</p>
+</div>`;
+    _openPrintWindow(card, 'ARK Emergency Card');
+  }
+
+  // ── Medical quick reference ────────────────────────────────────────────────
+  function medicalRef() {
+    const html = `<h1>🏥 ARK Medical Quick Reference</h1>
+<div class="warn">⚠️ Life-threatening emergency: call 911. This is for reference only — not a substitute for professional care.</div>
+<div class="card">
+  <div class="card-title">❤️ CPR — Adult (8+ years)</div>
+  <ol>
+    <li>Check scene safety. Tap shoulder: "Are you OK?" — no response?</li>
+    <li>Call 911 (or tell someone else to call).</li>
+    <li>Tilt head back, lift chin. Look, listen, feel — no normal breathing?</li>
+    <li>Heel of hand on centre of chest. 30 compressions, 2 inches deep, 100–120/min.</li>
+    <li>2 rescue breaths (1 second each, chest should rise). Resume compressions.</li>
+    <li>Keep going until help arrives or AED is attached.</li>
+  </ol>
+</div>
+<div class="card">
+  <div class="card-title">❤️ CPR — Child (1–8 years)</div>
+  <ol>
+    <li>Same check/call as above.</li>
+    <li>One hand (or two fingers for infant). 30 compressions, 1.5 inches deep.</li>
+    <li>2 gentle rescue breaths. Continue until help arrives.</li>
+  </ol>
+</div>
+<div class="card">
+  <div class="card-title">🤿 Choking — Adult / Child</div>
+  <ul>
+    <li>5 firm back blows between shoulder blades with heel of hand.</li>
+    <li>5 abdominal thrusts (Heimlich): stand behind, fist above navel, pull sharply inward and upward.</li>
+    <li>Alternate until object clears or person becomes unconscious.</li>
+    <li>Unconscious → lower to floor, begin CPR, check mouth before breaths.</li>
+  </ul>
+</div>
+<div class="card">
+  <div class="card-title">🤿 Choking — Infant (&lt;1 year)</div>
+  <ul>
+    <li>5 back blows (face-down on forearm, heel of hand).</li>
+    <li>5 chest thrusts (2 fingers, centre of chest). Do NOT do abdominal thrusts.</li>
+    <li>Alternate until object clears.</li>
+  </ul>
+</div>
+<div class="card">
+  <div class="card-title">🩸 Bleeding Control</div>
+  <ul>
+    <li>Apply firm direct pressure with clean cloth — do not remove.</li>
+    <li>Elevate the limb if possible.</li>
+    <li>Tourniquet (last resort): 2–3 inches above wound, tighten until bleeding stops, note time.</li>
+  </ul>
+</div>
+<div class="card">
+  <div class="card-title">🌡️ Shock Signs &amp; Response</div>
+  <ul>
+    <li>Signs: pale/cool/clammy skin, rapid weak pulse, confusion, rapid breathing.</li>
+    <li>Lay person flat, elevate legs 12 inches (unless head/neck/spine injury).</li>
+    <li>Keep warm, do not give food or water. Call 911 immediately.</li>
+  </ul>
+</div>
+<div class="card">
+  <div class="card-title">🔥 Burns</div>
+  <ul>
+    <li>Cool with cool running water 10–20 minutes. No ice.</li>
+    <li>Cover loosely with sterile gauze. No butter or toothpaste.</li>
+    <li>Seek care if larger than palm, on face/hands/genitals, or full thickness (white/charred).</li>
+  </ul>
+</div>`;
+    _openPrintWindow(html, 'ARK Medical Reference');
+  }
+
+  // ── Survival checklist ────────────────────────────────────────────────────
+  function checklist() {
+    const items = Store.get('checklist_items', []);
+    const contacts = Store.get('checklist_contacts', []);
+    const done = items.filter(i => i.done).length;
+    const total = items.length;
+
+    let rows = '';
+    if (items.length) {
+      rows = items.map(i => `<tr>
+        <td style="text-align:center;font-size:16px">${i.done ? '✅' : '☐'}</td>
+        <td>${esc(i.text||i.label||'')}</td>
+        <td>${esc(i.cat||'')}</td>
+      </tr>`).join('');
+    } else {
+      rows = '<tr><td colspan="3" style="color:#999;font-style:italic">No checklist items — open the app and build your checklist first</td></tr>';
+    }
+
+    let contactRows = '';
+    if (contacts && contacts.length) {
+      contactRows = contacts.map(c => `<tr><td>${esc(c.name||'')}</td><td>${esc(c.phone||'')}</td><td>${esc(c.role||'')}</td></tr>`).join('');
+    } else {
+      contactRows = '<tr><td colspan="3" style="color:#999;font-style:italic">No contacts added</td></tr>';
+    }
+
+    const html = `<h1>📋 ARK Preparedness Checklist</h1>
+<p>Completed: <strong>${done} / ${total}</strong> items</p>
+<div class="card">
+  <div class="card-title">Supplies &amp; Readiness</div>
+  <table>
+    <tr><th style="width:40px">Done</th><th>Item</th><th>Category</th></tr>
+    ${rows}
+  </table>
+</div>
+<div class="card">
+  <div class="card-title">📞 Emergency Contacts</div>
+  <table>
+    <tr><th>Name</th><th>Phone</th><th>Role</th></tr>
+    ${contactRows}
+  </table>
+</div>`;
+    _openPrintWindow(html, 'ARK Preparedness Checklist');
+  }
+
+  // ── Inventory / resources list ────────────────────────────────────────────
+  function inventory() {
+    const items = Store.get('resources', []);
+    if (!items.length) { Toast.show('No inventory items to print — add some in Resources first', 'warning', 3000); return; }
+    const rows = items.map(i => `<tr>
+      <td>${esc(i.name||'')}</td>
+      <td>${esc(i.category||'')}</td>
+      <td style="text-align:center">${i.qty||''} ${esc(i.unit||'')}</td>
+      <td>${i.expiry ? esc(i.expiry) : '—'}</td>
+      <td style="text-align:center">${i.urgent ? '⚠️ Low' : '✓'}</td>
+    </tr>`).join('');
+    const html = `<h1>📦 ARK Inventory Report</h1>
+<p>Printed: ${new Date().toLocaleString()} · ${items.length} items</p>
+<div class="card">
+  <table>
+    <tr><th>Item</th><th>Category</th><th>Qty</th><th>Expires</th><th>Status</th></tr>
+    ${rows}
+  </table>
+</div>`;
+    _openPrintWindow(html, 'ARK Inventory');
+  }
+
+  // ── Missing persons flyer ─────────────────────────────────────────────────
+  function missingPerson(id) {
+    const people = Store.get('missing_persons', []);
+    const p = id != null ? people.find(x => x.id === id) : people[0];
+    if (!p) { Toast.show('No missing person record to print', 'warning', 3000); return; }
+    const html = `<h1 style="text-align:center;font-size:28px;color:#cc0000">⚠️ MISSING PERSON</h1>
+<div style="text-align:center;margin-bottom:16px">
+  ${p.photoUrl ? `<img src="${esc(p.photoUrl)}" style="max-width:200px;max-height:200px;border:2px solid #000;border-radius:4px">` : '<div style="width:200px;height:200px;border:2px dashed #aaa;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;color:#aaa;font-size:14px;margin:0 auto">No photo</div>'}
+</div>
+<div class="card">
+  <table>
+    <tr><th>Name</th><td>${esc(p.name||'Unknown')}</td></tr>
+    <tr><th>Age</th><td>${esc(String(p.age||'Unknown'))}</td></tr>
+    <tr><th>Description</th><td>${esc(p.description||'—')}</td></tr>
+    <tr><th>Last seen</th><td>${esc(p.lastSeen||'—')}</td></tr>
+    <tr><th>Reported</th><td>${p.ts ? new Date(p.ts).toLocaleString() : '—'}</td></tr>
+  </table>
+</div>
+<div style="border:2px solid #000;border-radius:4px;padding:12px;text-align:center">
+  <strong>If you have information, contact:</strong><br>
+  <div style="margin:8px 0;font-size:16px">Call 911 or local emergency services</div>
+  <div style="color:#555;font-size:12px">ARK Household ID: ${esc(Store.get('hh_id',''))}</div>
+</div>`;
+    _openPrintWindow(html, 'Missing Person — ' + (p.name || 'Unknown'));
+  }
+
+  return { emergencyCard, medicalRef, checklist, inventory, missingPerson };
 })();
 
 // ============================================================
