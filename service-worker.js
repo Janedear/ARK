@@ -9,7 +9,7 @@
  * On activate, old caches are deleted automatically.
  */
 
-const CACHE_VERSION = 'ark-v1';
+const CACHE_VERSION = 'ark-v2';
 const CACHE_NAME = `ark-cache-${CACHE_VERSION}`;
 
 /** Files to pre-cache on install — the full offline experience lives here */
@@ -22,7 +22,8 @@ const PRECACHE_URLS = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-512.svg',
-  '/icons/apple-touch-icon.png'
+  '/icons/apple-touch-icon.png',
+  '/og-image.png'
 ];
 
 // ─── Install ──────────────────────────────────────────────────────────────────
