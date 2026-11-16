@@ -54,5 +54,24 @@
 .ll-tag.demo,.ll-tag.blocked{background:hsl(var(--danger-soft));color:hsl(var(--danger-ink))}
 .ll-tag.not{background:hsl(var(--muted));color:hsl(var(--muted-foreground))}
 .ll-print-only{display:none}
+/* Landing-only polish: keep operational screens unchanged. */
+.ark-download .ll-page{max-width:1040px}
+.ark-download main.ll-page{padding-top:40px}
+.ark-download h1{max-width:24ch;font-family:var(--font-body);font-weight:600;line-height:1.15}
+.ark-download .ll-muted,.ark-download .ll-tile small{color:hsl(var(--foreground));font-size:15px;line-height:1.6}
+.ark-download .ll-eyebrow{color:hsl(var(--foreground))}
+.ark-download .ll-card,.ark-download .ll-tile{border-radius:12px;padding:24px}
+.ark-download .ll-tile:hover{background:var(--fo-surface);border-color:var(--fo-line)}
+.ark-download .ll-btn{min-height:48px!important;border-radius:8px;white-space:normal;text-align:center}
+.ark-download .ll-btn:disabled{cursor:wait}
+.ark-download :is(a,button,input,summary):focus-visible{outline:3px solid hsl(var(--ring));outline-offset:4px}
+.ark-download .ll-field input{min-height:48px;font-size:16px;border:1px solid hsl(var(--input));background:hsl(var(--card))}
+.ark-download input[type=radio]{width:20px;height:20px;flex-shrink:0;margin-top:3px}
+.ark-download .ll-item,.ark-download [role=status]{overflow-wrap:anywhere;min-width:0}
+.ark-download .ll-chip{border-radius:8px;white-space:normal;max-width:100%;padding:10px 12px}
+.ark-download .ll-chip svg{flex-shrink:0}
+.ark-download ol{list-style:decimal;display:grid;gap:10px}
+@media(max-width:600px){.ark-download main.ll-page{padding-top:28px}.ark-download .ll-card,.ark-download .ll-tile{padding:18px}.ark-download .ll-grid{grid-template-columns:1fr}.ark-download main .ll-btn{width:100%}.ark-download h1{font-size:32px}}
+
 @media(max-width:720px){.ll-two{grid-template-columns:1fr}.ll-strip{grid-template-columns:1fr}.ll-page{padding:18px 16px 56px}.ll-urgent{flex-direction:column;align-items:stretch}.ll-urgent .ll-btn{width:100%}}
 @media print{@page{margin:14mm}.network-sidebar,.network-connection,.network-orientation,.network-banner,.field-shell>div:first-child,.field-shell>footer,.no-print{display:none!important}.network-workspace{display:block!important}.ll-page{max-width:none;padding:0;font-size:11.5pt}.ll-card,.ll-item{border-color:#999!important;background:#fff!important}.ll-print-only{display:block}.ll-status-table{display:table;font-size:9pt}.ll-page h1{font-size:20pt}.ll-page h2{font-size:13pt}.ll-alert{border:1px solid #333!important;background:#fff!important;color:#000!important}}

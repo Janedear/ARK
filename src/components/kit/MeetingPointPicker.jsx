@@ -29,11 +29,11 @@ export default function MeetingPointPicker({ value, onChange }) {
     {error && <p className="ll-muted" role="status">{error}</p>}
     <div className="ll-list">
       {options.map(o => <label key={o.name + o.lat} className="ll-item" style={{ display: 'flex', gap: 10, cursor: 'pointer' }}>
-        <input type="radio" name="meet" checked={value?.name === o.name} onChange={() => onChange(o)} />
+        <input type="radio" name="meet" checked={value?.name === o.name && value?.lat === o.lat && value?.lon === o.lon} onChange={() => onChange(o)} />
         <span><b>{o.name}</b><br /><span className="ll-muted">{o.kind} · {o.distance}{o.address ? ` · ${o.address}` : ''}</span></span>
       </label>)}
     </div>
-    <label className="ll-field" style={{ marginTop: 12 }}><span>Or type your own</span>
+    <label className="ll-field" style={{ marginTop: 12 }}><span>Or type a public meeting place (optional)</span>
       <input placeholder="e.g. Lincoln Elementary School, front entrance" value={value?.kind ? '' : value?.name || ''} onChange={e => onChange(e.target.value ? { name: e.target.value } : null)} />
     </label>
     <pre className="ll-item" style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', fontSize: 14 }}>{meetingPointText(value)}</pre>
