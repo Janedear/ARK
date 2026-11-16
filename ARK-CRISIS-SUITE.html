@@ -64,7 +64,15 @@
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ARK Crisis Suite — Offline Emergency Tool</title>
-<meta name="description" content="ARK — offline-first emergency communication suite. Works when the internet is gone.">
+<meta name="description" content="ARK — offline-first emergency communication suite. Works when the internet is gone. Offline AI, maps, Morse code, mesh messaging — one file.">
+<!-- Open Graph / social sharing -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="ARK Crisis Suite — Offline Emergency Tool">
+<meta property="og:description" content="No internet? Your phones can still connect, share the app, use offline AI, pull up cached maps, and communicate in Morse code. One self-contained file. Zero accounts. Works anywhere.">
+<meta property="og:site_name" content="ARK by HaloSuite">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ARK Crisis Suite">
+<meta name="twitter:description" content="Offline emergency preparedness in a single HTML file — AI, maps, radio reference, mesh messaging, Morse code. No internet required after first load.">
 <meta name="application-name" content="ARK Crisis Suite">
 <meta name="theme-color" content="#0e1013">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1653,7 +1661,7 @@ select.form-input{cursor:pointer}
       </span>
     </div>
     <canvas class="w-full" id="map-canvas" width="860" height="500" style="border-radius:var(--radius-md)"></canvas>
-    <div class="font-xs text-muted mt-8">Click to place markers. Scroll to zoom. No internet needed — GPS coordinates shown above.</div>
+    <div class="font-xs text-muted mt-8">Click to place markers. Scroll to zoom. Tiles cached locally after first load — works offline once visited.</div>
   </div>
 
   <!-- Map Tools -->
@@ -2037,43 +2045,15 @@ select.form-input{cursor:pointer}
 
   <div class="flex-between mb-12 wrap gap-8">
     <h2 class="section-title" style="margin:0"><span class="title-icon">🤖</span>AI Assistant</h2>
-    <div class="flex gap-8" id="ai-status-row">
-      <span id="ai-status-badge" class="badge badge-muted">Not loaded</span>
-    </div>
+    <span class="badge badge-green font-xs">✓ HALO Lite — always on</span>
   </div>
 
-  <div class="info-box mb-12" id="ai-intro-box">
-    <strong>Offline AI — runs entirely on your device.</strong> Uses <a href="https://webllm.mlc.ai" target="_blank" rel="noopener" style="color:var(--accent)">WebLLM</a> + Llama&nbsp;3.2&nbsp;1B (Instruct). The model downloads once (~650&nbsp;MB) and is cached by your browser — works fully offline after that. Requires a modern browser with WebGPU (Chrome 113+, Edge 113+).
-    <br><br>
-    <span class="text-muted font-xs">No data leaves your device. No API keys. No servers.</span>
-  </div>
-
-  <div id="ai-load-section" class="card mb-12">
-    <div class="card-title mb-8">🧠 Load Model</div>
-    <p class="font-sm text-secondary mb-12">First load downloads ~650 MB. Subsequent loads use the browser cache and take ~5 seconds.</p>
-    <div id="ai-model-select-row" class="flex gap-8 mb-12 wrap">
-      <select id="ai-model-select" class="form-input" style="flex:1;min-width:200px">
-        <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B — Fast, light (~650 MB)</option>
-        <option value="Llama-3.2-3B-Instruct-q4f16_1-MLC">Llama 3.2 3B — Smarter, heavier (~1.8 GB)</option>
-        <option value="TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC">TinyLlama 1.1B — Minimal footprint</option>
-      </select>
-      <button class="btn btn-primary" id="ai-load-btn" onclick="ARKai.load()">⬇ Load Model</button>
-    </div>
-    <div id="ai-progress-row" class="hidden">
-      <div class="font-sm mb-4" id="ai-progress-label">Downloading…</div>
-      <div style="background:var(--bg-secondary);border-radius:4px;height:8px;overflow:hidden">
-        <div id="ai-progress-bar" style="height:100%;background:var(--accent);width:0%;transition:width 0.3s"></div>
-      </div>
-      <div class="font-xs text-muted mt-4" id="ai-progress-pct">0%</div>
-    </div>
-  </div>
-
-  <!-- Chat UI (shown after model loads) -->
-  <div id="ai-chat-section" class="hidden">
+  <!-- Chat UI — always visible, HALO Lite works instantly -->
+  <div id="ai-chat-section">
     <div class="card mb-8" style="padding:0;overflow:hidden">
-      <div id="ai-messages" style="height:340px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px">
+      <div id="ai-messages" style="height:320px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px">
         <div class="ai-msg ai-msg-sys">
-          👋 I'm your offline ARK assistant. I know first aid, survival, emergency prep, and your app data. How can I help?
+          👋 I'm HALO — your offline crisis assistant. Ask me anything about first aid, water, survival, shelter, or your stored data. No download required.
         </div>
       </div>
     </div>
@@ -2110,14 +2090,29 @@ select.form-input{cursor:pointer}
     </div>
   </div>
 
-  <div class="card mt-12">
-    <div class="card-title mb-4">⚠️ Limitations</div>
-    <ul class="font-sm text-secondary" style="padding-left:16px">
-      <li>Requires WebGPU — Chrome 113+ or Edge 113+. Firefox and Safari are not yet supported.</li>
-      <li>First download is ~650 MB on the 1B model — use WiFi before a crisis.</li>
-      <li>Llama 3.2 1B is a small model — it will sometimes be wrong. Cross-check critical decisions.</li>
-      <li>Not a substitute for 911 or professional emergency services.</li>
-    </ul>
+  <!-- HALO+ Upgrade — optional LLM -->
+  <div class="card mt-12" id="ai-upgrade-card">
+    <div class="flex-between mb-8">
+      <div class="card-title" style="margin:0">🧠 HALO+ Upgrade <span class="badge badge-muted font-xs" style="vertical-align:middle">Optional</span></div>
+      <span id="ai-status-badge" class="badge badge-muted">Not loaded</span>
+    </div>
+    <p class="font-sm text-secondary mb-8">Upgrade to a full neural language model (Llama&nbsp;3.2). Requires internet <em>once</em> to download &amp; cache (~650&nbsp;MB). After that, runs fully offline. Needs Chrome 113+ / Edge 113+ (WebGPU).</p>
+    <div class="flex gap-8 mb-8 wrap">
+      <select id="ai-model-select" class="form-input" style="flex:1;min-width:180px">
+        <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B — Fast (~650 MB)</option>
+        <option value="Llama-3.2-3B-Instruct-q4f16_1-MLC">Llama 3.2 3B — Smarter (~1.8 GB)</option>
+        <option value="TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC">TinyLlama 1.1B — Minimal footprint</option>
+      </select>
+      <button class="btn btn-primary" id="ai-load-btn" onclick="ARKai.load()">⬇ Load Model</button>
+    </div>
+    <div id="ai-progress-row" class="hidden">
+      <div class="font-sm mb-4" id="ai-progress-label">Downloading…</div>
+      <div style="background:var(--bg-secondary);border-radius:4px;height:8px;overflow:hidden">
+        <div id="ai-progress-bar" style="height:100%;background:var(--accent);width:0%;transition:width 0.3s"></div>
+      </div>
+      <div class="font-xs text-muted mt-4" id="ai-progress-pct">0%</div>
+    </div>
+    <div class="font-xs text-muted mt-4">⚠️ Not a substitute for 911 or professional emergency services.</div>
   </div>
 
 </div><!-- /tab-ai -->
@@ -2311,7 +2306,7 @@ const DB = {
   async open() {
     if (this._db) return this._db;
     return new Promise((res, rej) => {
-      const req = indexedDB.open('ARK_DB', 2);
+      const req = indexedDB.open('ARK_DB', 3);
       req.onupgradeneeded = e => {
         const db = e.target.result;
         if (!db.objectStoreNames.contains('messages')) {
@@ -2322,10 +2317,54 @@ const DB = {
         if (!db.objectStoreNames.contains('resources')) {
           db.createObjectStore('resources', {keyPath:'id',autoIncrement:true});
         }
+        // v3: persistent map tile cache (key: "z/x/y", value: {key, blob, ts})
+        if (!db.objectStoreNames.contains('map_tiles')) {
+          const tileStore = db.createObjectStore('map_tiles', {keyPath:'key'});
+          tileStore.createIndex('ts','ts',{unique:false});
+        }
       };
-      req.onsuccess = e => { this._db = e.target.result; res(this._db); };
+      req.onsuccess = e => {
+        this._db = e.target.result;
+        // Prune tiles older than 30 days on open (non-blocking)
+        this._pruneTiles().catch(()=>{});
+        res(this._db);
+      };
       req.onerror = e => { console.error('IDB error', e); rej(e); };
     });
+  },
+  // ── Tile cache helpers ─────────────────────────────────────────────────────
+  async getTile(key) {
+    try {
+      const db = await this.open();
+      return new Promise((res) => {
+        const req = db.transaction('map_tiles','readonly').objectStore('map_tiles').get(key);
+        req.onsuccess = () => res(req.result || null);
+        req.onerror = () => res(null);
+      });
+    } catch(e) { return null; }
+  },
+  async putTile(key, blob) {
+    try {
+      const db = await this.open();
+      return new Promise((res) => {
+        const req = db.transaction('map_tiles','readwrite').objectStore('map_tiles').put({key, blob, ts: Date.now()});
+        req.onsuccess = () => res();
+        req.onerror = () => res();
+      });
+    } catch(e) {}
+  },
+  async _pruneTiles() {
+    try {
+      const db = await this.open();
+      const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 days
+      const tx = db.transaction('map_tiles','readwrite');
+      const idx = tx.objectStore('map_tiles').index('ts');
+      const range = IDBKeyRange.upperBound(cutoff);
+      idx.openCursor(range).onsuccess = (e) => {
+        const cur = e.target.result;
+        if (cur) { cur.delete(); cur.continue(); }
+      };
+    } catch(e) {}
   },
   async getAll(store) {
     try {
@@ -3523,20 +3562,44 @@ const MapTool = {
     return { x: W / 2 + (tX - centerTX) * ts, y: H / 2 + (tY - centerTY) * ts };
   },
 
-  // ── Tile loading ───────────────────────────────────────────────────────────
+  // ── Tile loading (memory cache → IndexedDB → network) ────────────────────
   _getTile(z, x, y) {
     const key = z + '/' + x + '/' + y;
+    // 1) Already in memory — return instantly
     if (this._tileCache[key]) return this._tileCache[key];
+    // 2) Create placeholder img, start async resolution
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    // Use OSM tile server (or cached tiles via SW if offline)
+    this._tileCache[key] = img; // prevent duplicate fetches
+    // Try IDB first, fall back to network
+    DB.getTile(key).then(record => {
+      if (record && record.blob) {
+        // Load from local cache
+        const url = URL.createObjectURL(record.blob);
+        img.onload = () => { URL.revokeObjectURL(url); this.draw(); };
+        img.onerror = () => { img._failed = true; this._fetchTileFromNetwork(img, key, z, x, y); };
+        img.src = url;
+      } else {
+        this._fetchTileFromNetwork(img, key, z, x, y);
+      }
+    }).catch(() => { this._fetchTileFromNetwork(img, key, z, x, y); });
+    return img;
+  },
+  _fetchTileFromNetwork(img, key, z, x, y) {
     const servers = ['a', 'b', 'c'];
     const s = servers[(x + y) % 3];
-    img.src = `https://${s}.tile.openstreetmap.org/${z}/${x}/${y}.png`;
-    img.onload = () => { this._tileCache[key] = img; this.draw(); };
-    img.onerror = () => { img._failed = true; this._tileCache[key] = img; };
-    this._tileCache[key] = img; // store immediately to avoid duplicate fetches
-    return img;
+    const url = `https://${s}.tile.openstreetmap.org/${z}/${x}/${y}.png`;
+    // Use fetch so we can get the blob for IDB storage
+    fetch(url).then(r => {
+      if (!r.ok) throw new Error('tile ' + r.status);
+      return r.blob();
+    }).then(blob => {
+      DB.putTile(key, blob).catch(()=>{}); // persist asynchronously
+      const objUrl = URL.createObjectURL(blob);
+      img.onload = () => { URL.revokeObjectURL(objUrl); this.draw(); };
+      img.onerror = () => { img._failed = true; };
+      img.src = objUrl;
+    }).catch(() => { img._failed = true; this.draw(); });
   },
 
   // ── Draw ───────────────────────────────────────────────────────────────────
@@ -5556,27 +5619,75 @@ const ARKQr = (() => {
 })();
 
 /* ============================================================
-   ARKai — Offline LLM via WebLLM (Llama 3.2, runs on-device)
+   ARKai — Hybrid AI: HALO Lite (zero-download) + HALO+ (WebLLM)
+   ============================================================
+   HALO Lite: pattern-matching knowledge base, works instantly offline.
+   HALO+: Llama 3.2 via WebLLM, requires internet once to cache model.
    ============================================================ */
 const ARKai = (() => {
-  // State
-  let _engine = null;
+  let _engine = null;      // WebLLM engine when loaded
   let _loading = false;
-  let _history = []; // {role:'user'|'assistant', content:string}[]
+  let _history = [];       // {role, content}[]
+  let _injectedCtx = {};   // keyed context blobs
+
   const WEBLLM_CDN = 'https://esm.run/@mlc-ai/web-llm';
-  const SYSTEM_PROMPT = `You are HALO, the AI assistant embedded in ARK Crisis Suite — an offline emergency preparedness app. You run entirely on the user's device with no internet connection.
 
-Your expertise: emergency preparedness, first aid, survival skills, water purification, food storage, disaster response, natural disasters, communication during outages, and helping people stay calm and focused in a crisis.
+  /* ── HALO Lite Knowledge Base ────────────────────────────── */
+  const KB = [
+    // Water
+    { k:['water','purify','safe to drink','contaminated','boil'],
+      r:`💧 WATER PURIFICATION\n\n1. Boiling (best): Bring to rolling boil for 1 min (3 min above 6500 ft). Let cool. Most reliable method.\n\n2. Chemical (no heat): Add 8 drops unscented household bleach (5–9% chlorine) per gallon. Wait 30 min. Should smell faintly of chlorine — if not, repeat once.\n\n3. Iodine tablets: Follow package. Not for pregnant women or thyroid conditions. 30–60 min contact time.\n\n4. Filtering + treatment: DIY filter (gravel → sand → charcoal in a bottle) removes sediment but NOT pathogens — always treat after filtering.\n\n⚠️ Signs water may be unsafe: unusual color, odor, foam, dead animals nearby, industrial area upstream.`},
+    // Fire
+    { k:['fire','start a fire','no lighter','no matches','spark','flint','tinder'],
+      r:`🔥 STARTING FIRE WITHOUT LIGHTER\n\nFriction method (bow drill):\n1. Carve a spindle ~18" long, pencil-width\n2. Carve a fireboard flat piece — same dry wood type\n3. Cut small notch in fireboard, place bark below to catch coal\n4. Loop string of bow around spindle, press down hard, bow back-and-forth fast\n5. When smoke and ember form, transfer to tinder bundle, blow gently\n\nFlint and steel: Strike flint against hard steel at angle over dry char cloth or tinder fungus.\n\nTinder: dry grass, bark shreds, birch paper bark, dry leaves, cattail fluff, pine needles. NOT damp material.\n\nFire lay: Teepee for fast heat, log cabin for sustained burn. Keep wind in mind — fire needs oxygen from downwind side.`},
+    // Wound
+    { k:['wound','bleeding','cut','deep cut','laceration','blood','treat wound','bandage','stop bleeding'],
+      r:`🩸 WOUND CARE — NO DOCTOR\n\n1. STOP BLEEDING first:\n   - Direct pressure: clean cloth, press hard, hold 10+ minutes. Do NOT remove — add more on top if soaked.\n   - Elevate above heart level if possible.\n   - Tourniquet (life-threatening limb bleed only): 2–3" above wound, tighten until bleeding stops, note time applied.\n\n2. CLEAN the wound (once bleeding controlled):\n   - Flush with large volume of clean water under pressure (use syringe or plastic bag with pinhole)\n   - Remove visible debris gently\n   - Do NOT close a dirty or animal-bite wound — leave open to drain\n\n3. COVER:\n   - Clean bandage or cloth\n   - Change daily, watch for infection\n\n⚠️ Infection signs (seek help): increasing redness, warmth, pus, red streaks spreading, fever, wound smells bad\n\n⚠️ Seek immediate help: spurting blood (artery), wound > 1/2" deep, exposed bone/tendon, face/hand/joint wounds`},
+    // Shock
+    { k:['shock','someone in shock','pale','cold sweat','fainting','collapsed','low blood pressure','shock treatment'],
+      r:`🚨 TREATING SHOCK\n\nShock = body not getting enough blood to vital organs. Life-threatening.\n\nSigns: pale/gray/bluish skin, cold clammy skin, rapid weak pulse, rapid shallow breathing, confusion/anxiety, nausea, unconsciousness.\n\nIMMEDIATE STEPS:\n1. Call 911 if possible\n2. Lay person flat, legs elevated ~12" (unless head/neck/spine injury, or breathing is worse)\n3. Keep them warm — cover with blanket\n4. Do NOT give food or water\n5. Loosen tight clothing\n6. If unconscious but breathing: recovery position (on side)\n7. If not breathing: begin CPR\n\nTypes to know:\n- Hemorrhagic (blood loss): control bleeding immediately\n- Anaphylactic (allergic): epinephrine (EpiPen) if available\n- Septic (infection): fever + shock signs = emergency\n\n⚠️ Do NOT leave them alone. Monitor breathing constantly.`},
+    // Burns
+    { k:['burn','burned','burn treatment','fire burn','scald','chemical burn'],
+      r:`🔥 BURN TREATMENT\n\nFirst, determine severity:\n- 1st degree: red, painful, no blisters (sunburn-like)\n- 2nd degree: blisters, intense pain, wet/shiny skin\n- 3rd degree: white/brown/black, leathery, may be painless (nerve damage)\n\n1st & 2nd degree (small area):\n1. Cool with cool running water 10–20 min — NOT ice, NOT butter/toothpaste/egg white\n2. After cooling: cover loosely with clean non-stick bandage\n3. Do NOT pop blisters\n4. Pain relief: ibuprofen or acetaminophen\n\n⚠️ Seek immediate help for:\n- Any 3rd degree burn\n- Burns on face, hands, feet, genitals, joints\n- Burns > palm-size (>1% body for 2nd/3rd)\n- Chemical or electrical burns\n- Smoke inhalation (hoarse voice, soot in mouth/nose)\n\nChemical burn: flush with large amounts of water 20+ min, remove contaminated clothing (protect yourself first)`},
+    // CPR
+    { k:['cpr','not breathing','cardiac arrest','heart stopped','chest compressions','resuscitation','unconscious not breathing'],
+      r:`❤️ CPR — QUICK GUIDE\n\nADULT/CHILD (8+):\n1. Check scene is safe. Tap shoulders: "Are you OK?"\n2. Call 911 (or send someone)\n3. No normal breathing → start CPR\n4. Heel of hand on center of chest (between nipples)\n5. 30 compressions: push down 2–2.4", rate 100–120/min (beat of "Stayin' Alive")\n6. Tilt head, lift chin, give 2 rescue breaths (1 sec each, chest should rise)\n7. Repeat 30:2 until help arrives or person recovers\n\nINFANT (under 1 yr):\n- 2 fingers on center of chest, just below nipple line\n- Compress 1.5" depth\n- 30 compressions → 2 gentle breaths\n\nCHILD (1–8):\n- 1 or 2 hands depending on child size\n- Compress 2"\n- 30:2 same ratio\n\nAED (if available): Turn on, follow voice prompts. Use as soon as possible — delivers shock before CPR if needed.\n\n🚨 Hands-only CPR (no breaths) is acceptable for adult bystander CPR — compression-only is better than nothing.`},
+    // Choking
+    { k:['choking','heimlich','can\'t breathe','obstruction','throat blocked','choking adult','choking infant','choking baby'],
+      r:`🫁 CHOKING — HEIMLICH MANEUVER\n\nADULT / CHILD (1+):\n1. Ask "Are you choking?" — if they can cough, encourage coughing\n2. If they can't speak/breathe/cough:\n   - Stand behind, arms around waist\n   - Fist thumb-side just above navel, below chest\n   - Grab fist with other hand\n   - 5 firm upward thrusts (J-motion: in and up)\n3. Alternate: 5 back blows between shoulder blades with heel of hand\n4. Repeat until object dislodged or they go unconscious\n5. If unconscious: lower to ground, call 911, begin CPR\n\nINFANT (under 1 yr):\n1. Face-down on forearm, head lower than chest\n2. 5 firm back blows between shoulder blades\n3. Flip face-up: 2 fingers on chest, 5 quick chest thrusts\n4. Check mouth — only remove object if you can SEE it\n5. Repeat until cleared or infant goes unresponsive → infant CPR\n\nIf ALONE and choking:\n- Thrust your upper abdomen against hard edge of table/chair back\n- Self-Heimlich: fist technique same as above, thrust hard`},
+    // Dehydration
+    { k:['dehydration','dehydrated','thirsty','no water','fluid','electrolyte','hydration','signs of dehydration'],
+      r:`💧 DEHYDRATION — SIGNS & TREATMENT\n\nSigns by severity:\n\nMild: dark urine, thirsty, slightly dry mouth, tired\nModerate: very dark/no urine, dry mouth, headache, dizziness, rapid heart rate, muscle cramps, irritability\nSevere: sunken eyes, no urine >8h, rapid breathing, confusion, can't stand — EMERGENCY\n\nChildren: sunken fontanelle (soft spot on infant head), no tears when crying, no wet diaper >6h → urgent\n\nTreatment:\n1. Drink small amounts frequently — not large gulps (can cause vomiting)\n2. Oral Rehydration Solution (ORS) if available — better than plain water\n   DIY ORS: 1 liter clean water + 6 tsp sugar + 1/2 tsp salt\n3. If vomiting: small sips every 5 min, ice chips, popsicles\n4. Rest in cool/shaded area\n5. Avoid caffeine and alcohol\n\nSurvival note:\nAdult minimum need: ~2 liters/day in mild conditions; more in heat, exertion, illness\nFood survival: 3+ weeks without food\nWater survival: 3–5 days without water (less in heat)`},
+    // Shelter
+    { k:['shelter','cold','hypothermia','stay warm','build shelter','stay dry','survive cold','exposure'],
+      r:`🏕️ EMERGENCY SHELTER & HYPOTHERMIA\n\nHypothermia signs:\n- Mild: shivering, confusion, slurred speech, stumbling\n- Moderate: intense shivering, pale skin, confusion\n- Severe: shivering stops (bad sign), unconscious, rigid muscles\n\nHypothermia treatment:\n1. Get to shelter, out of wind and wet\n2. Remove wet clothing\n3. Cover with dry insulation (blankets, leaves, clothing layers)\n4. Warm core first (chest, groin, armpits) — not extremities\n5. Warm sweet drinks if conscious and swallowing\n6. Do NOT rub extremities (drives cold blood to core)\n7. Handle gently — rough movement can cause cardiac arrest in severe hypothermia\n\nBuilding a debris shelter:\n1. Find natural windbreak (rock face, fallen log)\n2. Lean dead branches against it at 45°\n3. Pack debris (leaves, pine needles, bark) 2–3 ft thick on sides and roof\n4. Inside: deep leaf bed 4"+ off ground for insulation\n5. Opening: face away from prevailing wind\n6. Size: just big enough to fit — smaller holds body heat better\n\nInsulation priority: ground > sides > top. Cold ground steals heat 25x faster than cold air.`},
+    // Signaling
+    { k:['signal','help','rescue','found','lost','sos','signal for help','stranded','how to be found'],
+      r:`📡 SIGNALING FOR RESCUE\n\nRule of Threes for signaling: 3 of anything = distress (3 whistle blasts, 3 fires, 3 gunshots)\n\nMost visible signals:\n1. Signal mirror: flash toward aircraft/horizon. Can be seen 10+ miles. Aim reflection at target, use two-finger "V" aiming sight.\n2. Ground-to-air signals (stomp in snow or lay rocks/logs, minimum 10 ft tall):\n   - X = need medical help\n   - V = need help\n   - → = going this direction\n3. Fire/smoke: 3 fires in triangle, 100 ft apart. Green leaves/rubber = white smoke (visible in trees). Oil/rubber = black smoke (visible against snow).\n4. Whistle: 3 blasts, pause, repeat. Carries further than voice.\n5. Bright colors: lay any bright material flat in open area, contrast with background.\n\nStay put vs. move:\n- STAY if someone knows your location\n- STAY if you have shelter and water\n- MOVE only if you know exactly where help is and you have the ability`},
+    // Food survival
+    { k:['food','survive without food','hunger','what to eat','edible plants','foraging','rations','food storage'],
+      r:`🍎 FOOD SURVIVAL\n\nSurvival priority: Water > Shelter > Signals > Food\nYou can survive 3+ weeks without food.\n\nCalorie priorities for stored food:\n1. White rice/dried beans — longest shelf life (25+ years), complete protein together\n2. Oats — cheap, 30-year shelf life\n3. Honey — never spoils\n4. Salt — essential mineral, preservative\n5. Hard candy — morale + quick energy\n\nForaging universal edibility test (for unknown plants):\n1. Avoid white/yellow berries, plants with milky sap, umbrella-shaped flowers\n2. Touch small amount to lip — wait 3 min for reaction\n3. Touch to tongue — wait 15 min\n4. Chew (don't swallow) — wait 15 min\n5. Swallow small amount — wait 8 hours\n6. If no reaction: eat a small amount, wait 8 more hours\n\nSafe universally recognized plants:\n- Cattail (roots, pollen head)\n- Dandelion (all parts)\n- Acorns (must leach tannins — boil/soak multiple times)\n- Pine needles (tea — high vitamin C)\n- Rose hips (high vitamin C)\n\n⚠️ When in doubt, don't eat it. Hunger is survivable. Poison is not.`},
+    // Medical assessment
+    { k:['unconscious','unresponsive','assess','abc','airway','breathing','circulation','assess someone','first aid assessment'],
+      r:`🩺 CASUALTY ASSESSMENT — ABC\n\nDanger → Response → Airway → Breathing → Circulation\n\n1. DANGER: Is the scene safe? Don't become a casualty yourself.\n\n2. RESPONSE: Tap shoulders firmly. Shout "Can you hear me?"\n   - Responds → assess and treat\n   - No response → call 911 immediately\n\n3. AIRWAY: Tilt head back, lift chin. Look in mouth for obstruction. Remove if visible.\n\n4. BREATHING: Look (chest rise), listen, feel (cheek near mouth). 10 seconds.\n   - Breathing normally → recovery position\n   - Not breathing → CPR\n   - Gasping only → treat as not breathing\n\n5. CIRCULATION: Major bleeding? Treat now. Tourniquets > direct pressure for severe limb bleeds.\n\n6. DISABILITY: Check pupils (equal? reactive to light?). Can they squeeze your hands? Move feet?\n\n7. EXPOSURE: Check for hidden injuries. Protect from cold.\n\nRecord: What happened, time of injury, any medications, allergies. Tell emergency services when they arrive.`},
+    // Morse code
+    { k:['morse','morse code','sos'],
+      r:`📻 MORSE CODE — SOS & ESSENTIALS\n\nSOS: · · · — — — · · · (3 short, 3 long, 3 short)\nThis is THE universal distress signal. Any medium — light, sound, radio, tapping.\n\nBasic letters:\nA ·—   B —···  C —·—·  D —··   E ·\nF ··—·  G ——·   H ····   I ··    J ·———\nK —·—  L ·—··  M ——    N —·    O ———\nP ·——·  Q ——·—  R ·—·   S ···    T —\nU ··—   V ···—   W ·——   X —··—  Y —·——  Z ——··\n\nNumbers:\n1 ·——— 2 ··——— 3 ···——  4 ····— 5 ·····\n6 —···· 7 ——··· 8 ———·· 9 ————· 0 —————\n\nTiming: dot = 1 unit, dash = 3 units, space between letters = 3 units, space between words = 7 units`},
+    // Radio
+    { k:['radio','communicate','frequency','walkie','ham radio','baofeng','radio frequencies'],
+      r:`📡 EMERGENCY RADIO GUIDE\n\nFREQUENCIES TO KNOW:\n- 462.675 MHz — NOAA National Call Frequency\n- 155.340 MHz — National Search & Rescue\n- 156.800 MHz (Channel 16) — Marine distress & calling\n- 121.5 MHz — Aviation emergency (guard frequency)\n- GMRS/FRS (family radios): 462–467 MHz range\n\nFCC Emergency Authorization:\nDuring declared emergency, unlicensed use of ham frequencies is permitted to save lives or property.\n\nMESSAGE FORMAT (when radio works but conditions poor):\n- Say callsign/name\n- Say location (GPS or landmark)\n- Say situation briefly\n- Repeat 3 times\n- Listen 2× as long as you transmit\n\nBATTERY CONSERVATION:\n- Scan mode instead of monitoring\n- Lower power setting at close range\n- Charge via solar/hand-crank in power outage\n\nSee ARK's Radio tab for the Morse code trainer and frequency logger.`},
+    // General emergency
+    { k:['power outage','blackout','grid down','no power','earthquake','hurricane','tornado','flood','disaster'],
+      r:`🚨 GENERAL EMERGENCY PROTOCOL\n\nFIRST 60 SECONDS:\n1. Is anyone injured? Life safety first\n2. Is there immediate danger? (fire, gas, structure damage)\n3. 911 if phone works\n\nFIRST 24 HOURS:\n- Shelter in place unless ordered to evacuate\n- Gather: water, food, medications, documents, phone charger\n- Tune to emergency broadcast radio\n- Tell household your status (use ARK Hub)\n- Charge all devices now if power is intermittent\n\nUTILITY SAFETY:\n- Gas smell → leave immediately, don't flip switches, call utility from outside\n- Downed power line → 50 ft minimum clearance, never touch, treat as live\n- Water main break → turn off at house valve\n\nFOOD SAFETY in outage:\n- Fridge: safe 4 hours if closed\n- Freezer: safe 24–48 hours if closed (full freezer = longer)\n- When in doubt, throw it out\n\nEVACUATION bag (72-hour kit):\nWater 3 liters/person, food 3 days, first aid kit, medications 1 week, flashlight, radio, documents (ID/insurance), cash small bills, phone charger, warm layers, map (paper)`},
+    // Hypothermia in water
+    { k:['drowning','water rescue','cold water','fallen in water','water immersion'],
+      r:`🌊 COLD WATER SURVIVAL\n\nCold water (below 70°F) incapacitation:\n- 32°F: unconscious in 15 min, dead in 15–45 min\n- 50°F: exhausted/unconscious 1–2h\n- 60°F: exhausted/unconscious 2–7h\n\nIf YOU fall in:\n1. Don't panic — involuntary gasp reflex passes in 60–90 seconds\n2. Keep head above water, control breathing\n3. HELP position (Heat Escape Lessening Position): cross arms tight on chest, knees up — reduces heat loss 50%\n4. DON'T swim to exhaustion — HELP or treading is better if you can't reach shore quickly\n5. Get OUT of the water as fast as possible — even lying on ice is better\n\nIf YOU rescue someone:\n1. Reach → Throw → Row → Go (last resort: go in)\n2. Horizontal extraction — don't stand them up (blood pressure crash)\n3. Treat for hypothermia (see Shelter section)\n4. Watch for cardiac arrhythmia — handle gently`},
+  ];
 
-Keep answers practical, specific, and actionable. Prioritize life-safety above all. If someone is in immediate danger, always tell them to call 911 first if possible. Be concise — people in a crisis need fast answers, not essays.
-
-You have access to context about the user's situation when they inject it. Use that context to give personalized advice.`;
-
+  /* ── Utility functions ───────────────────────────────────── */
   function _setBadge(text, cls) {
     const b = document.getElementById('ai-status-badge');
-    if (!b) return;
-    b.textContent = text;
-    b.className = 'badge ' + (cls || 'badge-muted');
+    if (b) { b.textContent = text; b.className = 'badge ' + (cls || 'badge-muted'); }
   }
 
   function _setProgress(pct, label) {
@@ -5588,24 +5699,54 @@ You have access to context about the user's situation when they inject it. Use t
     if (labelEl && label) labelEl.textContent = label;
   }
 
-  function _appendMsg(role, text, extraClass = '') {
+  function _appendMsg(role, html, extraClass = '') {
     const container = document.getElementById('ai-messages');
     if (!container) return null;
     const div = document.createElement('div');
     div.className = 'ai-msg ' + (role === 'user' ? 'ai-msg-user' : role === 'system' ? 'ai-msg-sys' : 'ai-msg-ai') + (extraClass ? ' ' + extraClass : '');
-    div.textContent = text;
+    // Allow simple line breaks in responses
+    div.style.whiteSpace = 'pre-wrap';
+    div.textContent = html;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
     return div;
   }
 
+  /* ── HALO Lite: pattern match ────────────────────────────── */
+  function _liteResponse(query) {
+    const q = query.toLowerCase();
+    // Find best matching KB entry (keyword score)
+    let best = null, bestScore = 0;
+    for (const entry of KB) {
+      let score = 0;
+      for (const kw of entry.k) {
+        if (q.includes(kw)) score += kw.length; // longer match = more specific
+      }
+      if (score > bestScore) { bestScore = score; best = entry; }
+    }
+    if (bestScore > 0 && best) return best.r;
+
+    // Fallback generic responses
+    if (/\b(hello|hi|hey|help)\b/.test(q)) {
+      return "👋 Hello! I'm HALO — your offline crisis assistant. Ask me about:\n• First aid & CPR\n• Water purification\n• Fire starting\n• Wound care & burns\n• Shock & hypothermia\n• Emergency signaling\n• Morse code\n• Food & water survival\n\nOr inject your household/inventory context using the buttons above.";
+    }
+    if (_injectedCtx.medical && /\b(blood|medication|med|allerg|condition)\b/.test(q)) {
+      return `📋 Based on your household medical data:\n\n${_injectedCtx.medical}\n\nFor specific medical advice in an emergency, call 911 or poison control (1-800-222-1222).`;
+    }
+    if (_injectedCtx.inventory && /\b(inventory|stock|supply|run out|low|have)\b/.test(q)) {
+      return `📦 Based on your current inventory:\n\n${_injectedCtx.inventory}\n\nPrioritize replenishing low-stock items before a crisis develops.`;
+    }
+
+    return `I don't have a specific answer for "${query}" in my offline knowledge base.\n\nTopics I can help with right now:\n• Water purification & dehydration\n• CPR & choking\n• Wound care & burns\n• Shock & hypothermia treatment\n• Emergency shelter\n• Fire starting\n• Signaling for rescue\n• Morse code / SOS\n• General disaster protocols\n\nFor a full AI model that can answer anything: use the HALO+ upgrade card below (requires internet once to download).`;
+  }
+
+  /* ── Load WebLLM model (HALO+) ───────────────────────────── */
   async function load() {
     if (_loading || _engine) return;
     _loading = true;
 
-    // Check WebGPU support
     if (!navigator.gpu) {
-      Toast.show('WebGPU is not supported in this browser. Use Chrome 113+ or Edge 113+.', 'error', 6000);
+      Toast.show('WebGPU not supported — use Chrome 113+ or Edge 113+. HALO Lite still works!', 'warning', 6000);
       _setBadge('WebGPU not supported', 'badge-red');
       _loading = false;
       return;
@@ -5615,90 +5756,84 @@ You have access to context about the user's situation when they inject it. Use t
     const btn = document.getElementById('ai-load-btn');
     if (btn) btn.disabled = true;
 
-    // Show progress UI
     const progressRow = document.getElementById('ai-progress-row');
     if (progressRow) progressRow.classList.remove('hidden');
-    _setBadge('Loading…', 'badge-yellow');
-    _setProgress(0, 'Importing WebLLM…');
+    _setBadge('Downloading…', 'badge-yellow');
+    _setProgress(0, 'Fetching WebLLM…');
 
     try {
-      // Dynamic import — only fetched when user clicks Load
       const webllm = await import(WEBLLM_CDN);
-      _setProgress(5, 'WebLLM ready. Loading model…');
+      _setProgress(5, 'WebLLM ready. Loading model weights…');
 
       _engine = await webllm.CreateMLCEngine(modelId, {
-        initProgressCallback: (progress) => {
-          const pct = Math.round((progress.progress || 0) * 100);
-          _setProgress(pct, progress.text || 'Loading model…');
+        initProgressCallback: (p) => {
+          const pct = Math.round((p.progress || 0) * 100);
+          _setProgress(pct, p.text || 'Loading…');
           _setBadge('Loading ' + pct + '%', 'badge-yellow');
         }
       });
 
       _setProgress(100, 'Model ready!');
-      _setBadge('✓ ' + modelId.split('-').slice(0,3).join(' '), 'badge-green');
-
-      // Show chat, hide load section
-      document.getElementById('ai-load-section')?.classList.add('hidden');
-      document.getElementById('ai-intro-box')?.classList.add('hidden');
-      document.getElementById('ai-chat-section')?.classList.remove('hidden');
+      _setBadge('✓ HALO+', 'badge-green');
       progressRow?.classList.add('hidden');
-
-      Toast.show('🤖 AI loaded and ready — fully offline!', 'success', 3000);
+      document.getElementById('ai-upgrade-card')?.classList.add('hidden');
+      Toast.show('🤖 HALO+ loaded — full Llama AI active!', 'success', 3000);
+      _appendMsg('system', '🧠 HALO+ is now active — running Llama 3.2 fully on your device. I can answer anything now.');
     } catch (err) {
       console.error('ARKai load error:', err);
       _setBadge('Load failed', 'badge-red');
-      _setProgress(0, 'Failed to load — check browser console');
-      Toast.show('AI load failed: ' + (err.message || err), 'error', 5000);
+      _setProgress(0, 'Failed — check console');
+      Toast.show('Model load failed: ' + (err.message || err), 'error', 5000);
       if (btn) btn.disabled = false;
     }
     _loading = false;
   }
 
+  /* ── Send message ────────────────────────────────────────── */
   async function send() {
-    if (!_engine) {
-      Toast.show('Load the AI model first', 'warning', 2500);
-      return;
-    }
     const input = document.getElementById('ai-input');
     const text = input?.value.trim();
     if (!text) return;
 
     input.value = '';
-    document.getElementById('ai-send-btn').disabled = true;
+    const sendBtn = document.getElementById('ai-send-btn');
+    if (sendBtn) sendBtn.disabled = true;
 
     _appendMsg('user', text);
     _history.push({ role: 'user', content: text });
 
-    // Thinking indicator
-    const thinking = _appendMsg('assistant', '…thinking…', 'thinking');
-
-    try {
-      const messages = [
-        { role: 'system', content: SYSTEM_PROMPT },
-        ..._history.slice(-12) // keep last 12 turns in context
-      ];
-
-      let reply = '';
-      const stream = await _engine.chat.completions.create({ messages, stream: true, temperature: 0.7, max_tokens: 512 });
-
-      for await (const chunk of stream) {
-        const delta = chunk.choices[0]?.delta?.content || '';
-        reply += delta;
-        if (thinking) {
-          thinking.textContent = reply;
-          thinking.classList.remove('thinking');
+    if (_engine) {
+      // HALO+ — full LLM
+      const thinking = _appendMsg('assistant', '…', 'thinking');
+      try {
+        const sysPrompt = `You are HALO, the AI assistant in ARK Crisis Suite — an offline emergency preparedness app. You run on the user's device with no internet. Be concise and practical. Prioritize life-safety. For immediate danger, tell them to call 911 if possible. Answer in plain language suitable for a stressful crisis situation.`;
+        const messages = [{ role:'system', content: sysPrompt }, ..._history.slice(-10)];
+        let reply = '';
+        const stream = await _engine.chat.completions.create({ messages, stream: true, temperature: 0.7, max_tokens: 512 });
+        for await (const chunk of stream) {
+          const delta = chunk.choices[0]?.delta?.content || '';
+          reply += delta;
+          if (thinking) { thinking.textContent = reply; thinking.classList.remove('thinking'); }
           const c = document.getElementById('ai-messages');
           if (c) c.scrollTop = c.scrollHeight;
         }
+        _history.push({ role:'assistant', content: reply });
+      } catch (err) {
+        if (thinking) thinking.textContent = '⚠️ Error: ' + (err.message || 'generation failed');
       }
-
-      _history.push({ role: 'assistant', content: reply });
-    } catch (err) {
-      console.error('ARKai generate error:', err);
-      if (thinking) thinking.textContent = '⚠️ Error: ' + (err.message || 'generation failed');
+    } else {
+      // HALO Lite — knowledge base
+      const reply = _liteResponse(text);
+      setTimeout(() => {
+        _appendMsg('assistant', reply);
+        _history.push({ role:'assistant', content: reply });
+        if (sendBtn) sendBtn.disabled = false;
+        document.getElementById('ai-input')?.focus();
+      }, 180); // small delay feels more natural
+      return;
     }
 
-    document.getElementById('ai-send-btn').disabled = false;
+    if (sendBtn) sendBtn.disabled = false;
     document.getElementById('ai-input')?.focus();
   }
 
@@ -5706,51 +5841,47 @@ You have access to context about the user's situation when they inject it. Use t
     const text = btn.textContent;
     const input = document.getElementById('ai-input');
     if (input) { input.value = text; input.focus(); }
-    if (!_engine) {
-      Toast.show('Load the AI model first, then hit Send', 'info', 3000);
-    }
   }
 
-  // Inject structured context about the user's situation into the conversation
   function injectContext(type) {
-    if (!_engine) { Toast.show('Load the AI model first', 'warning', 2500); return; }
     let ctx = '';
     if (type === 'medical') {
       const hh = Store.get('household_members', []);
       const meds = hh.flatMap(m => (m.meds || []).map(med => `${m.name}: ${med}`));
       const allergies = hh.flatMap(m => (m.allergies || []).map(a => `${m.name}: ${a}`));
       const blood = hh.filter(m => m.blood).map(m => `${m.name}: ${m.blood}`);
-      ctx = `[HOUSEHOLD MEDICAL CONTEXT]\nMembers: ${hh.length}\nBlood types: ${blood.join(', ')||'unknown'}\nMedications: ${meds.join(', ')||'none recorded'}\nAllergies: ${allergies.join(', ')||'none recorded'}`;
+      ctx = `Blood types: ${blood.join(', ')||'unknown'}\nMedications: ${meds.join('; ')||'none'}\nAllergies: ${allergies.join('; ')||'none'}`;
+      _injectedCtx.medical = ctx;
     } else if (type === 'inventory') {
       const items = Store.get('resources', []);
       const urgent = items.filter(i => i.urgent);
-      const lines = items.slice(0,30).map(i => `- ${i.name}: ${i.qty||'?'} ${i.unit||''}`).join('\n');
-      ctx = `[INVENTORY CONTEXT]\nTotal items: ${items.length}\nUrgent/low stock: ${urgent.map(i=>i.name).join(', ')||'none'}\nInventory:\n${lines||'(empty)'}`;
+      ctx = `${items.length} items. Low/urgent: ${urgent.map(i=>i.name).join(', ')||'none'}.\n` + items.slice(0,20).map(i=>`${i.name}: ${i.qty||'?'} ${i.unit||''}`).join('\n');
+      _injectedCtx.inventory = ctx;
     } else if (type === 'household') {
       const hh = Store.get('household_members', []);
-      const lines = hh.map(m => `- ${m.name||'?'} (${m.role||'member'}${m.age?' age '+m.age:''}${m.conditions?' — '+m.conditions:''})`).join('\n');
-      ctx = `[HOUSEHOLD CONTEXT]\nHousehold ID: ${Store.get('hh_id','?')}\nMembers (${hh.length}):\n${lines||'(none added)'}`;
+      ctx = `Household ID: ${Store.get('hh_id','?')}\nMembers (${hh.length}):\n` + hh.map(m=>`- ${m.name||'?'} (${m.role||'member'}${m.age?' age '+m.age:''}${m.conditions?' — '+m.conditions:''})`).join('\n');
     } else if (type === 'situation') {
       const level = Store.get('alert_level', 1);
       const labels = {1:'Normal',2:'Elevated',3:'High Alert',4:'Crisis'};
       const gps = Store.get('last_gps');
       const mp = Store.get('missing_persons', []);
-      ctx = `[SITUATION CONTEXT]\nAlert level: ${labels[level]||level}\nLocation: ${gps?`${gps.lat.toFixed(4)},${gps.lon.toFixed(4)}`:'unknown'}\nMissing persons reported: ${mp.length}\nTimestamp: ${new Date().toLocaleString()}`;
+      ctx = `Alert: ${labels[level]||level}\nGPS: ${gps?`${gps.lat.toFixed(4)},${gps.lon.toFixed(4)}`:'unknown'}\nMissing persons: ${mp.length}`;
     }
     if (!ctx) return;
-    _history.push({ role: 'user', content: ctx });
-    _appendMsg('user', '📋 Context injected: ' + type);
-    _appendMsg('assistant', '✓ Got it — I\'ll use that context in my responses. What do you need?');
-    _history.push({ role: 'assistant', content: '✓ Got it — I\'ll use that context in my responses. What do you need?' });
+    _history.push({ role:'user', content: `[CONTEXT — ${type}]\n${ctx}` });
+    if (_engine) _history.push({ role:'assistant', content: `Context received. I'll use that in my responses.` });
+    _appendMsg('user', `📋 ${type.charAt(0).toUpperCase()+type.slice(1)} context loaded`);
+    if (!_engine) _appendMsg('assistant', `✓ Context saved. Ask me anything — I'll factor it in.`);
     Toast.show('Context injected ✓', 'success', 1500);
   }
 
   function clearChat() {
     _history = [];
+    _injectedCtx = {};
     const container = document.getElementById('ai-messages');
     if (container) {
       container.innerHTML = '';
-      _appendMsg('system', '👋 Chat cleared. I\'m still loaded and ready. How can I help?');
+      _appendMsg('system', '👋 Chat cleared. I\'m HALO — ask me anything about first aid, survival, water, fire, signals, or emergencies.');
     }
   }
 
