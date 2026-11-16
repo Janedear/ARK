@@ -1,0 +1,73 @@
+# One-button deploy for ARK Crisis Suite → ark.halosuite.ai
+#
+# HOW TO USE:
+#   GitHub → Actions → "Deploy ARK" → Run workflow → Run.
+#
+# What it does:
+#   1. SSH into the Hostinger VPS as the halo user.
+#   2. Runs the equivalent of deploy/deploy.sh (rsync public files + Caddy reload).
+#      No build step — ARK is a static app (plain HTML/JS/CSS).
+#
+# Required secrets (Settings → Secrets → Actions):
+#   HALO_SSH_PRIVATE_KEY   Private key whose public half is in /home/halo/.ssh/authorized_keys.
+#   HALO_KNOWN_HOSTS       Output of: ssh-keyscan -H 31.220.104.240
+#   VPS_HOST               VPS IP or hostname (e.g. 31.220.104.240).
+#   VPS_USER               SSH user (e.g. halo).
+#
+# These are the same secrets as HaloSuite's deploy.yml — no new secrets needed.
+
+name: Deploy ARK
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ark
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy ARK → ark.halosuite.ai
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HALO_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.HALO_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Rsync to VPS
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            "mkdir -p /opt/halosuite/ark"
+
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes" \
+            --exclude='.git/' \
+            --exclude='deploy/' \
+            --exclude='src/' \
+            --exclude='*.md' \
+            --exclude='.gitignore' \
+            ./ \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/halosuite/ark/
+
+      - name: Reload Caddy
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            "docker compose -f /opt/halosuite/app/deploy/docker-compose.prod.yml \
+             exec caddy caddy reload --config /etc/caddy/Caddyfile 2>&1 || \
+             echo 'Caddy reload skipped'"
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "### ✅ ARK deployed" >> $GITHUB_STEP_SUMMARY
+          echo "**Live:** https://ark.halosuite.ai" >> $GITHUB_STEP_SUMMARY
+          echo "**App:** https://ark.halosuite.ai/ARK-CRISIS-SUITE.html" >> $GITHUB_STEP_SUMMARY
