@@ -461,6 +461,17 @@ select.form-input{cursor:pointer}
 ::-webkit-scrollbar-track{background:var(--bg-secondary)}
 ::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
 
+/* === AI CHAT === */
+.ai-msg{padding:8px 12px;border-radius:var(--radius-md);font-size:13px;line-height:1.5;max-width:88%;word-break:break-word}
+.ai-msg-sys{background:var(--bg-elevated);color:var(--text-secondary);font-style:italic;align-self:center;text-align:center;max-width:100%;border-radius:var(--radius-sm)}
+.ai-msg-user{background:var(--accent);color:#17191d;align-self:flex-end;font-weight:500}
+.ai-msg-ai{background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);align-self:flex-start}
+.ai-msg-ai.thinking{opacity:0.6;font-style:italic}
+.badge-muted{background:var(--bg-elevated);color:var(--text-muted);font-size:11px;padding:2px 8px;border-radius:10px}
+.badge-green{background:rgba(72,187,120,0.15);color:var(--green);font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid rgba(72,187,120,0.3)}
+.badge-yellow{background:rgba(236,201,75,0.15);color:var(--yellow);font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid rgba(236,201,75,0.3)}
+.badge-red{background:rgba(245,101,101,0.15);color:var(--red);font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid rgba(245,101,101,0.3)}
+
 /* === W20 NEW FEATURES === */
 /* Message ack styling */
 .msg-acked{opacity:0.7}
@@ -821,6 +832,7 @@ select.form-input{cursor:pointer}
   <button class="nav-btn" data-tab="medical" id="navtab-medical" role="tab" aria-selected="false" aria-controls="tab-medical" tabindex="-1" aria-label="Medical"><span class="nav-icon" aria-hidden="true">🏥</span>Medical</button>
   <button class="nav-btn" data-tab="map" id="navtab-map" role="tab" aria-selected="false" aria-controls="tab-map" tabindex="-1" aria-label="Map"><span class="nav-icon" aria-hidden="true">🗺️</span>Map</button>
   <button class="nav-btn" data-tab="radio" id="navtab-radio" role="tab" aria-selected="false" aria-controls="tab-radio" tabindex="-1" aria-label="Radio"><span class="nav-icon" aria-hidden="true">📻</span>Radio</button>
+  <button class="nav-btn" data-tab="ai" id="navtab-ai" role="tab" aria-selected="false" aria-controls="tab-ai" tabindex="-1" aria-label="AI Assistant"><span class="nav-icon" aria-hidden="true">🤖</span>AI</button>
   <button class="nav-btn" data-tab="settings" id="navtab-settings" role="tab" aria-selected="false" aria-controls="tab-settings" tabindex="-1" aria-label="Settings"><span class="nav-icon" aria-hidden="true">⚙️</span>Settings</button>
 </nav>
 
@@ -2019,6 +2031,96 @@ select.form-input{cursor:pointer}
     </div>
   </div>
 </div><!-- /tab-settings -->
+
+<!-- === TAB: AI === -->
+<div class="tab-panel" id="tab-ai" role="tabpanel" aria-labelledby="navtab-ai" tabindex="-1">
+
+  <div class="flex-between mb-12 wrap gap-8">
+    <h2 class="section-title" style="margin:0"><span class="title-icon">🤖</span>AI Assistant</h2>
+    <div class="flex gap-8" id="ai-status-row">
+      <span id="ai-status-badge" class="badge badge-muted">Not loaded</span>
+    </div>
+  </div>
+
+  <div class="info-box mb-12" id="ai-intro-box">
+    <strong>Offline AI — runs entirely on your device.</strong> Uses <a href="https://webllm.mlc.ai" target="_blank" rel="noopener" style="color:var(--accent)">WebLLM</a> + Llama&nbsp;3.2&nbsp;1B (Instruct). The model downloads once (~650&nbsp;MB) and is cached by your browser — works fully offline after that. Requires a modern browser with WebGPU (Chrome 113+, Edge 113+).
+    <br><br>
+    <span class="text-muted font-xs">No data leaves your device. No API keys. No servers.</span>
+  </div>
+
+  <div id="ai-load-section" class="card mb-12">
+    <div class="card-title mb-8">🧠 Load Model</div>
+    <p class="font-sm text-secondary mb-12">First load downloads ~650 MB. Subsequent loads use the browser cache and take ~5 seconds.</p>
+    <div id="ai-model-select-row" class="flex gap-8 mb-12 wrap">
+      <select id="ai-model-select" class="form-input" style="flex:1;min-width:200px">
+        <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B — Fast, light (~650 MB)</option>
+        <option value="Llama-3.2-3B-Instruct-q4f16_1-MLC">Llama 3.2 3B — Smarter, heavier (~1.8 GB)</option>
+        <option value="TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC">TinyLlama 1.1B — Minimal footprint</option>
+      </select>
+      <button class="btn btn-primary" id="ai-load-btn" onclick="ARKai.load()">⬇ Load Model</button>
+    </div>
+    <div id="ai-progress-row" class="hidden">
+      <div class="font-sm mb-4" id="ai-progress-label">Downloading…</div>
+      <div style="background:var(--bg-secondary);border-radius:4px;height:8px;overflow:hidden">
+        <div id="ai-progress-bar" style="height:100%;background:var(--accent);width:0%;transition:width 0.3s"></div>
+      </div>
+      <div class="font-xs text-muted mt-4" id="ai-progress-pct">0%</div>
+    </div>
+  </div>
+
+  <!-- Chat UI (shown after model loads) -->
+  <div id="ai-chat-section" class="hidden">
+    <div class="card mb-8" style="padding:0;overflow:hidden">
+      <div id="ai-messages" style="height:340px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px">
+        <div class="ai-msg ai-msg-sys">
+          👋 I'm your offline ARK assistant. I know first aid, survival, emergency prep, and your app data. How can I help?
+        </div>
+      </div>
+    </div>
+
+    <!-- Context injector -->
+    <div class="flex gap-6 mb-8 wrap">
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.injectContext('medical')" title="Feed me the medical reference data">💊 Medical ctx</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.injectContext('inventory')" title="Tell AI about your current inventory">📦 Inventory ctx</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.injectContext('household')" title="Tell AI about your household members">🏘️ Household ctx</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.injectContext('situation')" title="Set current alert level as context">⚠️ Situation ctx</button>
+      <button class="btn btn-secondary btn-sm" onclick="ARKai.clearChat()" title="Start a new conversation">🗑️ Clear</button>
+    </div>
+
+    <!-- Input -->
+    <div class="flex gap-8">
+      <textarea id="ai-input" class="form-input" rows="2" style="flex:1;resize:none" placeholder="Ask anything — first aid, water purification, what to do if…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();ARKai.send()}" aria-label="AI chat input"></textarea>
+      <button class="btn btn-primary" id="ai-send-btn" onclick="ARKai.send()" style="align-self:flex-end" aria-label="Send message">Send</button>
+    </div>
+    <div class="font-xs text-muted mt-4">Enter sends · Shift+Enter new line</div>
+  </div>
+
+  <!-- Suggested prompts -->
+  <div class="card mt-12" id="ai-prompts-card">
+    <div class="card-title mb-8">💡 Try asking…</div>
+    <div class="flex gap-6 wrap" id="ai-prompt-chips">
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">How do I purify water without equipment?</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Signs of dehydration in adults vs children</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">How long can I survive without food? Water?</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">How do I treat a deep wound with no doctor?</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">What foods last longest in a survival situation?</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">How do I signal for help without a phone?</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Build a fire with no lighter or matches</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">What to do if someone goes into shock?</button>
+    </div>
+  </div>
+
+  <div class="card mt-12">
+    <div class="card-title mb-4">⚠️ Limitations</div>
+    <ul class="font-sm text-secondary" style="padding-left:16px">
+      <li>Requires WebGPU — Chrome 113+ or Edge 113+. Firefox and Safari are not yet supported.</li>
+      <li>First download is ~650 MB on the 1B model — use WiFi before a crisis.</li>
+      <li>Llama 3.2 1B is a small model — it will sometimes be wrong. Cross-check critical decisions.</li>
+      <li>Not a substitute for 911 or professional emergency services.</li>
+    </ul>
+  </div>
+
+</div><!-- /tab-ai -->
 
 </div><!-- /app -->
 
@@ -5451,6 +5553,208 @@ const ARKQr = (() => {
   }
 
   return { encode, toSVGDiv, _encodeWithMask: encodeWithMask, _formatBits: formatBits };
+})();
+
+/* ============================================================
+   ARKai — Offline LLM via WebLLM (Llama 3.2, runs on-device)
+   ============================================================ */
+const ARKai = (() => {
+  // State
+  let _engine = null;
+  let _loading = false;
+  let _history = []; // {role:'user'|'assistant', content:string}[]
+  const WEBLLM_CDN = 'https://esm.run/@mlc-ai/web-llm';
+  const SYSTEM_PROMPT = `You are HALO, the AI assistant embedded in ARK Crisis Suite — an offline emergency preparedness app. You run entirely on the user's device with no internet connection.
+
+Your expertise: emergency preparedness, first aid, survival skills, water purification, food storage, disaster response, natural disasters, communication during outages, and helping people stay calm and focused in a crisis.
+
+Keep answers practical, specific, and actionable. Prioritize life-safety above all. If someone is in immediate danger, always tell them to call 911 first if possible. Be concise — people in a crisis need fast answers, not essays.
+
+You have access to context about the user's situation when they inject it. Use that context to give personalized advice.`;
+
+  function _setBadge(text, cls) {
+    const b = document.getElementById('ai-status-badge');
+    if (!b) return;
+    b.textContent = text;
+    b.className = 'badge ' + (cls || 'badge-muted');
+  }
+
+  function _setProgress(pct, label) {
+    const bar = document.getElementById('ai-progress-bar');
+    const pctEl = document.getElementById('ai-progress-pct');
+    const labelEl = document.getElementById('ai-progress-label');
+    if (bar) bar.style.width = pct + '%';
+    if (pctEl) pctEl.textContent = Math.round(pct) + '%';
+    if (labelEl && label) labelEl.textContent = label;
+  }
+
+  function _appendMsg(role, text, extraClass = '') {
+    const container = document.getElementById('ai-messages');
+    if (!container) return null;
+    const div = document.createElement('div');
+    div.className = 'ai-msg ' + (role === 'user' ? 'ai-msg-user' : role === 'system' ? 'ai-msg-sys' : 'ai-msg-ai') + (extraClass ? ' ' + extraClass : '');
+    div.textContent = text;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    return div;
+  }
+
+  async function load() {
+    if (_loading || _engine) return;
+    _loading = true;
+
+    // Check WebGPU support
+    if (!navigator.gpu) {
+      Toast.show('WebGPU is not supported in this browser. Use Chrome 113+ or Edge 113+.', 'error', 6000);
+      _setBadge('WebGPU not supported', 'badge-red');
+      _loading = false;
+      return;
+    }
+
+    const modelId = document.getElementById('ai-model-select')?.value || 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
+    const btn = document.getElementById('ai-load-btn');
+    if (btn) btn.disabled = true;
+
+    // Show progress UI
+    const progressRow = document.getElementById('ai-progress-row');
+    if (progressRow) progressRow.classList.remove('hidden');
+    _setBadge('Loading…', 'badge-yellow');
+    _setProgress(0, 'Importing WebLLM…');
+
+    try {
+      // Dynamic import — only fetched when user clicks Load
+      const webllm = await import(WEBLLM_CDN);
+      _setProgress(5, 'WebLLM ready. Loading model…');
+
+      _engine = await webllm.CreateMLCEngine(modelId, {
+        initProgressCallback: (progress) => {
+          const pct = Math.round((progress.progress || 0) * 100);
+          _setProgress(pct, progress.text || 'Loading model…');
+          _setBadge('Loading ' + pct + '%', 'badge-yellow');
+        }
+      });
+
+      _setProgress(100, 'Model ready!');
+      _setBadge('✓ ' + modelId.split('-').slice(0,3).join(' '), 'badge-green');
+
+      // Show chat, hide load section
+      document.getElementById('ai-load-section')?.classList.add('hidden');
+      document.getElementById('ai-intro-box')?.classList.add('hidden');
+      document.getElementById('ai-chat-section')?.classList.remove('hidden');
+      progressRow?.classList.add('hidden');
+
+      Toast.show('🤖 AI loaded and ready — fully offline!', 'success', 3000);
+    } catch (err) {
+      console.error('ARKai load error:', err);
+      _setBadge('Load failed', 'badge-red');
+      _setProgress(0, 'Failed to load — check browser console');
+      Toast.show('AI load failed: ' + (err.message || err), 'error', 5000);
+      if (btn) btn.disabled = false;
+    }
+    _loading = false;
+  }
+
+  async function send() {
+    if (!_engine) {
+      Toast.show('Load the AI model first', 'warning', 2500);
+      return;
+    }
+    const input = document.getElementById('ai-input');
+    const text = input?.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    document.getElementById('ai-send-btn').disabled = true;
+
+    _appendMsg('user', text);
+    _history.push({ role: 'user', content: text });
+
+    // Thinking indicator
+    const thinking = _appendMsg('assistant', '…thinking…', 'thinking');
+
+    try {
+      const messages = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ..._history.slice(-12) // keep last 12 turns in context
+      ];
+
+      let reply = '';
+      const stream = await _engine.chat.completions.create({ messages, stream: true, temperature: 0.7, max_tokens: 512 });
+
+      for await (const chunk of stream) {
+        const delta = chunk.choices[0]?.delta?.content || '';
+        reply += delta;
+        if (thinking) {
+          thinking.textContent = reply;
+          thinking.classList.remove('thinking');
+          const c = document.getElementById('ai-messages');
+          if (c) c.scrollTop = c.scrollHeight;
+        }
+      }
+
+      _history.push({ role: 'assistant', content: reply });
+    } catch (err) {
+      console.error('ARKai generate error:', err);
+      if (thinking) thinking.textContent = '⚠️ Error: ' + (err.message || 'generation failed');
+    }
+
+    document.getElementById('ai-send-btn').disabled = false;
+    document.getElementById('ai-input')?.focus();
+  }
+
+  function quickPrompt(btn) {
+    const text = btn.textContent;
+    const input = document.getElementById('ai-input');
+    if (input) { input.value = text; input.focus(); }
+    if (!_engine) {
+      Toast.show('Load the AI model first, then hit Send', 'info', 3000);
+    }
+  }
+
+  // Inject structured context about the user's situation into the conversation
+  function injectContext(type) {
+    if (!_engine) { Toast.show('Load the AI model first', 'warning', 2500); return; }
+    let ctx = '';
+    if (type === 'medical') {
+      const hh = Store.get('household_members', []);
+      const meds = hh.flatMap(m => (m.meds || []).map(med => `${m.name}: ${med}`));
+      const allergies = hh.flatMap(m => (m.allergies || []).map(a => `${m.name}: ${a}`));
+      const blood = hh.filter(m => m.blood).map(m => `${m.name}: ${m.blood}`);
+      ctx = `[HOUSEHOLD MEDICAL CONTEXT]\nMembers: ${hh.length}\nBlood types: ${blood.join(', ')||'unknown'}\nMedications: ${meds.join(', ')||'none recorded'}\nAllergies: ${allergies.join(', ')||'none recorded'}`;
+    } else if (type === 'inventory') {
+      const items = Store.get('resources', []);
+      const urgent = items.filter(i => i.urgent);
+      const lines = items.slice(0,30).map(i => `- ${i.name}: ${i.qty||'?'} ${i.unit||''}`).join('\n');
+      ctx = `[INVENTORY CONTEXT]\nTotal items: ${items.length}\nUrgent/low stock: ${urgent.map(i=>i.name).join(', ')||'none'}\nInventory:\n${lines||'(empty)'}`;
+    } else if (type === 'household') {
+      const hh = Store.get('household_members', []);
+      const lines = hh.map(m => `- ${m.name||'?'} (${m.role||'member'}${m.age?' age '+m.age:''}${m.conditions?' — '+m.conditions:''})`).join('\n');
+      ctx = `[HOUSEHOLD CONTEXT]\nHousehold ID: ${Store.get('hh_id','?')}\nMembers (${hh.length}):\n${lines||'(none added)'}`;
+    } else if (type === 'situation') {
+      const level = Store.get('alert_level', 1);
+      const labels = {1:'Normal',2:'Elevated',3:'High Alert',4:'Crisis'};
+      const gps = Store.get('last_gps');
+      const mp = Store.get('missing_persons', []);
+      ctx = `[SITUATION CONTEXT]\nAlert level: ${labels[level]||level}\nLocation: ${gps?`${gps.lat.toFixed(4)},${gps.lon.toFixed(4)}`:'unknown'}\nMissing persons reported: ${mp.length}\nTimestamp: ${new Date().toLocaleString()}`;
+    }
+    if (!ctx) return;
+    _history.push({ role: 'user', content: ctx });
+    _appendMsg('user', '📋 Context injected: ' + type);
+    _appendMsg('assistant', '✓ Got it — I\'ll use that context in my responses. What do you need?');
+    _history.push({ role: 'assistant', content: '✓ Got it — I\'ll use that context in my responses. What do you need?' });
+    Toast.show('Context injected ✓', 'success', 1500);
+  }
+
+  function clearChat() {
+    _history = [];
+    const container = document.getElementById('ai-messages');
+    if (container) {
+      container.innerHTML = '';
+      _appendMsg('system', '👋 Chat cleared. I\'m still loaded and ready. How can I help?');
+    }
+  }
+
+  return { load, send, quickPrompt, injectContext, clearChat };
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
