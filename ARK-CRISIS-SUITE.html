@@ -1569,6 +1569,7 @@ select.form-input{cursor:pointer}
       </div>
     </div>
     <div id="hub-status-detail" class="font-sm text-secondary">Not connected to any hub.</div>
+    <div id="softhub-role-badge" class="font-xs mt-4" style="color:var(--text-muted)">📡 Peer mode</div>
     <div class="mt-8 flex gap-8 wrap" style="font-size:12px;color:var(--text-muted)">
       <span id="net-last-sync">Never synced</span>
       <span>·</span>
@@ -3015,6 +3016,148 @@ const UI = {
     );
   }
 };
+
+// === SOFT HUB (Auto-hub: first opener becomes the hub when no external hub is set) ===
+const SoftHub = (() => {
+  const CHANNEL   = 'ark_softhub_v1';
+  const ROLE_KEY  = 'softhub_role';   // 'hub' | 'peer'
+  const CLAIM_KEY = 'softhub_claimed'; // ISO timestamp of when this tab claimed hub role
+  const PEERS_KEY = 'softhub_peers';  // JSON array of {id, alias, lastSeen}
+  const SELF_ID   = 'ark_' + (Store.get('hh_id') || Math.random().toString(36).slice(2));
+
+  let _bc = null;
+  let _role = 'peer';
+  let _peers = [];
+  let _heartbeatInterval = null;
+
+  function _enabled()  { return typeof BroadcastChannel !== 'undefined'; }
+  function isHub()     { return _role === 'hub'; }
+  function peerCount() { return _peers.length; }
+
+  function _savePeers(list) {
+    _peers = list;
+    try { localStorage.setItem(PEERS_KEY, JSON.stringify(list)); } catch(e) {}
+  }
+
+  function _broadcast(type, payload = {}) {
+    if (_bc) try { _bc.postMessage({ type, from: SELF_ID, alias: Store.get('last_alias',''), ...payload }); } catch(e) {}
+  }
+
+  function _claimHub() {
+    _role = 'hub';
+    Store.set(ROLE_KEY, 'hub');
+    Store.set(CLAIM_KEY, new Date().toISOString());
+    _broadcast('hub_claim');
+    _updateUI();
+  }
+
+  function _updateUI() {
+    // Update Network tab hub status indicator if present
+    const badge = document.getElementById('softhub-role-badge');
+    if (badge) {
+      badge.textContent = isHub() ? '🛰 You are the Hub' : '📡 Peer mode';
+      badge.style.color = isHub() ? 'var(--gold, #8b6f3e)' : 'var(--text-secondary, #666)';
+    }
+    // Show notification once when auto-promoted
+    const notified = Store.get('softhub_notified');
+    if (isHub() && !notified) {
+      Store.set('softhub_notified', true);
+      Toast.show('🛰 You\'re the ARK Hub — your device is sharing messages with neighbours', 'success', 6000);
+    }
+    // Update hero peer badge
+    const heroPeers = document.getElementById('hero-sync-badge');
+    if (heroPeers) heroPeers.textContent = _peers.length + ' Peer' + (_peers.length !== 1 ? 's' : '');
+  }
+
+  function _handleMessage(e) {
+    const { type, from, alias } = e.data || {};
+    if (!type || from === SELF_ID) return;
+
+    if (type === 'hub_claim') {
+      // Another tab / window is claiming hub role — yield if we claimed later
+      const myClaim = new Date(Store.get(CLAIM_KEY, 0)).getTime();
+      const theirClaim = e.data.claimedAt ? new Date(e.data.claimedAt).getTime() : 0;
+      if (_role === 'hub' && theirClaim && theirClaim < myClaim) {
+        _role = 'peer';
+        Store.set(ROLE_KEY, 'peer');
+        _updateUI();
+      }
+    }
+
+    if (type === 'heartbeat') {
+      // Record peer
+      const now = Date.now();
+      const existing = _peers.findIndex(p => p.id === from);
+      const entry = { id: from, alias: alias || 'Unknown', lastSeen: now };
+      if (existing >= 0) _peers[existing] = entry;
+      else _peers.push(entry);
+      // Prune peers not seen in 90s
+      _savePeers(_peers.filter(p => now - p.lastSeen < 90000));
+      _updateUI();
+      // If hub, acknowledge
+      if (isHub()) _broadcast('hub_ack', { peers: _peers.length });
+    }
+
+    if (type === 'hub_ack') {
+      // We got a reply from a hub peer; update peer count
+      _updateUI();
+    }
+  }
+
+  async function init() {
+    // Only activate SoftHub when no external hub URL is configured
+    if (Store.get('hub_url')) return;
+
+    if (!_enabled()) return; // BroadcastChannel not available (very old browser)
+
+    try { _bc = new BroadcastChannel(CHANNEL); } catch(e) { return; }
+    _bc.onmessage = _handleMessage;
+
+    // Check if another tab already holds the hub role via localStorage timestamp
+    const existingClaim = Store.get(CLAIM_KEY);
+    const existingRole  = Store.get(ROLE_KEY);
+
+    if (existingRole === 'hub' && existingClaim) {
+      // Another tab may own hub — wait a moment to let it heartbeat
+      setTimeout(() => {
+        // If nobody has broadcast in ~2s, claim hub role ourselves
+        _claimHub();
+      }, 2000);
+    } else {
+      // First opener — claim hub role immediately
+      await new Promise(r => setTimeout(r, 300)); // small delay for UI
+      _claimHub();
+    }
+
+    // Send heartbeats every 15s
+    _heartbeatInterval = setInterval(() => {
+      _broadcast('heartbeat');
+      // Prune peers > 90s
+      const now = Date.now();
+      _savePeers(_peers.filter(p => now - p.lastSeen < 90000));
+      _updateUI();
+    }, 15000);
+
+    // Initial heartbeat
+    _broadcast('heartbeat');
+  }
+
+  function stop() {
+    if (_heartbeatInterval) clearInterval(_heartbeatInterval);
+    if (_bc) { try { _bc.close(); } catch(e) {} _bc = null; }
+    _role = 'peer';
+  }
+
+  // Called by Hub when an external hub URL is configured — SoftHub yields
+  function yield_to_external() {
+    stop();
+    Store.del(ROLE_KEY);
+    Store.del(CLAIM_KEY);
+    Store.del('softhub_notified');
+  }
+
+  return { init, stop, yield_to_external, isHub, peerCount };
+})();
 
 // === HUB COMMUNICATION ===
 const Hub = {
@@ -5136,6 +5279,7 @@ const Network = {
     const url = hubInputEl ? hubInputEl.value.trim() : '';
     if (!url) { Toast.show('Enter a hub URL', 'error'); return; }
     Store.set('hub_url', url);
+    SoftHub.yield_to_external(); // yield soft-hub role to the external hub
     // Keep Settings panel in sync
     const settingsEl = document.getElementById('set-hub-url');
     if (settingsEl) settingsEl.value = url;
@@ -5679,6 +5823,7 @@ const Settings = {
     const hubInputEl = document.getElementById('set-hub-url');
     const hubUrl = hubInputEl ? hubInputEl.value.trim() : '';
     Store.set('hub_url', hubUrl);
+    if (hubUrl) SoftHub.yield_to_external(); // external hub configured — stop soft-hub
     // Sync hub URL to network panel (always, including when cleared)
     const netHubEl = document.getElementById('hub-url-input');
     if (netHubEl) netHubEl.value = hubUrl;
@@ -7618,6 +7763,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Start hub sync
   Hub.startAutoSync();
+
+  // Auto-hub: if no external hub is configured, first opener becomes the hub
+  SoftHub.init();
 
   // Check for first run — show onboarding wizard
   if (!Store.get('first_run_done')) {
