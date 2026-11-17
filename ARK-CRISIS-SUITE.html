@@ -992,10 +992,10 @@ select.form-input{cursor:pointer}
       <h4>Share a Download Link</h4>
       <p style="margin-bottom:12px">Send someone a link to download ARK — they tap it and get the app instantly.</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button class="btn btn-primary" onclick="ShareARK.shareViaSMS()" style="font-size:.82rem">💬 SMS / iMessage</button>
-        <button class="btn btn-primary" onclick="ShareARK.shareViaEmail()" style="font-size:.82rem">✉️ Email</button>
-        <button class="btn" onclick="ShareARK.shareViaFacebook()" style="font-size:.82rem;background:#1877f2;color:#fff;border:none">👍 Facebook</button>
-        <button class="btn" onclick="ShareARK.shareViaInstagram()" style="font-size:.82rem;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none">📷 Instagram</button>
+        <button class="btn btn-primary" onclick="ShareARK.shareViaSMS()" style="font-size:.82rem;white-space:nowrap">💬 SMS</button>
+        <button class="btn btn-primary" onclick="ShareARK.shareViaEmail()" style="font-size:.82rem;white-space:nowrap">✉️ Email</button>
+        <button class="btn" onclick="ShareARK.shareViaFacebook()" style="font-size:.82rem;background:#1877f2;color:#fff;border:none;white-space:nowrap">👍 Facebook</button>
+        <button class="btn" onclick="ShareARK.shareViaInstagram()" style="font-size:.82rem;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none;white-space:nowrap">📷 Instagram</button>
       </div>
       <p style="font-size:.75rem;color:var(--text-muted);margin-top:8px;margin-bottom:0">Sends a link to <strong>ark.halosuite.ai</strong> — works over internet. For offline spread, use the Download + AirDrop method above.</p>
     </div>
@@ -2388,6 +2388,19 @@ select.form-input{cursor:pointer}
     </div>
   </div>
 
+  <!-- Report Issue / Updates -->
+  <div class="card mt-12">
+    <div class="card-header">
+      <div class="card-title"><span class="card-icon">🔧</span>App Issues &amp; Updates</div>
+    </div>
+    <div class="font-sm text-secondary mb-12" style="line-height:1.5">Something not working? Report it and check for fixes.</div>
+    <div class="flex gap-8 flex-wrap">
+      <button class="btn btn-secondary btn-sm" onclick="UI.switchTab('network');setTimeout(()=>document.getElementById('bug-report-text')?.focus(),150)">🐛 Report a Bug</button>
+      <button class="btn btn-secondary btn-sm" onclick="Network.checkForUpdates()">🔄 Check for Updates</button>
+    </div>
+    <div id="settings-patch-status" class="font-xs text-muted mt-8"></div>
+  </div>
+
   <!-- About -->
   <div class="card mt-12">
     <div class="card-title mb-8"><span class="card-icon">ℹ️</span>About ARK Crisis Suite</div>
@@ -3267,6 +3280,8 @@ const SoftHub = (() => {
 
   function _startDiscovery() {
     if (typeof BroadcastChannel === 'undefined') return;
+    // Close any existing channel before reopening (prevents instance leak on double-call)
+    if (_discoverBc) { try { _discoverBc.close(); } catch(e) {} _discoverBc = null; }
     try { _discoverBc = new BroadcastChannel(DISCOVER_CHANNEL); } catch(e) { return; }
 
     _discoverBc.onmessage = (e) => {
@@ -3308,7 +3323,12 @@ const SoftHub = (() => {
     }, 4000);
   }
 
+  // Validate that an IP is a private-range address (safe for LAN hub use)
+  const _PRIVATE_IP_RE = /^(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3})$/;
+
   function _showJoinBanner(alias, ip, port) {
+    // Validate IP is a private-range address before trusting it
+    if (!ip || !_PRIVATE_IP_RE.test(ip)) return;
     // Don't show if already connected to a hub
     if (Store.get('hub_url')) return;
     // Don't show if WE are the hub
@@ -3320,13 +3340,13 @@ const SoftHub = (() => {
     const bannerId = 'ark-join-banner';
     if (document.getElementById(bannerId)) return; // already showing
 
-    const hubUrl = 'http://' + ip + ':' + (port || 8765);
+    const hubUrl = 'http://' + ip + ':' + (parseInt(port) || 8765);
     const displayAlias = alias || 'a nearby device';
 
     const banner = document.createElement('div');
     banner.id = bannerId;
     banner.style.cssText = [
-      'position:fixed', 'bottom:80px', 'left:50%', 'transform:translateX(-50%)',
+      'position:fixed', 'bottom:calc(80px + env(safe-area-inset-bottom,0px))', 'left:50%', 'transform:translateX(-50%)',
       'z-index:9999', 'max-width:min(420px,calc(100vw - 32px))', 'width:100%',
       'background:linear-gradient(135deg,#2a2016 0%,#1a1208 100%)',
       'border:1.5px solid rgba(139,111,62,.55)', 'border-radius:20px',
@@ -3342,15 +3362,27 @@ const SoftHub = (() => {
         <div style="font-size:.85rem;color:#e8dcc8;line-height:1.3"><strong>${_esc(displayAlias)}</strong> has an ARK hub on this network. Join to sync messages.</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-        <button onclick="Network.joinFromBanner('${hubUrl}');document.getElementById('${bannerId}')?.remove()"
+        <button class="ark-join-btn"
           style="background:var(--accent,#8b6f3e);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap">
           Join →
         </button>
-        <button onclick="Store.set('${dismissKey}','1');document.getElementById('${bannerId}')?.remove()"
+        <button class="ark-dismiss-btn"
           style="background:transparent;color:rgba(200,180,150,.6);border:none;font-size:.75rem;cursor:pointer;padding:2px 0">
           Dismiss
         </button>
       </div>`;
+
+    // Wire buttons via data attributes — avoids string interpolation XSS in onclick
+    banner.querySelector('.ark-join-btn').dataset.hubUrl = hubUrl;
+    banner.querySelector('.ark-join-btn').addEventListener('click', function() {
+      Network.joinFromBanner(this.dataset.hubUrl);
+      banner.remove();
+    });
+    banner.querySelector('.ark-dismiss-btn').dataset.dismissKey = dismissKey;
+    banner.querySelector('.ark-dismiss-btn').addEventListener('click', function() {
+      Store.set(this.dataset.dismissKey, '1');
+      banner.remove();
+    });
 
     document.body.appendChild(banner);
 
@@ -5758,12 +5790,16 @@ const Network = {
   // Current app version — bump this when deploying new HTML
   APP_VERSION: '1.1.0',
 
+  _submitting: false, // in-flight guard
+
   async submitBugReport() {
+    if (this._submitting) return; // prevent double-tap spam
     const textEl   = document.getElementById('bug-report-text');
     const statusEl = document.getElementById('bug-report-status');
     const btn      = document.querySelector('button[onclick*="submitBugReport"]');
     const text     = textEl ? textEl.value.trim() : '';
     if (!text) { Toast.show('Please describe the bug first', 'warning'); return; }
+    this._submitting = true;
 
     // Collect useful but non-identifying diagnostic context
     const report = {
@@ -5828,11 +5864,11 @@ const Network = {
       if (textEl) textEl.value = '';
       Toast.show('Bug reported — we\'ll push a fix!', 'success', 5000);
     } else {
-      // Fallback: pre-filled email
+      // Fallback: pre-filled email — use capped report.bug (not raw text which may be huge)
       const body = encodeURIComponent(
         'ARK Bug Report\n' +
         '================\n' +
-        'Issue: ' + text + '\n\n' +
+        'Issue: ' + report.bug + '\n\n' +
         'App: v' + this.APP_VERSION + '\n' +
         'Patch: ' + (Store.get('ark_patch_level','none')) + '\n' +
         'UA: ' + navigator.userAgent.substring(0, 150)
@@ -5842,14 +5878,27 @@ const Network = {
       if (textEl) textEl.value = '';
     }
 
+    this._submitting = false;
     // Try to drain any queued reports if we're online
     if (navigator.onLine) this._drainBugQueue();
   },
 
+  _draining: false, // concurrency guard
+
   // Silently drain queued bug reports when connection available
   async _drainBugQueue() {
+    if (this._draining) return; // prevent concurrent drain loops
+    this._draining = true;
     try {
-      const queue = JSON.parse(localStorage.getItem('ark_bug_queue') || '[]');
+      let queue;
+      try {
+        queue = JSON.parse(localStorage.getItem('ark_bug_queue') || '[]');
+        if (!Array.isArray(queue)) throw new Error('not array');
+      } catch(e) {
+        // Corrupt queue — wipe it and bail
+        localStorage.removeItem('ark_bug_queue');
+        return;
+      }
       if (!queue.length) return;
       const remaining = [];
       for (const report of queue) {
@@ -5865,6 +5914,7 @@ const Network = {
       }
       localStorage.setItem('ark_bug_queue', JSON.stringify(remaining));
     } catch(e) {}
+    finally { this._draining = false; }
   },
 
   // Semver compare: "1.2.3" > "1.1.0" => true
@@ -5931,7 +5981,9 @@ const Network = {
     let applied = 0, skipped = 0;
     const errors = [];
 
-    for (const p of (patch.patches || [])) {
+    // Validate patches is an array — a plain object or null would cause errors / silent skip
+    const patchList = Array.isArray(patch.patches) ? patch.patches : [];
+    for (const p of patchList) {
       if (!p || !ALLOWED_ACTIONS.has(p.action)) { skipped++; continue; }
 
       try {
@@ -5941,8 +5993,27 @@ const Network = {
         }
         else if (p.action === 'replace_html') {
           if (!p.selector || typeof p.value !== 'string') { skipped++; continue; }
-          // Strip any <script> tags from patched HTML for safety
-          const safe = p.value.replace(/<script[\s\S]*?<\/script>/gi, '');
+          // Sanitize patched HTML: strip scripts, event handlers, javascript: URIs, iframes
+          const _sanitizePatchHtml = (html) => {
+            const tpl = document.createElement('template');
+            tpl.innerHTML = html
+              .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')  // script blocks
+              .replace(/<script[^>]*\/?>/gi, '');                  // self-closing or open script tags
+            tpl.content.querySelectorAll('*').forEach(el => {
+              [...el.attributes].forEach(attr => {
+                if (/^on/i.test(attr.name) ||
+                    /^javascript:/i.test(attr.value) ||
+                    /^data:/i.test(attr.value)) {
+                  el.removeAttribute(attr.name);
+                }
+              });
+            });
+            tpl.content.querySelectorAll('iframe,object,embed,script').forEach(el => el.remove());
+            const div = document.createElement('div');
+            div.appendChild(tpl.content.cloneNode(true));
+            return div.innerHTML;
+          };
+          const safe = _sanitizePatchHtml(p.value);
           document.querySelectorAll(p.selector).forEach(el => { el.innerHTML = safe; applied++; });
         }
         else if (p.action === 'add_css') {
@@ -5956,7 +6027,8 @@ const Network = {
         else if (p.action === 'store_set') {
           if (!p.key || typeof p.key !== 'string') { skipped++; continue; }
           // Only allow patching safe known keys — not hub_url, credentials etc
-          const SAFE_STORE_KEYS = /^(ark_|checklist_|guide_|alert_level|hh_name|last_alias)$/;
+          // Prefix keys: ark_*, checklist_*, guide_* — exact keys: alert_level, hh_name, last_alias
+          const SAFE_STORE_KEYS = /^(ark_|checklist_|guide_)[a-z0-9_-]+$|^(alert_level|hh_name|last_alias)$/;
           if (!SAFE_STORE_KEYS.test(p.key)) { skipped++; continue; }
           Store.set(p.key, p.value); applied++;
         }
@@ -5982,8 +6054,8 @@ const Network = {
         }
         else if (p.action === 'set_attr') {
           if (!p.selector || !p.attr) { skipped++; continue; }
-          // Block dangerous attributes
-          if (/^(on|href$|src$|action$|formaction)/i.test(p.attr)) { skipped++; continue; }
+          // Block dangerous attributes (event handlers, navigation, inline html, style injection)
+          if (/^(on|href$|src$|srcdoc$|style$|action$|formaction)/i.test(p.attr)) { skipped++; continue; }
           document.querySelectorAll(p.selector).forEach(el => { el.setAttribute(p.attr, p.value || ''); applied++; });
         }
       } catch(e) {
@@ -5992,16 +6064,31 @@ const Network = {
       }
     }
 
-    // Persist patch level and log
-    Store.set('ark_patch_level', patch.version);
-    Store.set('ark_patch_ts', new Date().toISOString());
-    Store.set('ark_patch_summary', patch.summary || '');
+    // Only persist patch level when at least one op was successfully applied
+    if (applied > 0) {
+      Store.set('ark_patch_level', patch.version);
+      Store.set('ark_patch_ts', new Date().toISOString());
+      Store.set('ark_patch_summary', patch.summary || '');
+    }
 
     const summary = patch.summary || (applied + ' fix' + (applied !== 1 ? 'es' : '') + ' applied');
 
     if (applied > 0) {
       if (statusEl) statusEl.textContent = '✅ Patch v' + patch.version + ' — ' + summary + (skipped ? ' (' + skipped + ' skipped)' : '') + '.';
-      if (!silent) Toast.show('🔧 ARK patched to v' + patch.version + ': ' + summary, 'success', 7000);
+      if (!silent) {
+        Toast.show('🔧 ARK patched to v' + patch.version + ': ' + summary, 'success', 7000);
+      } else {
+        // Silent patch: show a brief non-intrusive status bar indicator
+        const sb = document.getElementById('status-bar');
+        if (sb) {
+          const patchNote = document.createElement('span');
+          patchNote.id = 'ark-patch-note';
+          patchNote.style.cssText = 'margin-left:8px;font-size:.7rem;color:var(--accent,#8b6f3e);font-weight:600';
+          patchNote.textContent = '🔧 Patched v' + patch.version;
+          sb.appendChild(patchNote);
+          setTimeout(() => { patchNote.remove(); }, 10 * 60 * 1000); // remove after 10 min
+        }
+      }
       // Log for support
       console.info('[ARK] Patch', patch.version, 'applied:', applied, 'ops,', skipped, 'skipped,', errors.length, 'errors');
     } else if (skipped > 0) {
@@ -7113,7 +7200,10 @@ const Onboarding = (() => {
     }
   }
 
+  let _finishing = false; // re-entry guard for double-tap
   function finish() {
+    if (_finishing) return;
+    _finishing = true;
     try {
       Store.set('first_run_done', true);
       const overlay = document.getElementById('onboard-overlay');
@@ -7123,8 +7213,8 @@ const Onboarding = (() => {
       // Auto-discovery: start finding nearby ARK users on this network
       setTimeout(() => {
         if (typeof SoftHub !== 'undefined') SoftHub.startDiscovery();
-        // Show a "share ARK" nudge after a moment
-        setTimeout(_showShareNudge, 3500);
+        // Show a "share ARK" nudge after welcome toast fully exits (toast is 4s, exit anim ~300ms)
+        setTimeout(_showShareNudge, 5000);
       }, 1000);
     } catch (e) {
       console.warn('Onboarding.finish error:', e);
@@ -7142,7 +7232,7 @@ const Onboarding = (() => {
     const nudge = document.createElement('div');
     nudge.id = nudgeId;
     nudge.style.cssText = [
-      'position:fixed','bottom:80px','left:50%','transform:translateX(-50%)',
+      'position:fixed','bottom:calc(80px + env(safe-area-inset-bottom,0px))','left:50%','transform:translateX(-50%)',
       'z-index:9998','max-width:min(400px,calc(100vw - 32px))','width:100%',
       'background:linear-gradient(135deg,rgba(139,111,62,.18) 0%,rgba(240,235,224,.97) 100%)',
       'border:1.5px solid rgba(139,111,62,.35)','border-radius:20px',
@@ -7319,7 +7409,7 @@ const ShareARK = (() => {
   function shareViaSMS() {
     try {
       // sms: URI — works on iOS and Android; body param prefilled
-      const url = 'sms:?&body=' + encodeURIComponent(ARK_SHORT_MSG);
+      const url = 'sms:?body=' + encodeURIComponent(ARK_SHORT_MSG);
       window.open(url, '_self');
       Toast.show('Opening Messages…', 'info', 2000);
     } catch (e) {
@@ -7362,10 +7452,15 @@ const ShareARK = (() => {
     try {
       const msg = '🆘 ARK Crisis Suite — free offline emergency app. No install needed. Download: ' + ARK_DOWNLOAD_URL + ' — works without internet, perfect for emergencies. Share this with everyone you know. #emergency #preparedness #offlinefirst';
       if (navigator.clipboard?.writeText) {
-        navigator.clipboard.writeText(msg).then(() => {
-          Toast.show('Caption copied! Opening Instagram…', 'success', 3000);
-          setTimeout(() => window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer'), 800);
-        });
+        navigator.clipboard.writeText(msg)
+          .then(() => {
+            Toast.show('Caption copied! Opening Instagram…', 'success', 3000);
+            window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+          })
+          .catch(() => {
+            Toast.show('Could not copy caption — open Instagram and paste manually', 'info', 4000);
+            window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+          });
       } else {
         window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
         Toast.show('Open Instagram and paste your caption', 'info', 4000);
@@ -8444,7 +8539,7 @@ const ARKai = (() => {
 })();
 
 // === GLOBAL ERROR CAPTURE for bug reports ===
-window._arkErrors = [];
+window._arkErrors = window._arkErrors || []; // preserve existing buffer on script re-eval
 window.addEventListener('error', e => {
   const entry = { msg: e.message, src: (e.filename || '').split('/').pop(), line: e.lineno, ts: Date.now() };
   window._arkErrors.push(entry);
