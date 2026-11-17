@@ -36,20 +36,23 @@ ssh "$VPS_HOST" "mkdir -p $VPS_DIR"
 # Transferred:
 #   ARK-CRISIS-SUITE.html   the main offline app
 #   landing.html            the web landing page
-#   index.html              / → landing.html redirect
+#   index.html              / → /halo/ redirect
 #   manifest.json           PWA manifest
 #   service-worker.js       offline service worker
 #   og-image.png            social sharing image (1200×630)
 #   icons/                  PWA icons
+#   dist/                   HaloSuite React frontend (served at /halo/)
 # Not transferred:
 #   src/                    hub/toolkit server code — deployed separately
 #   BACKLOG.md, PROTOCOL.md, README.md — docs only
 #   deploy/                 this script
 #   .git/                   git history
+#   node_modules/           npm packages
 rsync -avz --delete \
   --exclude='.git/' \
   --exclude='deploy/' \
   --exclude='src/' \
+  --exclude='node_modules/' \
   --exclude='BACKLOG.md' \
   --exclude='PROTOCOL.md' \
   --exclude='README.md' \
@@ -57,15 +60,19 @@ rsync -avz --delete \
   "$REPO_ROOT/" \
   "$VPS_HOST:$VPS_DIR/"
 
+# ── 3. Symlink dist/ → /halo/ so the React SPA is served at /halo/ ────────────
+ssh "$VPS_HOST" "ln -sfn $VPS_DIR/dist $VPS_DIR/halo"
+
 echo ""
 echo "▶ Reloading Caddy to bust service-worker cache…"
 ssh "$VPS_HOST" \
   "docker compose -f $COMPOSE_FILE exec caddy caddy reload --config /etc/caddy/Caddyfile 2>&1 || echo 'Caddy reload skipped (may not be running yet)'"
 
 echo ""
-echo "✓ ARK deployed."
-echo "  Live at: https://ark.halosuite.ai/"
-echo "  App:     https://ark.halosuite.ai/ARK-CRISIS-SUITE.html"
+echo "✓ Deployed."
+echo "  HaloSuite app:  https://ark.halosuite.ai/halo/"
+echo "  ARK Crisis app: https://ark.halosuite.ai/ARK-CRISIS-SUITE.html"
+echo "  Landing:        https://ark.halosuite.ai/landing.html"
 echo ""
 echo "  First-time checklist:"
 echo "  [ ] DNS A record ark.halosuite.ai → 31.220.104.240 (Cloudflare, Proxied)"
