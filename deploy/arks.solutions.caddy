@@ -1,0 +1,36 @@
+# Caddy site block for arks.solutions
+#
+# Place this file at /etc/caddy/sites-enabled/arks.solutions.caddy
+# OR paste the contents into your main Caddyfile.
+#
+# Then run: caddy reload --config /etc/caddy/Caddyfile
+#           OR: systemctl reload caddy
+
+arks.solutions {
+    root * /var/www/arks.solutions
+
+    # PHP via php-fpm (adjust socket path to match your VPS setup)
+    php_fastcgi unix//run/php/php8.2-fpm.sock
+
+    # Serve ARK.php as default at root
+    @root {
+        path /
+    }
+    redir @root /ARK.php permanent
+
+    # Static file serving (og-image, icons, etc.)
+    file_server
+
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options SAMEORIGIN
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+
+    # Logs
+    log {
+        output file /var/log/caddy/arks.solutions.log
+        format json
+    }
+}

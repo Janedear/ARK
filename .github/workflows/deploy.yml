@@ -1,25 +1,30 @@
-# One-button deploy for ARK Crisis Suite → ark.halosuite.ai
+# ARK Crisis Suite — Deploy to VPS → arks.solutions
 #
 # HOW TO USE:
 #   GitHub → Actions → "Deploy ARK" → Run workflow → Run.
+#   Also auto-runs on every push to for-hostinger branch.
 #
 # What it does:
-#   1. SSH into the Hostinger VPS as the halo user.
-#   2. Runs the equivalent of deploy/deploy.sh (rsync public files + Caddy reload).
-#      No build step — ARK is a static app (plain HTML/JS/CSS).
+#   1. SSH into the VPS
+#   2. Copies ARK.php to /var/www/arks.solutions/ARK.php (served by Caddy)
+#   3. Sets correct permissions
+#   4. Reloads Caddy
 #
-# Required secrets (Settings → Secrets → Actions):
-#   HALO_SSH_PRIVATE_KEY   Private key whose public half is in /home/halo/.ssh/authorized_keys.
-#   HALO_KNOWN_HOSTS       Output of: ssh-keyscan -H 31.220.104.240
-#   VPS_HOST               VPS IP or hostname (e.g. 31.220.104.240).
-#   VPS_USER               SSH user (e.g. halo).
-#
-# These are the same secrets as HaloSuite's deploy.yml — no new secrets needed.
+# Required secrets (GitHub → Settings → Secrets → Actions):
+#   HALO_SSH_PRIVATE_KEY   Private key whose public half is in ~/.ssh/authorized_keys on VPS
+#   HALO_KNOWN_HOSTS       Output of: ssh-keyscan -H <VPS_IP>
+#   VPS_HOST               VPS IP or hostname
+#   VPS_USER               SSH user (e.g. halo or root)
 
 name: Deploy ARK
 
 on:
   workflow_dispatch:
+  push:
+    branches: [for-hostinger]
+    paths:
+      - 'ARK.php'
+      - 'index.html'
 
 concurrency:
   group: deploy-ark
@@ -27,7 +32,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy ARK → ark.halosuite.ai
+    name: Deploy ARK.php → arks.solutions
     runs-on: ubuntu-latest
 
     steps:
@@ -41,33 +46,55 @@ jobs:
           echo "${{ secrets.HALO_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      - name: Rsync to VPS
+      - name: Create web root on VPS
         run: |
           ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
-            "mkdir -p /opt/halosuite/ark"
+            "mkdir -p /var/www/arks.solutions && mkdir -p /var/www/arks.solutions/ark-data/bugs && mkdir -p /var/www/arks.solutions/ark-data/patches"
 
-          rsync -az --delete \
+      - name: Upload ARK.php
+        run: |
+          rsync -az \
             -e "ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes" \
-            --exclude='.git/' \
-            --exclude='deploy/' \
-            --exclude='src/' \
-            --exclude='*.md' \
-            --exclude='.gitignore' \
-            ./ \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/halosuite/ark/
+            ARK.php \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/arks.solutions/ARK.php
+
+      - name: Set permissions
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            "chmod 644 /var/www/arks.solutions/ARK.php && chown -R www-data:www-data /var/www/arks.solutions/ 2>/dev/null || true"
+
+      - name: Initialize patch file if missing
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            "[ -f /var/www/arks.solutions/ark-data/patches/latest.json ] || echo '{\"active\":false}' > /var/www/arks.solutions/ark-data/patches/latest.json"
 
       - name: Reload Caddy
         run: |
           ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
-            "docker compose -f /opt/halosuite/app/deploy/docker-compose.prod.yml \
-             exec caddy caddy reload --config /etc/caddy/Caddyfile 2>&1 || \
-             echo 'Caddy reload skipped'"
+            "caddy reload --config /etc/caddy/Caddyfile 2>/dev/null || \
+             systemctl reload caddy 2>/dev/null || \
+             docker compose -f /opt/halosuite/app/deploy/docker-compose.prod.yml exec caddy caddy reload --config /etc/caddy/Caddyfile 2>/dev/null || \
+             echo 'Caddy reload skipped — reload manually if needed'"
+
+      - name: Verify deploy
+        run: |
+          sleep 3
+          HTTP=$(curl -s -o /dev/null -w "%{http_code}" https://arks.solutions/ARK.php || echo "unreachable")
+          echo "HTTP status: $HTTP"
+          if [ "$HTTP" = "200" ]; then
+            echo "✅ arks.solutions/ARK.php is live"
+          else
+            echo "⚠️  Got $HTTP — Caddy config may need updating (see deploy/arks.solutions.caddy)"
+          fi
 
       - name: Summary
         if: success()
         run: |
-          echo "### ✅ ARK deployed" >> $GITHUB_STEP_SUMMARY
-          echo "**Live:** https://ark.halosuite.ai" >> $GITHUB_STEP_SUMMARY
-          echo "**App:** https://ark.halosuite.ai/ARK-CRISIS-SUITE.html" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ ARK Crisis Suite deployed" >> $GITHUB_STEP_SUMMARY
+          echo "**Live:** https://arks.solutions/ARK.php" >> $GITHUB_STEP_SUMMARY
+          echo "**Admin:** https://arks.solutions/ARK.php?admin" >> $GITHUB_STEP_SUMMARY
+          echo "**Password:** ARK-admin-2024" >> $GITHUB_STEP_SUMMARY

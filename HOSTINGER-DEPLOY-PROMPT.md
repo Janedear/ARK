@@ -10,13 +10,15 @@ You are deploying the **ARK Crisis Suite** — an offline-first emergency commun
 
 This is a **single-file PHP deployment**. There is exactly **one file to upload**.
 
+> ⚠️ **IMPORTANT:** The correct file is `index.html` from the `for-hostinger` branch. Despite the `.html` extension, it is a PHP file starting with `<?php` — Hostinger/PHP hosts will execute it correctly as PHP. Do NOT deploy any other file.
+
 ---
 
 ## WHAT YOU ARE UPLOADING
 
 | File | Purpose |
 |------|---------|
-| `ARK.php` | The entire app + backend in one file (~575 KB) |
+| `index.html` | The entire app + backend in one file (~575 KB). Starts with `<?php`. |
 
 That's it. No zip. No npm. No build step. No Cloudflare. No terminal.
 

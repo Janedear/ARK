@@ -1,80 +1,59 @@
 #!/usr/bin/env bash
-# ARK Crisis Suite — deploy to ark.halosuite.ai
+# ARK Crisis Suite — manual deploy to VPS (arks.solutions)
 #
 # Usage (from the ARK repo root):
 #   bash deploy/deploy.sh
 #
 # Requirements:
-#   - SSH access to the HaloSuite VPS as the halo user (key-based)
+#   - SSH access to the VPS (key-based, halo user or root)
 #   - rsync installed locally
-#   - The VPS /opt/halosuite/ark directory exists (created on first run)
-#   - The ark.caddy site block is in place (HaloSuiteMain/deploy/caddy/sites-enabled/ark.caddy)
-#   - DNS A record ark.halosuite.ai → 31.220.104.240 (Proxied) is live in Cloudflare
 #
 # What this does:
-#   1. rsync all public files to /opt/halosuite/ark on the VPS
-#   2. Reloads Caddy so the new service-worker cache version takes effect
-#   3. Prints the live URL
+#   1. Copies ARK.php to /var/www/arks.solutions/ on the VPS
+#   2. Creates ark-data directories (bug reports + patches)
+#   3. Reloads Caddy
 
 set -euo pipefail
 
 VPS_HOST="${ARK_VPS_HOST:-halo@31.220.104.240}"
-VPS_DIR="/opt/halosuite/ark"
-COMPOSE_FILE="/opt/halosuite/app/deploy/docker-compose.prod.yml"
+WEB_ROOT="/var/www/arks.solutions"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 echo "▶ ARK deploy — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-echo "  Source : $REPO_ROOT"
-echo "  Target : $VPS_HOST:$VPS_DIR"
+echo "  Source : $REPO_ROOT/ARK.php"
+echo "  Target : $VPS_HOST:$WEB_ROOT/ARK.php"
 echo ""
 
-# ── 1. Ensure target directory exists ─────────────────────────────────────────
-ssh "$VPS_HOST" "mkdir -p $VPS_DIR"
+# 1. Ensure directories exist
+ssh "$VPS_HOST" "mkdir -p $WEB_ROOT/ark-data/bugs $WEB_ROOT/ark-data/patches"
 
-# ── 2. rsync public files (exclude dev-only files) ────────────────────────────
-# Transferred:
-#   ARK-CRISIS-SUITE.html   the main offline app
-#   landing.html            the web landing page
-#   index.html              / → /halo/ redirect
-#   manifest.json           PWA manifest
-#   service-worker.js       offline service worker
-#   og-image.png            social sharing image (1200×630)
-#   icons/                  PWA icons
-#   dist/                   HaloSuite React frontend (served at /halo/)
-# Not transferred:
-#   src/                    hub/toolkit server code — deployed separately
-#   BACKLOG.md, PROTOCOL.md, README.md — docs only
-#   deploy/                 this script
-#   .git/                   git history
-#   node_modules/           npm packages
-rsync -avz --delete \
-  --exclude='.git/' \
-  --exclude='deploy/' \
-  --exclude='src/' \
-  --exclude='node_modules/' \
-  --exclude='BACKLOG.md' \
-  --exclude='PROTOCOL.md' \
-  --exclude='README.md' \
-  --exclude='.gitignore' \
-  "$REPO_ROOT/" \
-  "$VPS_HOST:$VPS_DIR/"
+# 2. Upload ARK.php
+rsync -avz \
+  "$REPO_ROOT/ARK.php" \
+  "$VPS_HOST:$WEB_ROOT/ARK.php"
 
-# ── 3. Symlink dist/ → /halo/ so the React SPA is served at /halo/ ────────────
-ssh "$VPS_HOST" "ln -sfn $VPS_DIR/dist $VPS_DIR/halo"
+# 3. Permissions
+ssh "$VPS_HOST" "chmod 644 $WEB_ROOT/ARK.php && chown -R www-data:www-data $WEB_ROOT/ 2>/dev/null || true"
 
-echo ""
-echo "▶ Reloading Caddy to bust service-worker cache…"
+# 4. Initialize patch file
+ssh "$VPS_HOST" "[ -f $WEB_ROOT/ark-data/patches/latest.json ] || echo '{\"active\":false}' > $WEB_ROOT/ark-data/patches/latest.json"
+
+# 5. Reload Caddy
+echo "▶ Reloading Caddy…"
 ssh "$VPS_HOST" \
-  "docker compose -f $COMPOSE_FILE exec caddy caddy reload --config /etc/caddy/Caddyfile 2>&1 || echo 'Caddy reload skipped (may not be running yet)'"
+  "caddy reload --config /etc/caddy/Caddyfile 2>/dev/null || \
+   systemctl reload caddy 2>/dev/null || \
+   docker compose -f /opt/halosuite/app/deploy/docker-compose.prod.yml exec caddy caddy reload --config /etc/caddy/Caddyfile 2>/dev/null || \
+   echo 'Caddy reload skipped — reload manually'"
 
 echo ""
 echo "✓ Deployed."
-echo "  HaloSuite app:  https://ark.halosuite.ai/halo/"
-echo "  ARK Crisis app: https://ark.halosuite.ai/ARK-CRISIS-SUITE.html"
-echo "  Landing:        https://ark.halosuite.ai/landing.html"
+echo "  App:   https://arks.solutions/ARK.php"
+echo "  Admin: https://arks.solutions/ARK.php?admin  (password: ARK-admin-2024)"
 echo ""
 echo "  First-time checklist:"
-echo "  [ ] DNS A record ark.halosuite.ai → 31.220.104.240 (Cloudflare, Proxied)"
-echo "  [ ] ark.caddy mounted in Caddy container (docker-compose.prod.yml volumes)"
-echo "  [ ] /srv/ark bind-mount added to caddy service"
+echo "  [ ] DNS A record arks.solutions → $VPS_HOST"
+echo "  [ ] Caddy config: deploy/arks.solutions.caddy installed in /etc/caddy/sites-enabled/"
+echo "  [ ] PHP-FPM running: systemctl status php8.2-fpm"
+echo "  [ ] PHP socket path matches arks.solutions.caddy (php8.2-fpm.sock)"
