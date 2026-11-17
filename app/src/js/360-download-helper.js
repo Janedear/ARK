@@ -1,0 +1,21 @@
+/* ============================================================
+   DOWNLOAD HELPER — strips first_run_done so recipient gets wizard
+   ============================================================ */
+async function _freshDownloadHTML() {
+  // The copy we hand to someone else must be the original app file — never a snapshot of the
+  // screen, which would bake this household's names, medical notes and messages into it.
+  // 1. Re-fetch the original file (works when ARK is opened from a website or a hub).
+  if (/^https?:$/.test(location.protocol)) {
+    try {
+      const r = await fetch(location.href.split('#')[0], {cache: 'no-store'});
+      if (r.ok) {
+        const t = await r.text();
+        if (t.length > 100000 && t.indexOf('ARK_PRISTINE_MARKER') !== -1) return t;
+      }
+    } catch (e) {}
+  }
+  // 2. Opened from a saved file: use the untouched copy captured before the app started.
+  if (window.__ARK_PRISTINE) return window.__ARK_PRISTINE;
+  throw new Error('no clean copy available');
+}
+

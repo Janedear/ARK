@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!-- Source of the link-preview image (og-image.png). It reuses the welcome page's real styles and
+     art so the preview always matches the site. Rendered at 1200x630 by scripts/make-og-image.py.
+     Files starting with "_" are not published. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ARK link preview</title>
+<link rel="stylesheet" href="/site.css">
+<style>
+  html,body{width:1200px;height:630px;overflow:hidden}
+  .og{display:grid;grid-template-columns:660px 540px;height:630px;background:var(--bg)}
+  .og-copy{padding:54px 0 0 72px;display:flex;flex-direction:column}
+  .og-copy .wordmark{font-size:34px;margin-bottom:58px}
+  .og-copy .wordmark svg{width:40px;height:19px}
+  .og-copy .wordmark small{font-size:10px}
+  .og-copy h1{font-size:68px;margin:24px 0 22px;line-height:1.04}
+  .og-copy .lead{font-size:22px;max-width:520px}
+  .og-foot{margin-top:auto;padding-bottom:46px;display:flex;align-items:center;gap:18px;font-size:13px;color:var(--muted);letter-spacing:.02em}
+  .og-foot b{font-weight:500;color:var(--ink);font-size:15px;letter-spacing:0}
+  .og-foot i{width:1px;height:14px;background:var(--line-strong)}
+  .room{min-height:0;height:630px;border-left:1px solid var(--line)}
+  .room::before{background:linear-gradient(90deg,var(--bg) 0%,rgba(250,249,245,.5) 12%,transparent 30%)}
+  .mascot{width:300px;bottom:150px;animation:none}
+  .guide{left:auto;right:36px;bottom:34px}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ark-roof" viewBox="0 0 60 26"><path d="M4 22 30 5l26 17"/><path d="M18 23l12-8 12 8" stroke-width="3.4"/></symbol>
+</svg>
+<div class="og">
+  <div class="og-copy">
+    <span class="wordmark"><span class="ark"><svg><use href="#ark-roof"/></svg>ARK</span><small>by HaloSuite</small></span>
+    <div class="kicker">Backup internet, AI &amp; more — for when crisis hits</div>
+    <h1>Prepared for the unexpected.<em>Connected when it matters.</em></h1>
+    <div class="og-foot"><b>arks.solutions</b><i></i>Free<i></i>No account<i></i>Works offline</div>
+  </div>
+  <div class="room">
+    <div class="room-caption"><span>Your guide, Halo</span><span>A little room to be ready</span></div>
+    <svg class="scene" viewBox="0 0 800 700" preserveAspectRatio="xMidYMid slice">
+      <circle class="sun" cx="610" cy="210" r="88"/>
+      <g class="floor">
+        <path d="M-40 560h880M-40 600h880M-40 648h880M-40 700h880"/>
+        <path d="M400 520L120 700M400 520L260 700M400 520v180M400 520l140 180M400 520l280 180M400 520L-40 640M400 520l440 120"/>
+      </g>
+      <path d="M0 470c90-34 190-40 300-14M520 452c80-26 170-28 280-2"/>
+      <path d="M664 452v-30l28-22 28 22v30zM682 452v-18h18v18"/>
+      <path class="arch-out" d="M262 560V330c0-88 62-158 138-158s138 70 138 158v230z"/>
+      <path class="arch-in" d="M296 560V336c0-68 46-124 104-124s104 56 104 124v224"/>
+      <ellipse class="plinth" cx="400" cy="566" rx="150" ry="20"/>
+      <ellipse class="plinth" cx="400" cy="556" rx="108" ry="13"/>
+    </svg>
+    <img class="mascot" src="/brand/halo-mascot.png" alt="">
+  </div>
+</div>
+</body>
+</html>

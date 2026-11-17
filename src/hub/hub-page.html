@@ -8,19 +8,20 @@
 /* ===== RESET & BASE ===== */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#2d333b;
-  --border:#30363d;--border2:#444c56;
-  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
-  --accent:#58a6ff;--accent2:#1f6feb;
-  --green:#3fb950;--green-bg:#0f2e18;
-  --yellow:#d29922;--yellow-bg:#2e1f00;
-  --orange:#db6d28;--orange-bg:#2e1500;
-  --red:#f85149;--red-bg:#2e0d0d;
-  --black:#8b949e;--black-bg:#1c1c1c;
-  --channel-help:#f85149;--channel-safe:#3fb950;--channel-offers:#58a6ff;
-  --channel-missing:#d29922;--channel-general:#8b949e;--channel-resources:#db6d28;
-  --channel-medical:#e06caa;--channel-shelter:#a371f7;--channel-water:#39d8f5;--channel-power:#ffd700;
-  --font-size:16px;--radius:8px;--shadow:0 2px 8px rgba(0,0,0,.4);
+  /* HaloSuite warm-cream palette (matches the ARK app) */
+  --bg:#faf9f5;--bg2:#fffefa;--bg3:#f0eee5;--bg4:#e2e0d6;
+  --border:#e2e0d6;--border2:#cdcabd;
+  --text:#292a25;--text2:#555a52;--text3:#6b7068;
+  --accent:#8d7041;--accent2:#292d2b;
+  --green:#227455;--green-bg:#e9f1ec;
+  --yellow:#8b6f20;--yellow-bg:#f6edd2;
+  --orange:#a85a1c;--orange-bg:#f8e8d8;
+  --red:#b24148;--red-bg:#f8e9e9;
+  --black:#55504a;--black-bg:#efe9dd;
+  --channel-help:#a3262e;--channel-safe:#2d7a5f;--channel-offers:#2d4f8b;
+  --channel-missing:#8b6f20;--channel-general:#6b6258;--channel-resources:#a85a1c;
+  --channel-medical:#a23a78;--channel-shelter:#5a2d8b;--channel-water:#1f7a8c;--channel-power:#8a6a00;
+  --font-size:16px;--radius:12px;--shadow:0 6px 22px rgba(120,96,52,.10);
 }
 .large-text{--font-size:19px}
 .small-text{--font-size:14px}
@@ -46,7 +47,7 @@ body{background:var(--bg);color:var(--text);font:var(--font-size)/1.6 -apple-sys
 .alert-3{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange)}
 .alert-4{background:var(--red-bg);color:var(--red);border:1px solid var(--red)}
 .alert-5{background:#111;color:#fff;border:2px solid #fff}
-#offlineIndicator{font-size:.7rem;padding:3px 8px;border-radius:20px;background:#2a0d0d;color:var(--red);border:1px solid var(--red);display:none}
+#offlineIndicator{font-size:.7rem;padding:3px 8px;border-radius:20px;background:var(--red-bg);color:var(--red);border:1px solid var(--red);display:none}
 #offlineIndicator.visible{display:block}
 
 /* ===== ALERT BANNER ===== */
@@ -129,8 +130,8 @@ select option{background:var(--bg3)}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:transparent}
 .btn-danger{background:#8b1a1a;border-color:var(--red)}
 .btn-danger:hover{background:#a01f1f}
-.btn-success{background:#1a4731;border-color:var(--green)}
-.btn-warn{background:#3d2800;border-color:var(--yellow);color:var(--yellow)}
+.btn-success{background:var(--green-bg);color:var(--green);border-color:var(--green)}
+.btn-warn{background:var(--yellow-bg);border-color:var(--yellow);color:var(--yellow)}
 .btn-sm{min-height:32px;padding:5px 12px;font-size:.8rem}
 .btn-xs{min-height:26px;padding:3px 8px;font-size:.75rem;border-radius:4px}
 .btn-emergency{background:var(--red);border-color:#ff0000;font-size:1rem;padding:14px 24px;animation:pulse-emergency 2s infinite}
@@ -251,7 +252,7 @@ select option{background:var(--bg3)}
 .bundle-instructions li{font-size:.9rem;color:var(--text2)}
 
 /* ===== ADMIN ===== */
-.log-viewer{background:#050a0f;border:1px solid var(--border);border-radius:6px;padding:12px;font:12px/1.6 "SF Mono","Cascadia Code",monospace;color:#8ec07c;max-height:300px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+.log-viewer{background:#232321;color:#f1ece0;border:1px solid var(--border);border-radius:6px;padding:12px;font:12px/1.6 "SF Mono","Cascadia Code",monospace;color:#8ec07c;max-height:300px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
 .stats-table{width:100%;border-collapse:collapse;font-size:.85rem}
 .stats-table th{text-align:left;padding:8px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600}
 .stats-table td{padding:8px;border-bottom:1px solid var(--border)}
@@ -295,7 +296,7 @@ select option{background:var(--bg3)}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* ===== OFFLINE BANNER ===== */
-#offlineBanner{display:none;background:#2a0909;color:var(--red);border-bottom:2px solid var(--red);padding:10px 16px;text-align:center;font-size:.85rem;font-weight:600;z-index:99}
+#offlineBanner{display:none;background:var(--red-bg);color:var(--red);border-bottom:2px solid var(--red);padding:10px 16px;text-align:center;font-size:.85rem;font-weight:600;z-index:99}
 #offlineBanner.visible{display:block}
 
 /* ===== PENDING QUEUE NOTICE ===== */
@@ -355,7 +356,7 @@ select option{background:var(--bg3)}
         <div class="ob-step-text"><strong>Carry messages</strong><span>Use the Bundle tab to export messages to a USB drive and carry them to other hubs without internet.</span></div>
       </div>
     </div>
-    <p style="font-size:.82rem;color:var(--red);background:#1a0a0a;border:1px solid var(--red);border-radius:4px;padding:8px;margin-bottom:16px">⚠ <b>Emergency services do not watch this board.</b> Call 911 or your local emergency number first.</p>
+    <p style="font-size:.82rem;color:var(--red);background:var(--red-bg);border:1px solid var(--red);border-radius:4px;padding:8px;margin-bottom:16px">⚠ <b>Emergency services do not watch this board.</b> Call 911 or your local emergency number first.</p>
     <button class="btn" style="width:100%" onclick="dismissOnboarding()">Got it — open the hub</button>
   </div>
 </div>
@@ -399,7 +400,7 @@ select option{background:var(--bg3)}
 
   <div id="capacityWarnDash"></div>
 
-  <div class="card" style="border-color:#f85149;background:#1a0a0a;padding:12px 16px">
+  <div class="card" style="border-color:var(--red);background:var(--red-bg);padding:12px 16px">
     <b style="color:#f85149">⚠ Emergency services do not watch this board.</b>
     Call 911 or your local emergency number if any phone works. Nobody is guaranteed to read messages here.
   </div>

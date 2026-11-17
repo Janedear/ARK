@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Connect to ARK — for emergency services and agencies</title>
+<meta name="description" content="Emergency management, responders, shelters, utilities and community organisations can ask to link with ARK: share verified local information with ARK users, or connect your own ARK hub.">
+<link rel="canonical" href="https://arks.solutions/connect">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://arks.solutions/connect">
+<meta property="og:site_name" content="ARK">
+<meta property="og:title" content="Connect to ARK — for emergency services and agencies">
+<meta property="og:description" content="Ask to link your organisation with ARK: share verified local information, or connect your own hub.">
+<meta property="og:image" content="https://arks.solutions/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#faf9f5">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="preload" href="/brand/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ark-roof" viewBox="0 0 60 26"><path d="M4 22 30 5l26 17"/><path d="M18 23l12-8 12 8" stroke-width="3.4"/></symbol>
+  <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
+</svg>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="wordmark" href="/" aria-label="ARK home"><span class="ark"><svg aria-hidden="true"><use href="#ark-roof"/></svg>ARK</span><small>by HaloSuite</small></a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/hub">ARK Hub</a>
+      <a class="button button-dark" href="/app">Open ARK</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="page-head">
+    <div class="kicker">For official services</div>
+    <h1>Connect to ARK.<em>Reach people when the network can't.</em></h1>
+    <p class="lead">If your organisation helps people in an emergency, ask to link with ARK.</p>
+    <p>ARK is used by households and neighbourhoods when normal communication is down. Linking lets you share verified local information with them, or connect a hub your team runs. Every request is checked by a person before anything is linked.</p>
+  </div>
+
+  <div class="split" style="padding-bottom:clamp(56px,8vw,110px)">
+    <form id="connect-form" novalidate>
+      <label>Organisation
+        <input name="organisation" autocomplete="organization" required maxlength="160">
+      </label>
+      <label>Type of organisation
+        <select name="type">
+          <option>Emergency management</option>
+          <option>Fire, EMS or police</option>
+          <option>Public health or hospital</option>
+          <option>Utility (power, water, telecom)</option>
+          <option>Shelter or relief organisation</option>
+          <option>Local government</option>
+          <option>Community or volunteer group</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <label>Your name
+        <input name="name" autocomplete="name" required maxlength="120">
+      </label>
+      <label>Your role
+        <input name="role" autocomplete="organization-title" required maxlength="120">
+      </label>
+      <label>Work email <small>Use your organisation's address so we can verify you.</small>
+        <input name="email" type="email" autocomplete="email" inputmode="email" required maxlength="200">
+      </label>
+      <label>Phone <small>Optional.</small>
+        <input name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="40">
+      </label>
+      <label>Area you serve <small>City, county, district or region.</small>
+        <input name="area" required maxlength="200">
+      </label>
+      <fieldset style="border:0;display:grid;gap:10px">
+        <legend style="font-size:14px;font-weight:500;margin-bottom:8px">What would you like to do?</legend>
+        <label class="check"><input type="checkbox" name="wants" value="Share verified alerts and local information">Share verified alerts and local information with ARK users in our area</label>
+        <label class="check"><input type="checkbox" name="wants" value="Connect our own ARK hub">Connect a hub our team runs (shelter, command post, station)</label>
+        <label class="check"><input type="checkbox" name="wants" value="Receive community reports">Receive community reports posted to local hubs</label>
+        <label class="check"><input type="checkbox" name="wants" value="Something else">Something else</label>
+      </fieldset>
+      <label>Anything we should know <small>Optional.</small>
+        <textarea name="message" maxlength="3000"></textarea>
+      </label>
+      <div class="hp" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
+      <p id="connect-error" role="alert" hidden></p>
+      <div><button class="button button-dark button-lg" type="submit" id="connect-submit">Request to connect <svg aria-hidden="true"><use href="#arrow"/></svg></button></div>
+      <p class="note">This form is not monitored for emergencies. In immediate danger, call 911.</p>
+    </form>
+
+    <div style="display:grid;gap:18px">
+      <div class="record" id="connect-done" role="status" hidden>
+        <strong>Request received.</strong>
+        <p>Thank you. A person at HaloSuite will reply to your work email after checking the details. Your reference is <strong id="connect-ref"></strong>.</p>
+      </div>
+      <div class="record">
+        <strong>What happens next</strong>
+        <p>We confirm who you are using contact details we find ourselves, not only the ones on this form. Then we agree what to link and how.</p>
+        <p>Nothing is connected automatically, and nothing about ARK users is shared with you: ARK keeps people's information on their own devices.</p>
+      </div>
+      <div class="record">
+        <strong>Already technical?</strong>
+        <p>ARK hubs exchange signed messages with each other over any network, and the open-source toolkit includes a responder bridge for verified announcements. See the <a href="https://github.com/Janedear/ARK">source code</a> and <a href="https://github.com/Janedear/ARK/blob/main/PROTOCOL.md">protocol</a>.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>ARK — made by <a href="https://halosuite.ai/">HaloSuite</a>. Free and open source.</span>
+    <span class="right"><a href="/">Home</a><a href="/hub">ARK Hub</a><a href="mailto:hello@halosuite.ai">hello@halosuite.ai</a></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var form = document.getElementById('connect-form');
+  var error = document.getElementById('connect-error');
+  var button = document.getElementById('connect-submit');
+  function fail(message) { error.textContent = message; error.hidden = false; error.focus && error.focus(); }
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    error.hidden = true;
+    var data = { wants: [] };
+    Array.prototype.forEach.call(form.elements, function (el) {
+      if (!el.name) return;
+      if (el.type === 'checkbox') { if (el.checked) data.wants.push(el.value); }
+      else data[el.name] = el.value;
+    });
+    var required = { organisation: 'your organisation', name: 'your name', role: 'your role', email: 'your work email', area: 'the area you serve' };
+    for (var key in required) {
+      if (!String(data[key] || '').trim()) { fail('Please add ' + required[key] + '.'); form.elements[key].focus(); return; }
+    }
+    button.disabled = true;
+    var label = button.firstChild; var original = label.nodeValue; label.nodeValue = 'Sending… ';
+    fetch('/?connect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+      .then(function (response) { return response.json().catch(function () { return {}; }).then(function (body) { return { ok: response.ok, body: body }; }); })
+      .then(function (result) {
+        if (!result.ok) throw new Error(result.body.error || 'Something went wrong. Please email hello@halosuite.ai.');
+        document.getElementById('connect-ref').textContent = result.body.reference || 'saved';
+        document.getElementById('connect-done').hidden = false;
+        form.reset();
+        document.getElementById('connect-done').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      })
+      .catch(function (err) {
+        fail(err && err.message && err.message !== 'Failed to fetch' ? err.message : 'We could not reach ARK just now. Please try again, or email hello@halosuite.ai.');
+      })
+      .then(function () { button.disabled = false; label.nodeValue = original; });
+  });
+})();
+</script>
+</body>
+</html>

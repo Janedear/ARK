@@ -4,7 +4,8 @@
  * Goal: once someone has opened https://arks.solutions/ a single time, ARK opens again with no
  * internet at all — and people who are online still get fixes quickly.
  *
- *   App page ("/" and /ARK-CRISIS-SUITE.html)  → network first (3 s limit), saved copy as fallback
+ *   App page (/app and /ARK-CRISIS-SUITE.html) → network first (3 s limit), saved copy as fallback
+ *   Welcome page ("/")                          → network first, saved copy, else the app itself
  *   Icons, manifest, preview image              → saved copy first, refreshed in the background
  *   On-device AI library (esm.run / jsDelivr)   → saved copy first, so HALO+ can start offline
  *   /?patches, /?bugs, /?admin, hub APIs        → never touched (always live, never cached)
@@ -12,14 +13,17 @@
  * Bump CACHE_VERSION whenever this file changes.
  */
 
-const CACHE_VERSION = 'ark-v5';
+const CACHE_VERSION = 'ark-v6';
 const CACHE_NAME = `ark-cache-${CACHE_VERSION}`;
 const APP_SHELL = '/ARK-CRISIS-SUITE.html';
 const NETWORK_TIMEOUT_MS = 3000;
 
 // Only files that are certain to exist — one missing file would cancel the whole install.
+const LANDING = '/landing.html';
 const PRECACHE_URLS = [
   APP_SHELL,
+  LANDING,
+  '/brand/halo-mascot.webp',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
@@ -59,17 +63,19 @@ function saveCopy(key, response) {
   return response;
 }
 
-/** The app page: try the network briefly so updates arrive, otherwise use the saved copy. */
-function appPage(request) {
+/** A page: try the network briefly so updates arrive, otherwise use the saved copy. */
+function page(request, key) {
   const fromNetwork = fetch(request).then(response => {
-    if (response.ok) saveCopy(APP_SHELL, response);
+    if (response.ok) saveCopy(key, response);
     return response;
   });
   const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), NETWORK_TIMEOUT_MS));
   return Promise.race([fromNetwork, timeout])
     .then(response => (response.ok ? response : Promise.reject(new Error('bad status'))))
-    .catch(() => caches.match(APP_SHELL, { ignoreSearch: true })
-      // No saved copy yet: wait for the network however long it takes.
+    .catch(() => caches.match(key, { ignoreSearch: true })
+      // Offline with no saved welcome page: the app itself is the best thing to show.
+      .then(saved => saved || (key === APP_SHELL ? null : caches.match(APP_SHELL, { ignoreSearch: true })))
+      // Nothing saved at all yet: wait for the network however long it takes.
       .then(saved => saved || fromNetwork));
 }
 
@@ -96,12 +102,16 @@ self.addEventListener('fetch', event => {
   if (url.search && /[?&](patches|bugs|admin)\b/.test(url.search)) return;
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/ark-data/')) return;
 
-  if (url.pathname === '/' || url.pathname === '/index.php' || url.pathname === '/index.html' || url.pathname === APP_SHELL) {
-    event.respondWith(appPage(request));
+  if (url.pathname === '/app' || url.pathname === '/app/' || url.pathname === APP_SHELL) {
+    event.respondWith(page(request, APP_SHELL));
+    return;
+  }
+  if (url.pathname === '/' || url.pathname === '/index.php' || url.pathname === LANDING) {
+    event.respondWith(page(request, LANDING));
     return;
   }
 
-  if (/\.(png|svg|ico|json|webmanifest)$/.test(url.pathname)) {
+  if (/\.(png|webp|svg|ico|json|webmanifest)$/.test(url.pathname)) {
     event.respondWith(savedFirst(request));
   }
   // Anything else: default browser behaviour.

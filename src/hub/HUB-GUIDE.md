@@ -9,16 +9,16 @@ needs this kit copied onto the machine **before** the internet goes down.
 - A shared message board: *need help, safe, can help, looking for someone, general news*.
 - "I saw this" buttons that record signed acknowledgments. A count means people read it, **never** that help is coming.
 - The first aid and survival guidance, emergency numbers and your meeting point.
-- The offline message app to save onto their own phone and carry away.
-- Every file in `library/files`: Kiwix and Organic Maps for Android, Wikipedia `.zim` files and more, each with a SHA-256 fingerprint.
+- The full ARK app to open, or to save onto their own phone and carry away.
+- Any file you put in `library/files` (maps, books, apps), each listed with a SHA-256 fingerprint.
 
 ## Before a crisis (needs internet once)
 
-1. Download the ARK kit and unzip it.
-2. Run the library downloader in `library/` so `library/files` holds Node.js, the apps and the Wikipedia files.
+1. Download the ARK Hub kit from <https://arks.solutions/hub> and unzip it. The kit includes Node.js for Windows; on Mac, Linux or Raspberry Pi install Node.js 20 or newer from <https://nodejs.org>.
+2. Optional: copy anything you want to share with neighbours (offline maps, books, apps) into `library/files`.
 3. Copy the whole kit folder onto the machine that will be the hub, and onto a USB stick as a spare.
 4. Do a full practice run with the Wi-Fi router unplugged from the internet: start the hub, join with two phones, post, and acknowledge.
-5. In the kit folder, run `node hub/selftest.mjs` (or the Node copy in `library/files`). All checks must pass.
+5. In the kit folder, run `node hub/selftest.mjs`. All checks must pass.
 
 ## Starting the hub
 

@@ -1,0 +1,36 @@
+# Checks that run on every push and pull request: hub and toolkit self-tests, PHP syntax, and a full build.
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Hub self-tests
+        run: |
+          node src/hub/selftest.mjs
+          node src/hub/selftest-extended.mjs
+      - name: Toolkit self-test
+        run: node src/toolkit/selftest.mjs
+      - name: JavaScript syntax
+        run: |
+          for f in src/hub/*.mjs src/toolkit/*.mjs web/service-worker.js; do node --check "$f"; done
+          node -e "const s=require('fs').readFileSync('ARK-CRISIS-SUITE.html','utf8');for(const m of s.matchAll(/<script>([\s\S]*?)<\/script>/g))new Function(m[1]);console.log('app scripts parse')"
+      - name: PHP syntax
+        run: php -l web/index.php
+      - name: Build website and hub kit
+        run: python scripts/build.py

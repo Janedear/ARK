@@ -10,5 +10,5 @@ for T in library/files/node-v*-"$OS"-"$A".tar.*; do
 done
 NODE="$DIR/bin/node"
 [ -x "$NODE" ] || NODE=$(command -v node)
-if [ -z "$NODE" ]; then echo "Node.js was not found. Run library/get-library.sh while you still have internet."; exit 1; fi
+if [ -z "$NODE" ]; then echo "Node.js was not found. Install Node.js 20 or newer from https://nodejs.org while you still have internet."; exit 1; fi
 exec "$NODE" hub/ark-hub.mjs

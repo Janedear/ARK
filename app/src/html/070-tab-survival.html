@@ -1,0 +1,35 @@
+<!-- === TAB: SURVIVAL === -->
+<div class="tab-panel" id="tab-survival" role="tabpanel" aria-labelledby="navtab-survival" tabindex="-1">
+
+  <div class="flex-between mb-12 wrap gap-8">
+    <h2 class="section-title"><span class="title-icon">📚</span>Survival Library<span class="guide-count-badge" id="guide-count-badge"></span></h2>
+    <div class="flex gap-8">
+      <input class="form-input" id="guide-search" maxlength="500" style="width:200px" placeholder="Search guides..." oninput="Guides.search()" aria-label="Search guides">
+      <button class="btn btn-ghost btn-sm" onclick="PrintARK.checklist()" title="Print your preparedness checklist">🖨️ Checklist</button>
+    </div>
+  </div>
+
+  <div class="guide-nav" id="guide-nav">
+    <span class="guide-cat-btn active" data-cat="all">All Guides</span>
+    <span class="guide-cat-btn" data-cat="water">💧 Water</span>
+    <span class="guide-cat-btn" data-cat="food">🍽️ Food</span>
+    <span class="guide-cat-btn" data-cat="shelter">🏕️ Shelter</span>
+    <span class="guide-cat-btn" data-cat="fire">🔥 Fire</span>
+    <span class="guide-cat-btn" data-cat="medical">🏥 Medical</span>
+    <span class="guide-cat-btn" data-cat="navigation">🧭 Navigation</span>
+    <span class="guide-cat-btn" data-cat="signaling">📡 Signaling</span>
+    <span class="guide-cat-btn" data-cat="comms">📻 Radio/Comms</span>
+    <span class="guide-cat-btn" data-cat="power">⚡ Power</span>
+    <span class="guide-cat-btn" data-cat="weather">🌡️ Weather</span>
+    <span class="guide-cat-btn" data-cat="evacuation">🚶 Evacuation</span>
+    <span class="guide-cat-btn" data-cat="communication">📶 Messaging</span>
+    <span class="guide-cat-btn" data-cat="reunification">👨‍👩‍👧 Family</span>
+    <span class="guide-cat-btn" data-cat="community">🤝 Community</span>
+    <span class="guide-cat-btn" data-cat="__bookmarks__">⭐ Bookmarked</span>
+  </div>
+
+  <div id="guides-container">
+    <!-- filled by JS from embedded data -->
+  </div>
+</div><!-- /tab-survival -->
+

@@ -16,8 +16,10 @@ AddDefaultCharset UTF-8
   RewriteRule ^ark-data(/|$) - [F,L]
 
   # Friendly and legacy addresses
+  RewriteRule ^app/?$ /ARK-CRISIS-SUITE.html [L]
   RewriteRule ^hub/?$ /hub.html [L]
-  RewriteRule ^(ARK\.php|index\.html|landing\.html)$ / [L,R=302,QSD]
+  RewriteRule ^connect/?$ /connect.html [L]
+  RewriteRule ^(ARK\.php|index\.html)$ /app [L,R=302,QSD]
 </IfModule>
 
 # Hidden files and anything that is not meant for visitors

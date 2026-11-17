@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!--
+  ARK Crisis Suite — Single-File Emergency Communication App
+  ==========================================================
+  Version : 1.2.0
+  License : MIT
+  Repo    : https://github.com/Janedear/ARK
+  Contact : hello@halosuite.ai
+
+  DESIGN INTENT — why this is a single HTML file
+  -----------------------------------------------
+  ARK is intentionally built as one self-contained HTML file with zero external
+  dependencies. This is not a limitation; it is the core architecture constraint:
+
+    1. OFFLINE-FIRST. The file must work when copied to a USB stick, opened from
+       a local filesystem, or served from an offline Raspberry Pi hub over Wi-Fi.
+       A build step producing multiple files adds failure modes (broken relative
+       paths, missing chunks). One file has exactly one failure mode: not present.
+
+    2. ZERO INSTALL. Recipients share it over Signal, AirDrop, email, or SD card.
+       A web app with a package.json cannot be shared this way.
+
+    3. DEPLOYABLE ANYWHERE. Drop it in an S3 bucket, a Caddy static root, a Pi's
+       home directory, or email it. No server-side rendering, no Node runtime.
+
+    4. AUDITABLE. Emergency software earns trust through inspectability. A single
+       HTML file can be read, reviewed, and forked by anyone with a text editor.
+
+  MODULES (in source order)
+  -------------------------
+  CSS            Lines ~52–443    Design system: tokens, layout, components
+  HTML           Lines ~444–693   Static shells: onboarding wizard, modals, nav
+  Tabs           Lines ~695–1600  Home, Messages, Medical, Map, Radio, Settings
+  DB             Lines ~1601–     IndexedDB wrapper (messages, resources)
+  Store          Lines ~...       localStorage wrapper
+  UI             Lines ~...       Tab switching, rendering, toast, modal helpers
+  Hub            Lines ~2082–     Hub sync, four-state connection pill, queue drain
+  Household      Lines ~...       Household plan, contacts
+  Guides         Lines ~...       Survival/medical guides
+  CPR            Lines ~...       CPR timer module
+  MapTool        Lines ~...       Offline map utilities
+  RadioTool      Lines ~...       Morse encoder, freq chart
+  ShareARK       Lines ~3790–     QR code + share flow
+  ARKQr          Lines ~3800–     Pure-JS Reed-Solomon QR encoder (versions 1–10, ECL M)
+  Init           Lines ~4008–     DOMContentLoaded bootstrap, PWA install prompt
+
+  HUB PROTOCOL: ARK-RELAY-1
+  -------------------------
+  Signed JSON packets (ECDSA P-256/SHA-256). Fields: v, kind, channel, alias,
+  text, ref, issued_at, expires_at, public_key, id (sha256 hex), signature
+  (base64url raw r||s 64 bytes). Full spec: PROTOCOL.md in this repository.
+
+  SECURITY MODEL
+  ---------------
+  - Signatures prove message integrity, NOT identity.
+  - Hub message board is public and unencrypted; treat it as a noticeboard.
+  - No delivery guarantee; "seen" count ≠ help is coming.
+  - ARK never spreads itself, runs hidden, or collects data without consent.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://esm.run https://cdn.jsdelivr.net; worker-src 'self' blob:; connect-src *;">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ARK — Backup internet, AI &amp; more for when crisis hits</title>
+<meta name="description" content="A free emergency app that keeps working when the internet is down: messaging between nearby phones, an offline AI helper, maps, first-aid and survival guides, and your family plan. No account. Save it now, before you need it.">
+<link rel="canonical" href="https://arks.solutions/app">
+<!-- Open Graph / social sharing -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://arks.solutions/app">
+<meta property="og:title" content="ARK — Backup internet, AI &amp; more for when crisis hits">
+<meta property="og:description" content="Free. No account. Keeps working when the internet is down: messaging between nearby phones, an offline AI helper, maps, first-aid guides and your family plan. Save it now, before you need it.">
+<meta property="og:site_name" content="ARK Crisis Suite">
+<meta property="og:image" content="https://arks.solutions/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ARK — Backup internet, AI and more for when crisis hits. Free emergency app that works offline.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ARK — Backup internet, AI &amp; more for when crisis hits">
+<meta name="twitter:description" content="Free emergency app that keeps working when the internet is down. Messaging, offline AI, maps, first-aid guides, family plan. Save it before you need it.">
+<meta name="twitter:image" content="https://arks.solutions/og-image.png">
+<meta name="application-name" content="ARK Crisis Suite">
+<meta name="theme-color" content="#faf9f5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23f0ebe0'/%3E%3Cpath d='M96 24 L152 54 L152 102 C152 132 128 158 96 168 C64 158 40 132 40 102 L40 54 Z' fill='%238b6f3e'/%3E%3Ctext x='96' y='118' text-anchor='middle' font-family='system-ui%2Csans-serif' font-weight='900' font-size='52' fill='%23f0ebe0'%3EARK%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="ARK">
+<!-- No web-font requests: the Geist typeface is embedded below, so ARK looks the same with no internet. -->
+<style>

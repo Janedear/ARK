@@ -1,0 +1,198 @@
+<!-- === TAB: SETTINGS === -->
+<div class="tab-panel" id="tab-settings" role="tabpanel" aria-labelledby="navtab-settings" tabindex="-1">
+
+  <h2 class="section-title"><span class="title-icon">⚙️</span>Settings</h2>
+
+  <!-- Connection -->
+  <div class="card">
+    <div class="card-title mb-12"><span class="card-icon">🌐</span>Connection</div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Hub URL</div>
+        <div class="setting-desc">Address of the ARK hub server on your local network</div>
+      </div>
+      <input class="form-input" id="set-hub-url" maxlength="500" style="width:220px" placeholder="http://10.42.0.1:8080" aria-label="Hub URL">
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Auto-sync interval</div>
+        <div class="setting-desc">How often to check for new messages</div>
+      </div>
+      <select class="form-input" id="set-sync-interval" style="width:150px">
+        <option value="30">30 seconds</option>
+        <option value="60" selected>1 minute</option>
+        <option value="300">5 minutes</option>
+        <option value="0">Manual only</option>
+      </select>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Offline mode</div>
+        <div class="setting-desc">Force offline — don't attempt hub connections</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="set-offline-mode" onchange="Settings.toggleOffline()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Identity -->
+  <div class="card">
+    <div class="card-title mb-12"><span class="card-icon">👤</span>Identity</div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Default Alias</div>
+        <div class="setting-desc">Your name on message boards</div>
+      </div>
+      <input class="form-input" id="set-alias" style="width:180px" placeholder="Anonymous" maxlength="40" aria-label="Default alias">
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Household ID</div>
+        <div class="setting-desc">Unique identifier for your household</div>
+      </div>
+      <div class="flex gap-8" style="align-items:center">
+        <input class="form-input" id="set-hh-id" style="width:140px" readonly aria-label="Household ID">
+        <button class="btn btn-ghost btn-sm" onclick="Settings.regenHHID()">↺ Regen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Display -->
+  <div class="card">
+    <div class="card-title mb-12"><span class="card-icon">🎨</span>Display</div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Font Size</div>
+        <div class="setting-desc">Applies to all text in the app</div>
+      </div>
+      <select class="form-input" id="set-font-size" style="width:150px" onchange="Settings.applyFontSize()">
+        <option value="14">Small</option>
+        <option value="16" selected>Normal</option>
+        <option value="18">Large</option>
+        <option value="20">Extra Large</option>
+      </select>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">🌙 Dark Mode</div>
+        <div class="setting-desc">Dark background — easier on the eyes at night</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="set-dark-mode" onchange="Settings.toggleDarkMode()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">High Contrast Mode</div>
+        <div class="setting-desc">Increase contrast for readability</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="set-high-contrast" onchange="Settings.toggleContrast()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Developer Mode</div>
+        <div class="setting-desc">Show raw API responses in console</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="set-dev-mode">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">🔋 Low-Power Mode</div>
+        <div class="setting-desc">Slow sync to 5 min, reduce animations — saves battery</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="set-low-power" onchange="Settings.toggleLowPower()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Data Management -->
+  <div class="card">
+    <div class="card-title mb-12"><span class="card-icon">💾</span>Data Management</div>
+    <div id="backup-reminder" style="display:none;background:rgba(210,153,34,0.12);border:1px solid var(--yellow);border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--yellow)">
+      ⚠️ <strong>Backup overdue</strong> — Your last export was <span id="backup-days-ago">more than 7 days</span> ago. Export your data now to avoid losing messages and settings.
+    </div>
+    <div class="flex gap-8 wrap">
+      <button class="btn btn-secondary btn-sm" onclick="Settings.exportAll()">📤 Export All Data</button>
+      <button class="btn btn-secondary btn-sm" onclick="Settings.importAll()">📥 Import Data</button>
+      <button class="btn btn-ghost btn-sm" onclick="Settings.clearCache()">🗑️ Clear Cache</button>
+      <button class="btn btn-red btn-sm" onclick="Settings.clearAll()">⚠️ Wipe All Data</button>
+    </div>
+    <div id="set-storage-info" class="font-xs text-muted mt-12">Calculating storage usage...</div>
+    <div id="set-last-save" class="font-xs text-muted mt-8" aria-live="polite">Last saved: nothing saved yet this session</div>
+    <div id="set-last-export" class="font-xs text-muted mt-4">Last exported: never</div>
+  </div>
+
+  <!-- Save Settings -->
+  <button class="btn btn-primary btn-block" onclick="Settings.save()">💾 Save All Settings</button>
+
+  <!-- Setup Wizard re-run -->
+  <div class="card mt-12">
+    <div class="card-title mb-8"><span class="card-icon">🧭</span>Setup</div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Re-run Setup Wizard</div>
+        <div class="setting-desc">Walk through the initial setup again to update your name, role, or hub address</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="Settings.rerunWizard()">↺ Setup Wizard</button>
+    </div>
+  </div>
+
+  <!-- App / Install -->
+  <div class="card mt-12">
+    <div class="card-title mb-12"><span class="card-icon">📲</span>App</div>
+    <div class="setting-row" id="pwa-install-row" style="display:none">
+      <div>
+        <div class="setting-label">Install to Home Screen</div>
+        <div class="setting-desc">Add ARK as an app for one-tap offline access</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="installPWA()">📲 Install</button>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Alert Notifications</div>
+        <div class="setting-desc">Allow browser notifications for critical alerts</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="set-notif-btn" onclick="Settings.requestNotifications()">Enable</button>
+    </div>
+  </div>
+
+  <!-- Report Issue / Updates -->
+  <div class="card mt-12">
+    <div class="card-header">
+      <div class="card-title"><span class="card-icon">🔧</span>App Issues &amp; Updates</div>
+    </div>
+    <div class="font-sm text-secondary mb-12" style="line-height:1.5">Something not working? Report it and check for fixes.</div>
+    <div class="flex gap-8 flex-wrap">
+      <button class="btn btn-secondary btn-sm" onclick="UI.switchTab('network');setTimeout(()=>document.getElementById('bug-report-text')?.focus(),150)">🐛 Report a Bug</button>
+      <button class="btn btn-secondary btn-sm" onclick="Network.checkForUpdates()">🔄 Check for Updates</button>
+    </div>
+    <div id="settings-patch-status" class="font-xs text-muted mt-8"></div>
+  </div>
+
+  <!-- About -->
+  <div class="card mt-12">
+    <div class="card-title mb-8"><span class="card-icon">ℹ️</span>About ARK Crisis Suite</div>
+    <div class="font-sm text-secondary" style="line-height:1.8">
+      <div><strong>Version:</strong> 1.0.0 (2026-11-15)</div>
+      <div><strong>Format:</strong> Single-file offline HTML application</div>
+      <div><strong>Works on:</strong> Chrome, Firefox, Safari, Edge — Windows, Mac, Linux, Android, iOS</div>
+      <div><strong>No internet required</strong> — all data stored locally in your browser</div>
+      <hr class="divider">
+      <div><strong>Guidance sources:</strong> Ready.gov, CDC, FEMA, USDA, National Weather Service, American Red Cross (checked 2026-11-14)</div>
+      <div class="text-muted mt-8">Not reviewed by a clinician. Not a substitute for professional medical or emergency services.</div>
+      <div class="mt-8">In a life-threatening emergency: <span class="text-red bold">call 911</span></div>
+    </div>
+  </div>
+</div><!-- /tab-settings -->
+

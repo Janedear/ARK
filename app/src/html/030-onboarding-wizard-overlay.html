@@ -1,0 +1,141 @@
+<!-- ===== ONBOARDING WIZARD OVERLAY ===== -->
+<div id="onboard-overlay" class="hidden">
+  <div class="onboard-box">
+    <div class="onboard-logo"><svg aria-hidden="true"><use href="#i-ark-roof"/></svg>ARK<small>by HaloSuite</small><span class="wiz-mascot" aria-hidden="true"></span></div>
+    <div class="onboard-tagline"><b>Prepared for the unexpected.</b><em>Connected when it matters.</em>A two-minute setup. Everything you enter stays on this device.</div>
+    <div class="onboard-progress">
+      <div class="ob-dot" id="ob-d1"></div>
+      <div class="ob-dot" id="ob-d2"></div>
+      <div class="ob-dot" id="ob-d3"></div>
+      <div class="ob-dot" id="ob-d4"></div>
+      <div class="ob-dot" id="ob-d5"></div>
+    </div>
+
+    <!-- Step 1: Welcome -->
+    <div class="onboard-step active" id="ob-step-1">
+      <div class="onboard-step-icon">🛡️</div>
+      <h2>Welcome to ARK Crisis Suite</h2>
+      <p>ARK is a fully <strong>offline-capable</strong> emergency communication and coordination tool. It works without internet, can run from a USB drive, and you can share it instantly with anyone who needs it.</p>
+      <ul>
+        <li>Works 100% offline — no servers, no accounts required</li>
+        <li>Send this file via text, email, AirDrop, or USB to your neighbors</li>
+        <li>Coordinate with your neighborhood hub when in range</li>
+        <li>Manage medical triage, resources, and household status</li>
+      </ul>
+      <div class="ob-warn">⚡ This app requires no internet. All data is stored only on your device. Nothing is transmitted to any company or server unless you connect to a local hub.</div>
+      <div class="onboard-nav">
+        <span class="onboard-step-label">Step 1 of 5</span>
+        <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost" onclick="Onboarding.finish()" title="Go straight to the app. You can run setup later from Settings.">Skip — I need help now</button>
+          <button class="btn btn-primary" onclick="Onboarding.next()">Get Started →</button>
+        </span>
+      </div>
+    </div>
+
+    <!-- Step 2: Identity Setup -->
+    <div class="onboard-step" id="ob-step-2">
+      <div class="onboard-step-icon">👤</div>
+      <h2>Your Identity</h2>
+      <p>Set a name so your household appears correctly when coordinating with neighbors and hubs. This stays on your device — it is never sent anywhere automatically.</p>
+      <div class="form-group">
+        <label class="form-label">Your Name / Household Name <span style="color:var(--red)">*</span></label>
+        <input type="text" class="form-input" id="ob-name" placeholder="e.g. Martinez Family, Dr. Chen, Unit 4B" maxlength="60" autocomplete="off" oninput="document.getElementById('ob-name-err').style.display='none';this.style.borderColor=''">
+        <div id="ob-name-err" style="display:none;color:var(--red);font-size:12px;margin-top:4px">Please enter a household name to continue.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Role (optional)</label>
+        <select class="form-input" id="ob-role">
+          <option value="">— Select a role if applicable —</option>
+          <option value="IC">🔺 Incident Commander</option>
+          <option value="MED">🏥 Medical / First Responder</option>
+          <option value="LOG">📦 Logistics / Supply</option>
+          <option value="OPS">⚙️ Operations</option>
+          <option value="PIO">📢 Public Information</option>
+          <option value="SEC">🔒 Security / Safety</option>
+          <option value="VOL">🤝 Volunteer</option>
+          <option value="RES">🏠 Resident</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address / Location (optional — helps coordinate nearby)</label>
+        <input type="text" class="form-input" id="ob-addr" placeholder="e.g. 123 Oak St or Apt 4B — stays on device" maxlength="80" autocomplete="off">
+      </div>
+      <div class="onboard-nav">
+        <button class="btn btn-secondary" onclick="Onboarding.back()">← Back</button>
+        <span class="onboard-step-label">Step 2 of 5</span>
+        <button class="btn btn-primary" onclick="Onboarding.saveIdentity()">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Hub Connection -->
+    <div class="onboard-step" id="ob-step-3">
+      <div class="onboard-step-icon">🌐</div>
+      <h2>Connect to a Local Hub</h2>
+      <p>A <strong>Community Hub</strong> is ARK running on a local computer or Raspberry Pi nearby. When you're in range, your device syncs messages and resource updates automatically.</p>
+      <ul>
+        <li>Works on any local WiFi — no internet needed</li>
+        <li>Your neighborhood coordinator should give you a Hub address</li>
+        <li>If you don't have one yet, skip this — you can add it later in Settings</li>
+      </ul>
+      <div class="form-group">
+        <label class="form-label">Hub Address (optional)</label>
+        <input type="text" class="form-input" id="ob-hub" maxlength="500" placeholder="e.g. 192.168.1.100:3000 or hub.local:3000" autocomplete="off">
+      </div>
+      <div class="ob-info">💡 <strong>Setting up a hub?</strong> The ARK Hub software runs on any computer or Raspberry Pi. Download it from the same place you got this file, or ask your neighborhood coordinator.</div>
+      <div class="onboard-nav">
+        <button class="btn btn-secondary" onclick="Onboarding.back()">← Back</button>
+        <span class="onboard-step-label">Step 3 of 5</span>
+        <button class="btn btn-primary" onclick="Onboarding.saveHub()">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Share ARK -->
+    <div class="onboard-step" id="ob-step-4">
+      <div class="onboard-step-icon">📡</div>
+      <h2>Share ARK — Build Your Network</h2>
+      <p>The more people have ARK, the stronger your community's resilience. <strong>Share this single HTML file</strong> with anyone who may need it — it contains the entire application.</p>
+      <ul>
+        <li><strong>Text message</strong> — Send the file as an attachment</li>
+        <li><strong>AirDrop / Nearby Share</strong> — Works phone-to-phone in seconds</li>
+        <li><strong>USB drive</strong> — Copy the file, hand the drive to anyone</li>
+        <li><strong>Email</strong> — Attach and send like any document</li>
+        <li><strong>QR code</strong> — Generate a code on the Share tab</li>
+      </ul>
+      <div class="ob-success">✓ The whole app is one file. Sharing it = installing it. Recipients just open it in any browser — no app store, no account, no internet.</div>
+      <div class="onboard-actions">
+        <button class="btn btn-primary" style="flex:1" onclick="Onboarding.downloadARK()">⬇ Download ARK to Share</button>
+      </div>
+      <div class="onboard-nav" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="Onboarding.back()">← Back</button>
+        <span class="onboard-step-label">Step 4 of 5</span>
+        <button class="btn btn-primary" onclick="Onboarding.next()">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 5: Ready -->
+    <div class="onboard-step" id="ob-step-5">
+      <div class="onboard-step-icon">✅</div>
+      <h2>You're Ready</h2>
+      <p>ARK is configured and ready for use. Here's a quick guide to the main tabs:</p>
+      <ul>
+        <li><strong>🏠 Home</strong> — Status overview, quick actions, share ARK</li>
+        <li><strong>💬 Messages</strong> — Community messages; sync with hub when in range</li>
+        <li><strong>🌿 Survival</strong> — Water, food, shelter, fire, first aid checklists</li>
+        <li><strong>📦 Resources</strong> — Post what you have; find what others have nearby</li>
+        <li><strong>👥 Household</strong> — Track your household members and status</li>
+        <li><strong>🌐 Network</strong> — Peer discovery, hub connection, mesh status</li>
+        <li><strong>🏥 Medical</strong> — Triage, medications, hospital coordination</li>
+        <li><strong>🗺️ Map</strong> — Mark critical locations offline</li>
+        <li><strong>📻 Radio</strong> — Emergency frequency reference</li>
+        <li><strong>⚙️ Settings</strong> — All configuration, backup, and restore</li>
+      </ul>
+      <div class="ob-info">💡 Tip: Tap <strong>Share ARK</strong> on the Home tab any time to share with someone new.</div>
+      <div class="onboard-nav">
+        <button class="btn btn-secondary" onclick="Onboarding.back()">← Back</button>
+        <span class="onboard-step-label">Step 5 of 5</span>
+        <button class="btn btn-primary btn-block" onclick="Onboarding.finish()" style="flex:1">Enter ARK →</button>
+      </div>
+    </div>
+  </div>
+</div>
+

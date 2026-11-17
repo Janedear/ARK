@@ -1,0 +1,235 @@
+/* =====================================================================
+   HaloSuite design language for ARK
+   ---------------------------------------------------------------------
+   ARK is its own product, made by HaloSuite, and follows halosuite.ai's visual system:
+   warm paper surfaces, near-black ink, restrained gold, hairline borders,
+   Geist for text, Georgia italic for the accent line, small tracked labels,
+   7px buttons. Everything a person sees should feel like the same family.
+
+   base.css holds structure and components; this file sets the tokens and
+   the brand surfaces on top of it. Change colours here, not in base.css.
+   ===================================================================== */
+
+/* ---------- 1. Tokens ---------- */
+:root{
+  /* Surfaces */
+  --bg-primary:#faf9f5;      /* page          (halo: entry-bg)    */
+  --bg-secondary:#f0eee5;    /* quiet fill    (halo: entry-soft)  */
+  --bg-card:#fffefa;         /* paper         (halo: entry-paper) */
+  --bg-elevated:#f6f4ec;
+  --bg-highlight:#f3f1e8;
+  /* Lines */
+  --border:#e2e0d6;          /* (halo: entry-line) */
+  --border-strong:#cdcabd;
+  /* Ink */
+  --text-primary:#292a25;    /* (halo: entry-ink)   */
+  --text-secondary:#555a52;
+  --text-muted:#6b7068;      /* (halo: entry-muted) */
+  /* Gold */
+  --accent:#8d7041;          /* (halo: entry-gold) */
+  --accent-dark:#765927;
+  --accent-soft:#b99b62;
+  --accent-glow:rgba(141,112,65,.09);
+  --accent-rgb:141,112,65;
+  --accent-serif:#99805a;    /* the italic accent line */
+  /* Status — muted, never neon */
+  --green:#227455;  --green-bg:rgba(34,116,85,.08);
+  --red:#b24148;    --red-bg:rgba(178,65,72,.07);
+  --yellow:#8a6a1e; --yellow-bg:rgba(138,106,30,.09);
+  --blue:#3d5a80;   --blue-bg:rgba(61,90,128,.08);
+  /* Action (buttons, bottom bar) */
+  --action:#292d2b;
+  --action-hover:#434941;
+  --on-action:#fffdf5;
+  --bar-active:#e1c58f;
+  /* Shape */
+  --radius-sm:6px;
+  --radius-md:8px;
+  --radius-lg:12px;
+  --radius-xl:14px;
+  --shadow:0 1px 2px rgba(41,45,43,.04);
+  --shadow-card:0 1px 0 rgba(255,255,255,.7) inset,0 4px 14px rgba(53,39,27,.035);
+  --shadow-lg:0 16px 50px rgba(41,45,43,.10);
+  --shadow-glow:0 0 0 3px rgba(141,112,65,.14);
+  /* Type */
+  --font:"Geist","Geist Variable",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-serif:Georgia,"Times New Roman",serif;
+}
+.dark-mode{
+  --bg-primary:#121519; --bg-secondary:#22272c; --bg-card:#1b1f24; --bg-elevated:#20252a; --bg-highlight:#262b31;
+  --border:#353a40; --border-strong:#4a5058;
+  --text-primary:#eeeae1; --text-secondary:#cdcbc3; --text-muted:#b4b6ba;
+  --accent:#d5bb89; --accent-dark:#e1c58f; --accent-soft:#b99b62; --accent-serif:#d5bb89;
+  --accent-glow:rgba(213,187,137,.10); --accent-rgb:213,187,137;
+  --green:#7ad4b1; --green-bg:rgba(122,212,177,.10);
+  --red:#f39a9f;   --red-bg:rgba(243,154,159,.10);
+  --yellow:#e1c58f; --yellow-bg:rgba(225,197,143,.10);
+  --blue:#a9c1e6;  --blue-bg:rgba(169,193,230,.10);
+  --action:#e8dbc0; --action-hover:#f3e9d3; --on-action:#29241b; --bar-active:#e1c58f;
+  --shadow-card:0 1px 0 rgba(255,255,255,.03) inset,0 4px 14px rgba(0,0,0,.25);
+  --shadow-lg:0 16px 50px rgba(0,0,0,.45);
+}
+
+/* ---------- 2. Page and type ---------- */
+body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--font);font-weight:400;font-size:15.5px;line-height:1.65;letter-spacing:-.005em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+h1,h2,h3,h4{font-weight:500;letter-spacing:-.03em;color:var(--text-primary)}
+h1{font-weight:450;letter-spacing:-.05em}
+strong,b,.bold{font-weight:600}
+a{color:var(--accent-dark);text-underline-offset:3px}
+::selection{background:var(--accent);color:#fffdf5}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.text-serif-accent,.serif-accent{font-family:var(--font-serif);font-style:italic;font-weight:400;color:var(--accent-serif)}
+
+/* Small tracked label with a gold dot — the HaloSuite "eyebrow" */
+.eyebrow,.hero-eyebrow,.hub-deploy-label,.form-label,.onboard-step-label{font-family:var(--font);font-size:10.5px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)}
+.eyebrow::before{display:none}
+.kicker{display:flex;align-items:center;gap:10px;font-size:10px;font-weight:500;letter-spacing:.17em;text-transform:uppercase;color:var(--text-muted)}
+.kicker::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent-soft);box-shadow:0 0 0 4px rgba(var(--accent-rgb),.10);flex-shrink:0}
+
+.section-title{font-size:1.5rem;font-weight:450;letter-spacing:-.045em;line-height:1.15;margin-bottom:16px}
+.section-title .title-icon{display:none}
+.card-title{font-size:15px;font-weight:500;letter-spacing:-.02em}
+.card-icon{font-size:15px;opacity:.85}
+.text-muted{color:var(--text-muted)}
+.text-secondary{color:var(--text-secondary)}
+
+/* ---------- 3. Surfaces ---------- */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:20px}
+.card:hover{background:var(--bg-card);border-color:var(--border);transform:none}
+.warn-box,.info-box,.ob-warn,.ob-info,.ob-success{border-radius:var(--radius-md);font-size:13.5px;line-height:1.6}
+.warn-box,.ob-warn{background:var(--red-bg);border:1px solid rgba(178,65,72,.28);color:var(--text-primary)}
+.info-box,.ob-info{background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-secondary)}
+.ob-success{background:var(--green-bg);border:1px solid rgba(34,116,85,.28);color:var(--text-primary)}
+
+/* ---------- 4. Buttons ---------- */
+.btn{border-radius:7px;font-family:var(--font);font-size:13px;font-weight:500;letter-spacing:0;line-height:1.5;padding:11px 18px;min-height:44px;gap:8px;box-shadow:none;transition:background .16s ease,color .16s ease,border-color .16s ease,transform .12s ease}
+.btn:active{transform:scale(.985)}
+.btn-primary{background:var(--action)!important;color:var(--on-action)!important;border:1px solid var(--action)!important;font-weight:500!important;box-shadow:inset 0 1px rgba(255,255,255,.07),0 4px 8px rgba(41,45,43,.05)}
+.btn-primary:hover{background:var(--action-hover)!important;border-color:var(--action-hover)!important;filter:none}
+.btn-secondary{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--bg-secondary);border-color:var(--border-strong)}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid transparent}
+.btn-ghost:hover{background:var(--bg-secondary);color:var(--text-primary)}
+.btn-green{background:var(--green)!important;color:#fffdf5!important;border:1px solid var(--green)!important;font-weight:500!important}
+.btn-red{background:var(--red)!important;color:#fffdf5!important;border:1px solid var(--red)!important;font-weight:500!important}
+.btn-sm{min-height:38px;padding:8px 14px;font-size:12.5px}
+.btn-xs{min-height:32px;padding:5px 10px;font-size:12px;border-radius:6px}
+.btn:disabled,.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+/* ---------- 5. Forms ---------- */
+.form-input,input.form-input,select.form-input,textarea.form-input,.form-select,.form-textarea{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);font-size:16px;min-height:46px;padding:11px 12px;box-shadow:none;transition:border-color .16s ease,box-shadow .16s ease}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);box-shadow:var(--shadow-glow);outline:none}
+.form-input::placeholder{color:var(--text-muted);opacity:.75}
+.form-label{display:block;margin-bottom:6px}
+
+/* ---------- 6. Badges and pills ---------- */
+.badge{border-radius:999px;font-size:10.5px;font-weight:500;letter-spacing:.04em;padding:3px 9px}
+.conn-pill{border-radius:999px;font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);padding:4px 10px}
+.ch-tab,.guide-cat-btn{border-radius:999px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-size:12.5px;font-weight:500}
+.ch-tab.active,.guide-cat-btn.active{background:var(--action);border-color:var(--action);color:var(--on-action);font-weight:500}
+
+/* ---------- 7. Header ---------- */
+#status-bar{background:var(--bg-primary);border-bottom:1px solid var(--border);box-shadow:none;gap:12px;padding-top:10px;padding-bottom:10px;font-size:11.5px;color:var(--text-muted)}
+.dark-mode #status-bar{background:var(--bg-primary)}
+#status-bar .ark-brand{display:inline-flex;align-items:center;gap:10px;font-weight:400;letter-spacing:0;color:var(--text-primary)}
+.brand-ark{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-serif);font-size:21px;letter-spacing:.02em;line-height:1}
+.brand-by{font-family:var(--font);font-size:9px;font-weight:500;letter-spacing:.17em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap}
+@media (max-width:380px){.brand-by{display:none}}
+.brand-ark svg{flex:0 0 24px;width:24px;height:12px;fill:none;stroke:var(--accent-soft);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.sb-gear{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;color:var(--text-secondary);flex-shrink:0}
+.sb-gear:hover{background:var(--bg-secondary);color:var(--text-primary)}
+.sb-gear .hi{width:19px;height:19px}
+#status-bar > .btn{min-height:34px;padding:6px 12px;font-size:11.5px;border-radius:7px;font-weight:500}
+@media (max-width:560px){
+  #status-bar .sb-extra{display:none!important}
+  #status-bar .sb-label{display:none}
+  #status-bar > .btn{margin-left:auto}
+}
+
+/* Section strip */
+#nav{background:var(--bg-primary);border-bottom:1px solid var(--border);box-shadow:none}
+.dark-mode #nav{background:var(--bg-primary);border-top-color:var(--border)}
+#nav .nav-icon{display:none}
+#nav .nav-btn{font-size:12.5px;font-weight:500;letter-spacing:0;color:var(--text-muted);padding:14px 14px;border-radius:0;background:transparent}
+#nav .nav-btn:hover{color:var(--text-primary);background:transparent}
+#nav .nav-btn.active{color:var(--text-primary);background:transparent;box-shadow:inset 0 -1.5px 0 var(--accent)}
+
+/* Icons (line, 1.5 stroke — same family as halosuite.ai) */
+.hi{width:1.25em;height:1.25em;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-.22em}
+
+/* ---------- 8. Home ---------- */
+.home-hero.halo-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 14px;padding:26px 22px 24px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow-card);margin-bottom:14px;position:relative;overflow:hidden}
+.home-hero.halo-hero::before,.home-hero.halo-hero::after{display:none}
+.halo-hero .kicker{margin-bottom:16px}
+.halo-hero h1{font-size:clamp(1.75rem,7.4vw,2.5rem);font-weight:450;letter-spacing:-.055em;line-height:1.06;margin:0 0 12px}
+.halo-hero h1 em{display:block;font:italic 400 1em/1.08 var(--font-serif);letter-spacing:-.045em;color:var(--accent-serif)}
+.halo-hero .hero-sub{font-size:14px;line-height:1.6;color:var(--text-muted);margin:0;max-width:30ch}
+.halo-mascot{width:138px;height:113px;background:var(--mascot) center/contain no-repeat;flex-shrink:0;border:0;padding:0;cursor:pointer;position:relative;z-index:1;filter:drop-shadow(0 12px 16px rgba(53,39,27,.14));transition:transform .3s cubic-bezier(.16,1,.3,1)}
+.halo-mascot:hover,.halo-mascot:focus-visible{transform:translateY(-3px)}
+.halo-guide{grid-column:1 / -1;display:flex;align-items:center;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:12.5px;color:var(--text-secondary);text-align:left;width:100%;background:none;cursor:pointer}
+.halo-guide span{font-size:9.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--accent);font-weight:500;flex-shrink:0}
+.halo-guide .hi{margin-left:auto;width:15px;height:15px;color:var(--text-muted)}
+@media (max-width:400px){.halo-mascot{width:108px;height:89px}}
+
+.ready-banner{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:14px;border-radius:var(--radius-lg);background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary)}
+.ready-banner > .hi{width:22px;height:22px;color:var(--accent)}
+.ready-banner b{display:block;font-size:13.5px;font-weight:500;letter-spacing:-.01em}
+.ready-banner span{font-size:12.5px;color:var(--text-muted);line-height:1.45;display:block}
+.ready-banner .ready-check{margin-left:auto;width:20px;height:20px;flex-shrink:0}
+.dark-mode .ready-banner{background:var(--bg-secondary);border-color:var(--border);color:var(--text-primary)}
+
+.home-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.home-tile{display:flex;flex-direction:column;align-items:flex-start;gap:12px;text-align:left;padding:16px 15px 15px;min-height:118px;border-radius:var(--radius-lg);background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--shadow-card);color:var(--text-primary);position:relative;transition:border-color .16s ease,transform .12s ease}
+.home-tile:hover{border-color:var(--border-strong);box-shadow:var(--shadow-card)}
+.home-tile:active{transform:scale(.985)}
+.home-tile .tile-icon{width:26px;height:26px;color:var(--accent);stroke-width:1.35}
+.home-tile .tile-label{font-size:14.5px;font-weight:500;letter-spacing:-.025em;line-height:1.25;display:flex;align-items:flex-start;gap:6px;width:100%;justify-content:space-between;margin-top:auto}
+.home-tile .tile-label .hi{width:14px;height:14px;color:var(--text-muted);margin-top:3px}
+.home-tile .tile-sub{font-size:12px;color:var(--text-muted);margin-top:-8px;line-height:1.45}
+.tile-status.active{color:var(--green);font-weight:500}
+.dark-mode .home-tile{box-shadow:var(--shadow-card)}
+
+.halo-landscape{display:block;width:100%;height:auto;max-height:96px;margin:6px 0 16px;color:var(--accent-soft);opacity:.6}
+.halo-landscape *{fill:none;stroke:currentColor;stroke-width:1;stroke-linecap:round;stroke-linejoin:round}
+.halo-landscape .sun{fill:rgba(185,155,98,.18);stroke:none}
+
+/* Alert level and quick actions, quieter */
+.alert-banner{border-radius:var(--radius-lg);box-shadow:none}
+.alert-level-num{font-family:var(--font-serif);font-weight:400}
+.alert-info h3{font-weight:500;letter-spacing:-.02em}
+.quick-action{border-radius:var(--radius-lg);border:1px solid var(--border);background:var(--bg-card);box-shadow:none}
+.quick-action .qa-label{font-weight:500;font-size:12.5px;color:var(--text-primary)}
+.quick-action.urgent{background:var(--red-bg);border-color:rgba(178,65,72,.3)}
+
+/* ---------- 9. Bottom bar: Home · Plan · Guides · Messages · Hub ---------- */
+#bottom-tab-bar{background:#292d2b;border-radius:14px;padding:6px;gap:2px;box-shadow:0 14px 34px rgba(41,45,43,.28),inset 0 1px rgba(255,255,255,.07);width:min(420px,calc(100vw - 24px));justify-content:space-between;min-width:0}
+.btb-btn{flex:1;min-width:0;padding:9px 4px 7px;border-radius:9px;color:rgba(255,253,245,.58);font-size:10px;font-weight:500;letter-spacing:.02em;gap:4px}
+.btb-btn .btb-icon{font-size:0;line-height:0}
+.btb-btn .btb-icon .hi{width:21px;height:21px;stroke-width:1.5}
+.btb-btn.active{background:rgba(255,253,245,.06);color:var(--bar-active)}
+.btb-btn .btb-badge{top:6px;right:calc(50% - 17px);background:var(--bar-active);border-color:#292d2b}
+
+/* ---------- 10. Overlays ---------- */
+#onboard-overlay,#ark-modal,#share-modal{background:rgba(41,42,37,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.onboard-box,#ark-modal-box,.share-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg)}
+.onboard-logo{display:flex;align-items:center;gap:10px;font-family:var(--font-serif);font-size:1.7rem;font-weight:400;letter-spacing:.02em;color:var(--text-primary);margin-bottom:14px}
+.onboard-logo svg{flex:0 0 34px;width:34px;height:16px;fill:none;stroke:var(--accent-soft);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.onboard-logo small{font-family:var(--font);font-size:9.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--text-muted);font-weight:500;margin-left:2px}
+.onboard-logo .wiz-mascot{margin-left:auto;width:78px;height:64px;background:var(--mascot) center/contain no-repeat;filter:drop-shadow(0 8px 10px rgba(53,39,27,.14))}
+.onboard-tagline{font-size:13.5px;color:var(--text-muted);margin-bottom:22px;line-height:1.5}
+.onboard-tagline b{display:block;font-size:1.5rem;font-weight:450;letter-spacing:-.05em;line-height:1.1;color:var(--text-primary)}
+.onboard-tagline em{display:block;font:italic 400 1.5rem/1.15 var(--font-serif);letter-spacing:-.04em;color:var(--accent-serif);margin-bottom:10px}
+.onboard-step h2{font-size:1.15rem;font-weight:500;letter-spacing:-.03em}
+.ob-dot{height:2px;border-radius:1px;background:var(--border)}
+.ob-dot.done{background:var(--accent)}.ob-dot.active{background:var(--accent);opacity:1}
+#toast{border-radius:9px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg)}
+
+/* ---------- 11. Details that carried heavy weights ---------- */
+.hub-deploy-title{font-size:1.15rem;font-weight:500;letter-spacing:-.03em}
+.hub-deploy-card{border-radius:var(--radius-lg);border:1px solid var(--border);background:var(--bg-card);box-shadow:var(--shadow-card)}
+.guide-title{font-weight:500;letter-spacing:-.02em}
+.msg-alias{font-weight:500}
+.cpr-counter{font-family:var(--font-serif);font-weight:400}
+.share-method h4{font-weight:500}
+
+@media print{.halo-landscape,.ready-banner,.home-tiles,.halo-guide{display:none!important}}

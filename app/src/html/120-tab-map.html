@@ -1,0 +1,70 @@
+<!-- === TAB: MAP === -->
+<div class="tab-panel" id="tab-map" role="tabpanel" aria-labelledby="navtab-map" tabindex="-1">
+
+  <div class="flex-between mb-12 wrap gap-8">
+    <h2 class="section-title"><span class="title-icon">🗺️</span>Local Map</h2>
+    <div id="gps-coords" class="font-sm text-muted">GPS: waiting...</div>
+  </div>
+
+  <div class="card">
+    <div class="map-toolbar">
+      <span class="map-btn active" onclick="MapTool.setMode('select',this)" title="Pan/select mode">👆 Select</span>
+      <span class="map-btn" onclick="MapTool.setMode('meeting',this)" title="Drop a meeting point">📍 Meeting</span>
+      <span class="map-btn" onclick="MapTool.setMode('water',this)" title="Mark a water source">💧 Water</span>
+      <span class="map-btn" onclick="MapTool.setMode('shelter',this)" title="Mark a shelter">🏠 Shelter</span>
+      <span class="map-btn" onclick="MapTool.setMode('hazard',this)" title="Mark a hazard">⚠️ Hazard</span>
+      <span class="map-btn" onclick="MapTool.setMode('medical',this)" title="Mark a medical site">🏥 Medical</span>
+      <span style="margin-left:auto;display:flex;gap:4px">
+        <span class="map-btn" id="map-btn-zoomin" onclick="MapTool.zoomIn()" title="Zoom in" aria-label="Zoom in">＋</span>
+        <span class="map-btn" id="map-btn-zoomout" onclick="MapTool.zoomOut()" title="Zoom out" aria-label="Zoom out">－</span>
+        <span class="map-btn" id="map-btn-locate" onclick="MapTool.locateMe()" title="Center on my GPS location" aria-label="Center on my GPS location">🎯 Me</span>
+        <span class="map-btn" id="map-btn-cache" onclick="MapTool.preCacheArea()" title="Cache nearby tiles for offline use" aria-label="Cache nearby tiles for offline use">📥 Cache Area</span>
+        <span class="map-btn" onclick="MapTool.clearAll()" title="Remove all markers">🗑️</span>
+        <span class="map-btn" onclick="MapTool.exportImg()" title="Save map as image">💾</span>
+      </span>
+    </div>
+    <canvas class="w-full" id="map-canvas" width="860" height="500" style="border-radius:var(--radius-md)"></canvas>
+    <div class="font-xs text-muted mt-8">Click to place markers. Scroll to zoom. Tiles cached locally after first load — works offline once visited.</div>
+  </div>
+
+  <!-- Map Tools -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title mb-8"><span class="card-icon">📐</span>Distance & Bearing</div>
+      <div class="form-group">
+        <label class="form-label">Point A (lat, lon)</label>
+        <div style="display:flex;gap:6px">
+          <input class="form-input" id="dist-a" placeholder="37.7749, -122.4194" style="flex:1">
+          <button class="btn btn-ghost btn-sm" onclick="MapTool.fillDistPoint('dist-a')" title="Fill from GPS" style="flex-shrink:0;white-space:nowrap">📍 Me</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Point B (lat, lon)</label>
+        <div style="display:flex;gap:6px">
+          <input class="form-input" id="dist-b" placeholder="37.7849, -122.4094" style="flex:1">
+          <button class="btn btn-ghost btn-sm" onclick="MapTool.fillDistPoint('dist-b')" title="Fill from GPS" style="flex-shrink:0;white-space:nowrap">📍 Me</button>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="MapTool.calcDistance()">Calculate</button>
+      <div id="dist-result" class="font-sm text-secondary mt-8" style="line-height:1.6"></div>
+    </div>
+    <div class="card">
+      <div class="card-title mb-8"><span class="card-icon">🧭</span>Compass & Bearing</div>
+      <div style="font-size:48px;text-align:center;padding:10px;line-height:1"><span id="compass-display" style="display:inline-block;transition:transform 0.3s ease">🧭</span></div>
+      <div id="compass-heading" class="text-center font-sm text-secondary">Heading: --°</div>
+      <button class="btn btn-secondary btn-sm mt-8 btn-block" onclick="MapTool.startCompass()">Use Device Compass</button>
+    </div>
+  </div>
+
+  <!-- Saved Locations -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="card-icon">📌</span>Saved Locations</div>
+      <button class="btn btn-ghost btn-sm" onclick="MapTool.openLocationForm()">+ Add Manual</button>
+    </div>
+    <div id="saved-locations">
+      <div class="text-secondary font-sm" style="padding:12px 0;text-align:center">No locations saved — tap the map or use Add Location</div>
+    </div>
+  </div>
+</div><!-- /tab-map -->
+

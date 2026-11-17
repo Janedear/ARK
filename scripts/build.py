@@ -1,8 +1,14 @@
 """Builds everything ARK ships, from the files in this repository.
 
-    python scripts/build.py              # website folder + zips
+    python scripts/build.py              # app file + website folder + zips
+    python scripts/build.py --app-only   # just rebuild ARK-CRISIS-SUITE.html from app/src/
+    python scripts/build.py --check      # fail if ARK-CRISIS-SUITE.html is out of date (used by CI)
     python scripts/build.py --with-node  # also bundle Node.js for Windows into the hub kit
                                          # (downloads ~35 MB from nodejs.org; use for releases)
+
+The app is written as small source files in app/src/ and joined, in the order listed in
+app/parts.txt, into the single file ARK-CRISIS-SUITE.html at the repository root (committed, so
+anyone can download and open it without building).
 
 Output (in build/, which is not committed):
 
@@ -29,6 +35,31 @@ APP = ROOT / "ARK-CRISIS-SUITE.html"
 NODE_LINE = "latest-v22.x"            # long-term-support line bundled for Windows hubs
 
 
+def assemble_app() -> str:
+    """Join the source parts listed in app/parts.txt into the single-file app."""
+    src = ROOT / "app" / "src"
+    names = [l.strip() for l in (ROOT / "app" / "parts.txt").read_text(encoding="utf-8").splitlines()
+             if l.strip() and not l.startswith("#")]
+    on_disk = {p.relative_to(src).as_posix() for p in src.rglob("*") if p.is_file()}
+    missing, unused = [n for n in names if n not in on_disk], sorted(on_disk - set(names))
+    if missing or unused:
+        sys.exit(f"app/parts.txt does not match app/src/: missing {missing}, not listed {unused}")
+    return "".join((src / n).read_text(encoding="utf-8") for n in names)
+
+
+def build_app(check_only: bool = False) -> None:
+    text = assemble_app()
+    current = APP.read_text(encoding="utf-8") if APP.exists() else ""
+    if check_only:
+        if text != current:
+            sys.exit("ARK-CRISIS-SUITE.html is out of date. Run: python scripts/build.py --app-only")
+        print("ARK-CRISIS-SUITE.html matches app/src/")
+        return
+    if text != current:
+        APP.write_text(text, encoding="utf-8", newline="")
+    print(f"ARK-CRISIS-SUITE.html  {len(text.encode('utf-8')) / 1000:.0f} KB from app/src/")
+
+
 def clean() -> None:
     if BUILD.exists():
         shutil.rmtree(BUILD)
@@ -53,7 +84,8 @@ def check_app() -> None:
 
 def build_website() -> Path:
     out = BUILD / "public_html"
-    shutil.copytree(ROOT / "web", out)
+    # Files starting with "_" are build inputs (for example the link-preview source), not pages.
+    shutil.copytree(ROOT / "web", out, ignore=shutil.ignore_patterns("_*"))
     shutil.copy2(APP, out / APP.name)
     return out
 
@@ -102,7 +134,14 @@ def zip_dir(folder: Path, target: Path, top: str | None = None) -> None:
 
 def main() -> None:
     with_node = "--with-node" in sys.argv
+    if "--check" in sys.argv:
+        build_app(check_only=True)
+        check_app()
+        return
+    build_app()
     check_app()
+    if "--app-only" in sys.argv:
+        return
     clean()
     site = build_website()
     kit = build_hub_kit(with_node)

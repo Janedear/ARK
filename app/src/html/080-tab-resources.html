@@ -1,0 +1,107 @@
+<!-- === TAB: RESOURCES === -->
+<div class="tab-panel" id="tab-resources" role="tabpanel" aria-labelledby="navtab-resources" tabindex="-1">
+
+  <div class="flex-between mb-12 wrap gap-8">
+    <h2 class="section-title"><span class="title-icon">📦</span>Inventory Tracker</h2>
+    <div class="flex gap-8">
+      <button class="btn btn-secondary btn-sm" onclick="Resources.shareWithHub()">📡 Share with Hub</button>
+      <button class="btn btn-ghost btn-sm" onclick="PrintARK.inventory()" title="Print inventory list">🖨️ Print List</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="card-icon">📊</span>Current Supplies</div>
+      <div class="text-muted font-xs" id="resources-updated">Not yet updated</div>
+    </div>
+
+    <div id="resource-meters">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="mt-12">
+      <button class="btn btn-primary" onclick="Resources.openEdit()">✏️ Update Inventory</button>
+    </div>
+  </div>
+
+  <!-- Quick preset kits -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="card-icon">⚡</span>Quick Presets</div>
+      <div class="text-muted font-xs">Load a starting point</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <button class="btn btn-secondary btn-sm" onclick="Resources.loadPreset('72hr')" title="FEMA recommended 72-hour emergency kit">🧳 72-Hour Kit</button>
+      <button class="btn btn-secondary btn-sm" onclick="Resources.loadPreset('2week')" title="2-week extended preparedness supply">📦 2-Week Supply</button>
+      <button class="btn btn-secondary btn-sm" onclick="Resources.loadPreset('month')" title="30-day long-term preparedness">🏠 30-Day Plan</button>
+    </div>
+    <div class="text-muted font-xs mt-8">Presets fill the form below with FEMA-recommended quantities for 1 person — adjust to your household size before saving.</div>
+  </div>
+
+  <!-- Edit form (hidden by default) -->
+  <div class="card hidden" id="resource-edit-card">
+    <div class="card-header">
+      <div class="card-title"><span class="card-icon">✏️</span>Update Inventory</div>
+      <button class="btn btn-ghost btn-sm" onclick="Resources.closeEdit()" aria-label="Close" style="padding:4px 8px">✕</button>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">💧 Water (gallons)</label>
+        <input class="form-input" id="res-water" type="number" min="0" step="0.5" placeholder="0">
+        <div class="text-muted font-xs" style="margin-top:3px">FEMA: 1 gal/person/day</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🍽️ Food (days of supply)</label>
+        <input class="form-input" id="res-food" type="number" min="0" step="0.5" placeholder="0">
+        <div class="text-muted font-xs" style="margin-top:3px">Total days for the household</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">⛽ Fuel (gallons)</label>
+        <input class="form-input" id="res-fuel" type="number" min="0" step="0.5" placeholder="0">
+        <div class="text-muted font-xs" style="margin-top:3px">Gas, propane, kerosene combined</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🏥 Medical Supplies (0–5)</label>
+        <select class="form-input" id="res-medical">
+          <option value="0">0 — None</option>
+          <option value="1">1 — Minimal (bandages only)</option>
+          <option value="2">2 — Basic first-aid kit</option>
+          <option value="3">3 — Good supply + prescription meds</option>
+          <option value="4">4 — Well stocked + trauma kit</option>
+          <option value="5">5 — Fully equipped + advanced care</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🏠 Shelter Capacity (people)</label>
+        <input class="form-input" id="res-shelter" type="number" min="0" placeholder="0">
+        <div class="text-muted font-xs" style="margin-top:3px">How many people can shelter here</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🔋 Power (hours of backup)</label>
+        <input class="form-input" id="res-power" type="number" min="0" placeholder="0">
+        <div class="text-muted font-xs" style="margin-top:3px">Generator, battery bank, solar hours</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">📝 Notes</label>
+      <textarea class="form-input" id="res-notes" maxlength="500" placeholder="Storage locations, expiry notes, special items..."></textarea>
+    </div>
+    <div class="flex gap-8">
+      <button class="btn btn-primary" onclick="Resources.save()">💾 Save Inventory</button>
+      <button class="btn btn-secondary" onclick="Resources.closeEdit()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Inventory History & Export -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="card-icon">📈</span>Snapshot History</div>
+      <div class="flex gap-8">
+        <button class="btn btn-ghost btn-sm" onclick="Resources.exportJSON()" title="Export inventory as JSON">⬇ Export</button>
+        <button class="btn btn-ghost btn-sm" onclick="Resources.importJSON()" title="Import inventory from JSON">⬆ Import</button>
+      </div>
+    </div>
+    <div id="res-history" class="font-sm text-secondary">No history yet — save a snapshot to track changes.</div>
+  </div>
+</div><!-- /tab-resources -->
+
