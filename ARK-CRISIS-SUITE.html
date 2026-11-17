@@ -986,17 +986,18 @@ select.form-input{cursor:pointer}
       <button class="btn btn-primary btn-block" onclick="ShareARK.downloadFile()">⬇ Download ARK-CRISIS-SUITE.html</button>
     </div>
 
-    <!-- Text Message -->
+    <!-- One-tap share buttons -->
     <div class="share-method">
-      <div class="share-method-icon">💬</div>
-      <h4>Share via Text Message</h4>
-      <p>Send the file directly as a text message attachment. Works on Android and iPhone.</p>
-      <ol class="share-steps">
-        <li>Tap <strong>Download File</strong> above to save ARK to your device</li>
-        <li>Open Messages and start a new conversation</li>
-        <li>Tap the attachment icon (📎) and select the downloaded file</li>
-        <li>Send — recipient opens it in any browser</li>
-      </ol>
+      <div class="share-method-icon">🚀</div>
+      <h4>Share a Download Link</h4>
+      <p style="margin-bottom:12px">Send someone a link to download ARK — they tap it and get the app instantly.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn btn-primary" onclick="ShareARK.shareViaSMS()" style="font-size:.82rem">💬 SMS / iMessage</button>
+        <button class="btn btn-primary" onclick="ShareARK.shareViaEmail()" style="font-size:.82rem">✉️ Email</button>
+        <button class="btn" onclick="ShareARK.shareViaFacebook()" style="font-size:.82rem;background:#1877f2;color:#fff;border:none">👍 Facebook</button>
+        <button class="btn" onclick="ShareARK.shareViaInstagram()" style="font-size:.82rem;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none">📷 Instagram</button>
+      </div>
+      <p style="font-size:.75rem;color:var(--text-muted);margin-top:8px;margin-bottom:0">Sends a link to <strong>ark.halosuite.ai</strong> — works over internet. For offline spread, use the Download + AirDrop method above.</p>
     </div>
 
     <!-- AirDrop / Nearby Share -->
@@ -7151,20 +7152,27 @@ const Onboarding = (() => {
     ].join(';');
 
     nudge.innerHTML = `
-      <span style="font-size:1.6rem;flex-shrink:0">🤝</span>
       <div style="flex:1;min-width:0">
-        <div style="font-size:.8rem;font-weight:700;color:var(--accent,#8b6f3e);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px">Get Your People In</div>
-        <div style="font-size:.82rem;color:var(--text-secondary,#555);line-height:1.35">ARK works best when everyone nearby has it. Share the file — they'll get the setup wizard automatically.</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-        <button onclick="UI.switchTab('network');document.getElementById('${nudgeId}')?.remove()"
-          style="background:var(--accent,#8b6f3e);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap">
-          Share →
-        </button>
-        <button onclick="document.getElementById('${nudgeId}')?.remove()"
-          style="background:transparent;color:var(--text-muted,#aaa);border:none;font-size:.75rem;cursor:pointer;padding:2px 0">
-          Later
-        </button>
+        <div style="font-size:.8rem;font-weight:700;color:var(--accent,#8b6f3e);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">🤝 Get Your People In</div>
+        <div style="font-size:.82rem;color:var(--text-secondary,#555);line-height:1.35;margin-bottom:10px">ARK works best when everyone nearby has it. Send them the link now.</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <button onclick="ShareARK.shareViaSMS();document.getElementById('${nudgeId}')?.remove()"
+            style="background:var(--accent,#8b6f3e);color:#fff;border:none;border-radius:10px;padding:7px 13px;font-size:.78rem;font-weight:700;cursor:pointer">
+            💬 SMS
+          </button>
+          <button onclick="ShareARK.shareViaEmail();document.getElementById('${nudgeId}')?.remove()"
+            style="background:var(--accent,#8b6f3e);color:#fff;border:none;border-radius:10px;padding:7px 13px;font-size:.78rem;font-weight:700;cursor:pointer">
+            ✉️ Email
+          </button>
+          <button onclick="ShareARK.openModal();document.getElementById('${nudgeId}')?.remove()"
+            style="background:transparent;color:var(--accent,#8b6f3e);border:1.5px solid rgba(139,111,62,.35);border-radius:10px;padding:7px 13px;font-size:.78rem;font-weight:600;cursor:pointer">
+            More →
+          </button>
+          <button onclick="document.getElementById('${nudgeId}')?.remove()"
+            style="background:transparent;color:var(--text-muted,#aaa);border:none;font-size:.75rem;cursor:pointer;padding:2px 4px;margin-left:auto;align-self:center">
+            ✕
+          </button>
+        </div>
       </div>`;
 
     document.body.appendChild(nudge);
@@ -7303,7 +7311,71 @@ const ShareARK = (() => {
     }
   }
 
-  return { openModal, closeModal, downloadFile, copyTemplate, generateQR };
+  const ARK_DOWNLOAD_URL = 'https://ark.halosuite.ai/halo/ARK-CRISIS-SUITE.html';
+  const ARK_SHORT_MSG = 'I\'m sharing ARK Crisis Suite with you — a free offline emergency app that works without internet. Download it here: ' + ARK_DOWNLOAD_URL;
+  const ARK_EMAIL_SUBJECT = 'ARK Crisis Suite — Free Offline Emergency App';
+  const ARK_EMAIL_BODY = `Hi,\n\nI wanted to share ARK Crisis Suite with you — it's a free emergency communication app that works completely offline. No install needed — just open the HTML file in any browser.\n\nDownload it here: ${ARK_DOWNLOAD_URL}\n\nIt's useful for coordinating with neighbours and family during power outages, natural disasters, or any emergency where the internet is down.\n\nStay safe.`;
+
+  function shareViaSMS() {
+    try {
+      // sms: URI — works on iOS and Android; body param prefilled
+      const url = 'sms:?&body=' + encodeURIComponent(ARK_SHORT_MSG);
+      window.open(url, '_self');
+      Toast.show('Opening Messages…', 'info', 2000);
+    } catch (e) {
+      // Fallback: copy the message
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(ARK_SHORT_MSG).then(() =>
+          Toast.show('Message copied — paste it into your SMS app', 'success', 3500)
+        );
+      }
+    }
+  }
+
+  function shareViaEmail() {
+    try {
+      const url = 'mailto:?subject=' + encodeURIComponent(ARK_EMAIL_SUBJECT)
+        + '&body=' + encodeURIComponent(ARK_EMAIL_BODY);
+      window.open(url, '_self');
+      Toast.show('Opening email…', 'info', 2000);
+    } catch (e) {
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(ARK_SHORT_MSG).then(() =>
+          Toast.show('Message copied — paste it into your email', 'success', 3500)
+        );
+      }
+    }
+  }
+
+  function shareViaFacebook() {
+    try {
+      const shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(ARK_DOWNLOAD_URL)
+        + '&quote=' + encodeURIComponent('ARK Crisis Suite — a free offline emergency app. No install. Works without internet.');
+      window.open(shareUrl, '_blank', 'width=600,height=500,noopener,noreferrer');
+    } catch (e) {
+      Toast.show('Could not open Facebook — try sharing the link manually', 'error', 3000);
+    }
+  }
+
+  function shareViaInstagram() {
+    // Instagram has no web share URI. Best we can do: copy the message, then open Instagram.
+    try {
+      const msg = '🆘 ARK Crisis Suite — free offline emergency app. No install needed. Download: ' + ARK_DOWNLOAD_URL + ' — works without internet, perfect for emergencies. Share this with everyone you know. #emergency #preparedness #offlinefirst';
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(msg).then(() => {
+          Toast.show('Caption copied! Opening Instagram…', 'success', 3000);
+          setTimeout(() => window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer'), 800);
+        });
+      } else {
+        window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+        Toast.show('Open Instagram and paste your caption', 'info', 4000);
+      }
+    } catch (e) {
+      Toast.show('Open Instagram and share: ' + ARK_DOWNLOAD_URL, 'info', 5000);
+    }
+  }
+
+  return { openModal, closeModal, downloadFile, copyTemplate, generateQR, shareViaSMS, shareViaEmail, shareViaFacebook, shareViaInstagram };
 })();
 
 /* ============================================================
