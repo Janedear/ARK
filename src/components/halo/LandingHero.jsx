@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ShieldCheck, WifiOff, Users, Shield } from 'lucide-react';
-import { HERO_IMAGE } from '@/components/halo/brand';
+import { HERO_IMAGE, HERO_VIDEO } from '@/components/halo/brand';
 
 const badges = [
   { icon: WifiOff, label: 'Works offline' },
@@ -23,6 +23,6 @@ export default function LandingHero() {
       <ul className="halo-badges">{badges.map(b => <li key={b.label}><b.icon size={17} />{b.label}</li>)}</ul>
       <p className="halo-note"><ShieldCheck size={16} />ARK helps you prepare. It does not call 911 for you.</p>
     </div>
-    <div className="halo-hero-art"><img src={HERO_IMAGE} alt="ARK's angel robot guide waving in front of a glowing doorway, with homes connected by dotted lines" /></div>
+    <div className="halo-hero-art"><video src={HERO_VIDEO} poster={HERO_IMAGE} autoPlay muted loop playsInline preload="metadata" aria-label="ARK's halo guide in front of a glowing doorway, with homes lighting up and connecting across the hills" /></div>
   </section>;
 }

@@ -28,7 +28,7 @@
 .halo-badges li:first-child{padding-left:0;border-left:0}
 .halo-badges svg,.halo-note svg{color:var(--fo-gold);flex-shrink:0}
 .halo-note{display:flex;align-items:center;gap:8px;margin-top:22px;font-size:13.5px;color:var(--fo-muted)}
-.halo-hero-art img{width:100%;height:auto;display:block;-webkit-mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 55%,transparent 100%)}
+.halo-hero-art :is(img,video){width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;display:block;-webkit-mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 55%,transparent 100%)}
 
 .halo-features{max-width:1240px;margin:20px auto 0;padding:0 28px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
 .halo-features article{padding:28px 26px;border-radius:18px;background:var(--fo-surface);border:1px solid var(--fo-line);box-shadow:0 10px 30px -18px rgba(60,40,10,.22)}
