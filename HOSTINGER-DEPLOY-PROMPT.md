@@ -1,145 +1,136 @@
-# ARK Crisis Suite — Hostinger Deployment Prompt
+# ARK Crisis Suite — Hostinger Deployment
 
-## COPY EVERYTHING BELOW THIS LINE AND PASTE TO YOUR HOSTINGER AGENT
-
----
-
-You are deploying the ARK Crisis Suite to Hostinger. There are two parts:
-
-1. **The app** — `ARK-CRISIS-SUITE.html` goes on Hostinger's static hosting (or hPanel File Manager)
-2. **The backend** — a Cloudflare Worker (Hostinger can't run Node backend code, so we use Cloudflare's free tier for the API)
+> **For the Hostinger agent.** Copy everything below the line and paste it.
 
 ---
 
-## PART 1 — Upload the App to Hostinger
+## TASK: Deploy ARK Crisis Suite to Hostinger
 
-### Via hPanel File Manager
+You are deploying the **ARK Crisis Suite** — an offline-first emergency communications and survival tool built for HaloSuite.
+
+This is a **single-file PHP deployment**. There is exactly **one file to upload**.
+
+---
+
+## WHAT YOU ARE UPLOADING
+
+| File | Purpose |
+|------|---------|
+| `ARK.php` | The entire app + backend in one file (~575 KB) |
+
+That's it. No zip. No npm. No build step. No Cloudflare. No terminal.
+
+---
+
+## STEP 1 — Upload to Hostinger
+
+### Via hPanel File Manager (easiest)
 1. Log in to hPanel → **File Manager**
-2. Navigate to `public_html` (or your domain's root folder)
-3. Upload `ARK-CRISIS-SUITE.html`
-4. If you want it at the root URL, rename it to `index.html`
-5. If you want it at `/ark`, create a folder called `ark` and upload it there as `index.html`
+2. Navigate to `public_html/`
+3. Upload `ARK.php`
+4. Done
 
-### Via FTP (if you prefer)
-Use the FTP credentials from hPanel → **FTP Accounts**:
-- Upload `ARK-CRISIS-SUITE.html` to `public_html/` (rename to `index.html` for root access)
+### Via FTP
+- Upload `ARK.php` to `public_html/`
 
-The file is fully self-contained — no other files needed, no npm install, no build step.
+**Final structure on the server:**
+```
+public_html/
+└── ARK.php          ← the whole app
+```
+
+The file auto-creates its own data directory (`ark-data/`) on first request. No manual folder creation needed.
 
 ---
 
-## PART 2 — Deploy the Cloudflare Worker Backend
+## STEP 2 — Visit the App
 
-The backend handles bug reports and hot-patches. It runs on Cloudflare's free Workers tier (100,000 requests/day free).
+After upload, the URLs are:
 
-### You need
-- A free Cloudflare account: https://dash.cloudflare.com/sign-up
-- A Cloudflare API token with **Edit Cloudflare Workers** permissions:
-  - Go to https://dash.cloudflare.com/profile/api-tokens
-  - Click **Create Token** → use **Edit Cloudflare Workers** template
-  - Copy the token
-- Your Cloudflare Account ID:
-  - Visible on the right sidebar of https://dash.cloudflare.com (after selecting any domain or the Workers section)
-
-### Deploy command
-On any machine with Node.js (or in a terminal on your computer):
-
-```bash
-cd backend
-export CLOUDFLARE_API_TOKEN="paste_your_token_here"
-export CLOUDFLARE_ACCOUNT_ID="paste_your_account_id_here"
-bash deploy.sh
-```
-
-The script outputs something like:
-```
-Your ARK backend is live.
-  Bug reports:  POST https://ark-backend.yourname.workers.dev/halo/bugs
-  Latest patch: GET  https://ark-backend.yourname.workers.dev/halo/patches/latest.json
-  Admin secret: abc123xyz...
-```
-
-**Save the Worker URL and admin secret — you need them in Part 3.**
+| What | URL |
+|------|-----|
+| **App** | `https://yourdomain.com/ARK.php` |
+| **Admin panel** | `https://yourdomain.com/ARK.php?admin` |
+| **Admin password** | `ARK-admin-2024` |
 
 ---
 
-## PART 3 — Wire Backend URL Into the App
+## STEP 3 — Verify It Works
 
-Before uploading the HTML file (or after — you can re-upload):
+1. Open `https://yourdomain.com/ARK.php` — the app should load with a **warm cream** design
+2. Open browser DevTools (F12) → Console — no network errors
+3. The patch check runs silently on boot (`ARK patch check` in console is normal)
 
-Open `ARK-CRISIS-SUITE.html` in a text editor and search for `PATCH_URL` (around line 5786).
-
-Find these two lines:
-```javascript
-const PATCH_URL = 'https://ark.halosuite.ai/halo/patches/latest.json';
-const BUG_URL   = 'https://ark.halosuite.ai/halo/bugs';
+Test the backend endpoints directly:
 ```
-
-Replace with your actual Worker URL:
-```javascript
-const PATCH_URL = 'https://ark-backend.YOUR-SUBDOMAIN.workers.dev/halo/patches/latest.json';
-const BUG_URL   = 'https://ark-backend.YOUR-SUBDOMAIN.workers.dev/halo/bugs';
-```
-
-Save, then re-upload to `public_html/`.
-
----
-
-## PART 4 — Test It
-
-1. Visit your Hostinger URL — the app should load instantly
-2. Open browser DevTools (F12) → Console tab
-3. You should see: `ARK patch check` with no network errors
-4. Test the backend directly:
-
-```
-GET https://your-worker.workers.dev/halo/patches/latest.json
-```
-Should return: `{"active":false}` or a patch object
-
----
-
-## PART 5 — Custom Domain on Hostinger (Optional)
-
-If you have a domain like `ark.halosuite.ai` pointed at Hostinger:
-1. In hPanel → **Domains** → point your subdomain to the same `public_html` or a subfolder
-2. Upload the HTML there
-3. Update `PATCH_URL` / `BUG_URL` to use `https://api.halosuite.ai/halo/...` and add that subdomain as a custom domain on the Cloudflare Worker
-
----
-
-## File List (what's in the zip)
-
-```
-ARK-CRISIS-SUITE.html          → upload this to Hostinger public_html/
-backend/deploy.sh              → run this to deploy the Cloudflare Worker
-backend/src/index.ts           → Worker source (deploy.sh handles building)
-backend/wrangler.toml          → Worker config
-backend/package.json           → Worker deps
-backend/DEPLOY.md              → detailed backend deploy reference
-HOSTINGER-DEPLOY-PROMPT.md    → this file
+GET  https://yourdomain.com/ARK.php?patches   → returns {"active":false}
+POST https://yourdomain.com/ARK.php?bugs      → returns {"status":"ok","id":"..."}
+GET  https://yourdomain.com/ARK.php?admin     → shows login form
 ```
 
 ---
 
-## Pushing a Hot-Patch Later (optional)
+## WHAT ARK.PHP DOES (How It Works)
 
-To push a live fix to all running instances without redeploying the file:
+The PHP header runs first on every request and routes to the right handler:
 
-```bash
-curl -X POST https://YOUR-WORKER.workers.dev/admin/patches \
-  -H "X-Admin-Secret: YOUR-ADMIN-SECRET" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "ops": [
-      { "op": "set_text", "selector": "#some-element", "value": "Updated text" }
-    ]
-  }'
+| Request | Handler |
+|---------|---------|
+| `POST ARK.php?bugs` | Saves bug report JSON to `ark-data/bugs/` |
+| `GET ARK.php?patches` | Returns `ark-data/patches/latest.json` |
+| `GET ARK.php?admin` | Admin panel (session-authenticated) |
+| Any other request | Outputs the full ARK Crisis Suite app |
+
+The admin panel lets you:
+- **Push hot-patches** to all running instances (live CSS/text fixes without re-uploading)
+- **View and delete bug reports** submitted by users
+- **Clear patches** when done
+
+---
+
+## PUSHING A HOT-PATCH FROM ADMIN PANEL
+
+1. Go to `https://yourdomain.com/ARK.php?admin`
+2. Sign in with password `ARK-admin-2024`
+3. Paste patch JSON into the Patch field, e.g.:
+```json
+{
+  "active": true,
+  "ops": [
+    { "op": "set_text", "selector": "#some-id", "value": "Updated text" }
+  ]
+}
 ```
+4. Click **Push Patch** — all running instances pick it up within 2 hours (or on next load)
 
-Supported ops: `replace_html`, `set_text`, `set_attr`, `set_class`, `store_set`, `store_delete`, `store_clear`, `add_css`, `reload`
+---
 
-The app polls for patches on boot and every 2 hours automatically.
+## WHAT'S IN THE APP (11 Tabs)
+
+| Tab | Function |
+|-----|----------|
+| 🏠 Home | Alert level, quick actions, real-time stats, battery, offline status |
+| 💬 Messages | Signed encrypted messages, hub sync, search, channel filters |
+| 📚 Survival | 24 emergency guides — CPR, bites, hypothermia, shelter, water |
+| 📦 Resources | Food/water/power tracking, FEMA presets, export/import |
+| 👥 Household | Members, medical info, vehicles, go-bag, meeting points, print card |
+| 🌐 Network | Hub deploy/join, QR scanner, heartbeat, IP detection |
+| 🏥 Medical | CPR timer (100bpm), Heimlich guide, medication log |
+| 🗺️ Map | Custom OSM tile renderer, markers, distance/bearing, offline cache |
+| 📻 Radio | Morse encoder/decoder, phonetic alphabet, frequency logbook |
+| 🤖 ARKai | HALO Lite (rule-based) + HALO+ (WebLLM/Llama 3.2 on-device) |
+| ⚙️ Settings | Dark mode, backup/restore, wipe, notification permissions |
+
+**Additional modules:** Missing Persons tracker, Checklists (5 types + custom), QR encoder, ECDSA message signing, SoftHub mesh networking, hot-patch system, bug reporting pipeline.
+
+---
+
+## PRIVACY
+
+- No personal address, phone number, or personal email embedded anywhere
+- Bug reports go to `hello@halosuite.ai` via admin panel
+- All user data stays in `localStorage` / `IndexedDB` on the user's device
+- No analytics, no trackers, no external CDN calls at runtime
 
 ---
 

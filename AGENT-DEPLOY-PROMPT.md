@@ -4,217 +4,114 @@
 
 ---
 
-## TASK: Deploy ARK Crisis Suite + Cloudflare Backend
+## TASK: Deploy ARK Crisis Suite to Hostinger Shared Hosting
 
-You are deploying the **ARK Crisis Suite** — an offline-first emergency communications and survival tool — along with its Cloudflare Workers backend.
-
-### What You Are Deploying
-
-1. **`ARK-CRISIS-SUITE.html`** — The entire app. Single HTML file (~567 KB). Zero external dependencies. Runs from filesystem, USB, or any static host.
-2. **`backend/`** — Cloudflare Worker that receives bug reports and serves hot-patches to the app.
-3. **`backend/deploy.sh`** — Automated deploy script. Handles KV creation, secret generation, and Worker deployment.
+You are deploying the **ARK Crisis Suite** — an offline-first emergency communications and survival tool for HaloSuite. This is a **single PHP file** deployment designed for Hostinger shared hosting.
 
 ---
 
-## STEP 1: Deploy the Cloudflare Backend
+## THE FILE
 
-### Prerequisites
-You need:
-- `CLOUDFLARE_API_TOKEN` — Create at https://dash.cloudflare.com/profile/api-tokens with "Edit Cloudflare Workers" template
-- `CLOUDFLARE_ACCOUNT_ID` — Found at https://dash.cloudflare.com → right sidebar
+**`ARK.php`** — 10,014 lines, ~575 KB. Contains the entire app and backend in one file.
 
-### Run the deploy script
-```bash
-cd backend
-chmod +x deploy.sh
-export CLOUDFLARE_API_TOKEN="your_token_here"
-export CLOUDFLARE_ACCOUNT_ID="your_account_id_here"
-bash deploy.sh
-```
-
-The script will:
-1. Install Node dependencies (`npm install`)
-2. Create the KV namespace (`ARK_KV`)
-3. Inject the real KV ID into `wrangler.toml`
-4. Generate a random admin secret
-5. Deploy the Worker to Cloudflare
-6. Print the Worker URL (e.g. `https://ark-backend.YOUR-SUBDOMAIN.workers.dev`)
-
-**Save the output.** You'll need the Worker URL and admin secret for Step 2.
-
-### What the Worker does
-- `POST /halo/bugs` — receives bug reports from the app, stores in KV, emails `hello@halosuite.ai` via SendGrid
-- `GET /halo/patches/latest.json` — returns hot-patch JSON for the app to apply
-- `POST /admin/patches` (X-Admin-Secret header) — push a new patch
-- `GET /admin/bugs` (X-Admin-Secret header) — view received bugs
-- `DELETE /admin/patches/active` (X-Admin-Secret header) — clear active patch
-
-### Optional: Enable email notifications for bug reports
-```bash
-cd backend
-npx wrangler secret put SENDGRID_API_KEY
-# Enter your SendGrid API key when prompted
-```
-If SENDGRID_API_KEY is not set, bug reports are still stored in KV — email is just skipped.
+No zip. No npm. No Node.js. No Cloudflare. No build step. No terminal required.
 
 ---
 
-## STEP 2: Wire the Backend URL Into the App
+## DEPLOYMENT STEPS
 
-Open `ARK-CRISIS-SUITE.html` and find lines ~5786–5787 (search for `PATCH_URL`):
+### Step 1 — Upload to Hostinger
 
-```javascript
-const PATCH_URL = 'https://ark.halosuite.ai/halo/patches/latest.json';
-const BUG_URL   = 'https://ark.halosuite.ai/halo/bugs';
-```
+**Via hPanel File Manager:**
+1. Log in to Hostinger hPanel
+2. Click **File Manager**
+3. Navigate to `public_html/`
+4. Upload `ARK.php`
+5. Done
 
-Replace both URLs with your deployed Worker URL:
-```javascript
-const PATCH_URL = 'https://ark-backend.YOUR-SUBDOMAIN.workers.dev/halo/patches/latest.json';
-const BUG_URL   = 'https://ark-backend.YOUR-SUBDOMAIN.workers.dev/halo/bugs';
-```
+**Via FTP:**
+- Upload `ARK.php` to `public_html/`
 
-Save the file.
-
----
-
-## STEP 3: Host the App File
-
-The app is a single HTML file. Choose any of these:
-
-### Option A: Cloudflare Pages (recommended — free, fast, global CDN)
-```bash
-npx wrangler pages deploy . --project-name ark-crisis-suite
-```
-Or drag-and-drop the HTML file at https://pages.cloudflare.com
-
-### Option B: GitHub Pages
-1. Push `ARK-CRISIS-SUITE.html` to a repo
-2. Enable Pages on the repo → deploy from `main` branch
-
-### Option C: Any static host
-Upload `ARK-CRISIS-SUITE.html` to Netlify, Vercel, S3+CloudFront, or any web server.
-
-### Option D: Offline / USB use
-No hosting needed. The file works directly from the filesystem — just open it in a browser. Service worker caching won't work (requires HTTP), but all features function offline.
+The file auto-creates `ark-data/bugs/` and `ark-data/patches/` on first request. Nothing else needed.
 
 ---
 
-## STEP 4: Custom Domain (Optional)
+### Step 2 — Confirm It Works
 
-If deploying to `ark.halosuite.ai`:
+| What | URL |
+|------|-----|
+| App | `https://yourdomain.com/ARK.php` |
+| Admin panel | `https://yourdomain.com/ARK.php?admin` |
+| Patch endpoint | `https://yourdomain.com/ARK.php?patches` (GET → `{"active":false}`) |
+| Bug endpoint | `https://yourdomain.com/ARK.php?bugs` (POST → `{"status":"ok","id":"..."}`) |
 
-1. Add a CNAME record pointing `ark.halosuite.ai` → your Cloudflare Pages / static host
-2. Update `PATCH_URL` and `BUG_URL` to `https://ark.halosuite.ai/halo/patches/latest.json` etc.
-3. Add a custom domain in your Cloudflare Worker settings pointing to the same subdomain or use a separate `api.halosuite.ai` → Worker
+Admin password: `ARK-admin-2024`
 
----
-
-## STEP 5: Verify Deployment
-
-After deployment, test these endpoints with curl or a browser:
-
-```bash
-# Should return {"active":false} or a patch object
-curl https://YOUR-WORKER.workers.dev/halo/patches/latest.json
-
-# Should return 400 (missing body) — proves the endpoint exists
-curl -X POST https://YOUR-WORKER.workers.dev/halo/bugs
-
-# Admin: view bugs (replace YOUR-ADMIN-SECRET with the value from deploy.sh output)
-curl -H "X-Admin-Secret: YOUR-ADMIN-SECRET" https://YOUR-WORKER.workers.dev/admin/bugs
-```
-
-Then open the app, go to **Settings → App** and check that:
-- The app loads without errors
-- Bug reports don't show a network error in the console
-- The patch check runs silently on boot (check DevTools console for `ARK patch check`)
+The app loads with a warm cream design (`--bg-primary:#f0ebe0`). If you see that, it's correct.
 
 ---
 
-## Pushing a Hot-Patch
+## HOW ARK.PHP ROUTES REQUESTS
 
-To update the running app without redeploying the file:
-
-```bash
-curl -X POST https://YOUR-WORKER.workers.dev/admin/patches \
-  -H "X-Admin-Secret: YOUR-ADMIN-SECRET" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "ops": [
-      {
-        "op": "set_text",
-        "selector": "#some-element",
-        "value": "Updated text"
-      }
-    ]
-  }'
+```
+POST  ARK.php?bugs      → stores bug report in ark-data/bugs/
+GET   ARK.php?patches   → returns ark-data/patches/latest.json
+GET   ARK.php?admin     → admin panel (session auth)
+*     anything else     → serves the full ARK Crisis Suite app
 ```
 
-**Supported patch operations:**
-- `replace_html` — replace innerHTML of an element (sanitized)
-- `set_text` — set textContent
-- `set_attr` — set an attribute (blocked list enforced)
-- `set_class` — set className
-- `store_set` — set a localStorage key (primitives only)
-- `store_delete` — delete a localStorage key
-- `store_clear` — clear all localStorage (use with caution)
-- `add_css` — inject a `<style>` block (no @import, url(), javascript:)
-- `reload` — force a page reload after applying other ops
+PHP auto-creates `ark-data/` and sub-folders on first run. No manual setup.
+
+---
+
+## PUSHING A HOT-PATCH (live fix without re-upload)
+
+1. Go to `https://yourdomain.com/ARK.php?admin`
+2. Sign in (password: `ARK-admin-2024`)
+3. Paste patch JSON:
+```json
+{
+  "active": true,
+  "ops": [
+    { "op": "set_text", "selector": "#target-id", "value": "New text" }
+  ]
+}
+```
+4. Click **Push Patch**
+
+Supported ops: `replace_html`, `set_text`, `set_attr`, `set_class`, `store_set`, `store_delete`, `store_clear`, `add_css`, `reload`
 
 The app polls for patches on boot (10s delay) and every 2 hours.
 
-To clear the active patch:
-```bash
-curl -X DELETE https://YOUR-WORKER.workers.dev/admin/patches/active \
-  -H "X-Admin-Secret: YOUR-ADMIN-SECRET"
-```
-
 ---
 
-## File Manifest
+## APP OVERVIEW (11 Tabs)
 
-```
-ARK-CRISIS-SUITE.html          Main app — 9896 lines, 567 KB
-backend/
-  src/index.ts                 Cloudflare Worker TypeScript source
-  wrangler.toml                Worker config (KV ID injected by deploy.sh)
-  deploy.sh                    One-shot deploy script
-  package.json                 Node deps (wrangler, typescript)
-  tsconfig.json                TypeScript config
-  DEPLOY.md                    Detailed deploy guide
-AGENT-DEPLOY-PROMPT.md         This file
-```
-
----
-
-## What's In the App (11 Tabs)
-
-| Tab | What It Does |
-|-----|-------------|
+| Tab | Function |
+|-----|----------|
 | 🏠 Home | Alert level, quick actions, real-time stats, battery, offline status |
 | 💬 Messages | Signed encrypted messages, hub sync, search, channel filters |
-| 📚 Survival | 24 emergency guides with search, filtering, accordion, CPR/bites/hypothermia |
-| 📦 Resources | Food/water/power tracking with FEMA presets, export/import, duration math |
+| 📚 Survival | 24 emergency guides — CPR, bites, hypothermia, shelter, water |
+| 📦 Resources | Food/water/power tracking, FEMA presets, export/import |
 | 👥 Household | Members, medical info, vehicles, go-bag, meeting points, print card |
-| 🌐 Network | Hub deploy/join, QR scanner (BarcodeDetector), heartbeat, IP detection |
-| 🏥 Medical | CPR timer (100bpm, pause/resume, breath prompts), Heimlich, med log |
-| 🗺️ Map | Custom OSM tile renderer, markers, distance+bearing calc, scale bar, offline cache |
-| 📻 Radio | Morse encoder/decoder with speed control, phonetic alphabet, frequency logbook |
-| 🤖 ARKai | HALO Lite (rule-based, instant) + HALO+ (WebLLM/Llama 3.2, 32-entry KB) |
-| ⚙️ Settings | Dark mode, backup/restore, wipe with TYPE-TO-CONFIRM, notification permissions |
+| 🌐 Network | Hub deploy/join, QR scanner, heartbeat, IP detection |
+| 🏥 Medical | CPR timer (100bpm), Heimlich guide, medication log |
+| 🗺️ Map | Custom OSM tile renderer, markers, distance/bearing, offline cache |
+| 📻 Radio | Morse encoder/decoder, phonetic alphabet, frequency logbook |
+| 🤖 ARKai | HALO Lite (rule-based) + HALO+ (WebLLM/Llama 3.2 on-device) |
+| ⚙️ Settings | Dark mode, backup/restore, wipe, notification permissions |
 
-**Additional modules:** Missing Persons (5-checklist system + status updates), Checklist (Daily/Bug-Out/Shelter/Evacuation/72hr + custom), QR encoder, ECDSA message signing, SoftHub (BroadcastChannel mesh), hot-patch system, bug reporting pipeline.
-
----
-
-## Privacy Notes
-
-- No personal address, phone number, or personal email is embedded in the app or backend
-- Bug reports go to `hello@halosuite.ai`
-- All user data stays in `localStorage` / `IndexedDB` on the user's device
-- No analytics, no trackers, no external CDN calls at runtime
+**Additional:** Missing Persons tracker, 5-type Checklists, QR encoder, ECDSA signing, SoftHub mesh, hot-patch, bug pipeline.
 
 ---
 
-*ARK Crisis Suite — HaloSuite · hello@halosuite.ai*
+## PRIVACY
+
+- No personal address, phone, or personal email anywhere in the file
+- Bug reports go to `hello@halosuite.ai` via the admin panel
+- All user data: `localStorage` / `IndexedDB` on the user's device only
+- No analytics, no trackers, no external CDN at runtime
+
+---
+
+*ARK Crisis Suite · HaloSuite · hello@halosuite.ai*
