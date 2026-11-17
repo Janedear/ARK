@@ -4,85 +4,84 @@
   <div id="ark-modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"></div>
 </div>
 
-<div id="share-modal" class="hidden">
+<div id="share-modal" class="hidden" onclick="if(event.target===this)ShareARK.closeModal()">
   <div class="share-box" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
-    <div class="flex-between" style="margin-bottom:16px">
-      <h3 id="share-modal-title" style="margin:0;font-size:18px">📡 Share ARK</h3>
-      <button class="btn btn-secondary btn-sm" onclick="ShareARK.closeModal()" aria-label="Close share dialog">✕ Close</button>
+    <div class="flex-between gap-8" style="margin-bottom:16px">
+      <h3 id="share-modal-title" style="margin:0;font-size:18px">Save &amp; share ARK</h3>
+      <button class="btn btn-secondary btn-sm" onclick="ShareARK.closeModal()" aria-label="Close share dialog"><svg class="hi" aria-hidden="true"><use href="#i-x"/></svg> Close</button>
     </div>
-    <p class="font-sm" style="color:var(--text-secondary);margin-bottom:16px">Share the ARK Crisis Suite with anyone who needs it. The entire app is one file — opening it in any browser installs it instantly.</p>
+    <p class="font-sm text-secondary" style="margin-bottom:16px">ARK makes its network from people's devices, so it helps more when the people near you have it too. The whole app is one file. They open it in any web browser. Nothing to install.</p>
 
     <!-- Download -->
     <div class="share-method">
-      <div class="share-method-icon">⬇️</div>
-      <h4>Download File to Share</h4>
-      <p>Download a fresh copy of ARK to share via USB drive, AirDrop, Nearby Share, email, or any file transfer.</p>
-      <button class="btn btn-primary btn-block" onclick="ShareARK.downloadFile()">⬇ Download ARK-CRISIS-SUITE.html</button>
-    </div>
-
-    <!-- One-tap share buttons -->
-    <div class="share-method">
-      <div class="share-method-icon">🚀</div>
-      <h4>Share a Download Link</h4>
-      <p style="margin-bottom:12px">Send someone a link to download ARK — they tap it and get the app instantly.</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button class="btn btn-primary" onclick="ShareARK.shareViaSMS()" style="font-size:.82rem;white-space:nowrap">💬 SMS</button>
-        <button class="btn btn-primary" onclick="ShareARK.shareViaEmail()" style="font-size:.82rem;white-space:nowrap">✉️ Email</button>
-        <button class="btn" onclick="ShareARK.shareViaFacebook()" style="font-size:.82rem;background:#1877f2;color:#fff;border:none;white-space:nowrap">👍 Facebook</button>
-        <button class="btn" onclick="ShareARK.shareViaInstagram()" style="font-size:.82rem;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none;white-space:nowrap">📷 Instagram</button>
-      </div>
-      <p style="font-size:.75rem;color:var(--text-muted);margin-top:8px;margin-bottom:0">Sends a link to <strong>arks.solutions</strong> — works over internet. For offline spread, use the Download + AirDrop method above.</p>
+      <div class="share-method-icon"><svg class="hi" aria-hidden="true"><use href="#i-download"/></svg></div>
+      <h4>Save a copy of ARK</h4>
+      <p class="mb-8">Saves a clean copy of the app to this device. None of your names, notes or messages are in it. Works with no internet.</p>
+      <button class="btn btn-primary btn-block" onclick="ShareARK.downloadFile()"><svg class="hi" aria-hidden="true"><use href="#i-download"/></svg> Save ARK-CRISIS-SUITE.html</button>
     </div>
 
     <!-- AirDrop / Nearby Share -->
     <div class="share-method">
-      <div class="share-method-icon">📲</div>
-      <h4>AirDrop / Nearby Share (Fastest)</h4>
-      <p>Share phone-to-phone in seconds with no internet required.</p>
+      <div class="share-method-icon"><svg class="hi" aria-hidden="true"><use href="#i-phone"/></svg></div>
+      <h4>Phone to phone (no internet needed)</h4>
+      <p>The fastest way when someone is next to you.</p>
       <ol class="share-steps">
-        <li>Download the file above first</li>
+        <li>Save a copy of ARK with the button above</li>
         <li>Open your Files app and find <em>ARK-CRISIS-SUITE.html</em></li>
-        <li>Long-press → Share → AirDrop (iPhone) or Nearby Share (Android)</li>
-        <li>Select the recipient's device — done in under 10 seconds</li>
+        <li>Press and hold it, then tap Share. Choose AirDrop (iPhone) or Quick Share (Android)</li>
+        <li>Pick the other person's phone</li>
       </ol>
-    </div>
-
-    <!-- QR Code -->
-    <div class="share-method">
-      <div class="share-method-icon">📱</div>
-      <h4>QR Code (Hub Required)</h4>
-      <p>If your device is connected to a local ARK Hub, generate a QR code that lets others download ARK directly from the hub over local WiFi.</p>
-      <div id="share-qr-container">
-        <button class="btn btn-secondary btn-block" onclick="ShareARK.generateQR()">Generate QR Code</button>
-        <canvas id="share-qr-canvas" style="display:none;max-width:200px;margin:12px auto;"></canvas>
-        <div class="mt-8" id="share-qr-status" style="font-size:12px;color:var(--text-secondary);text-align:center"></div>
-      </div>
     </div>
 
     <!-- USB / Offline Instructions -->
     <div class="share-method">
-      <div class="share-method-icon">🔌</div>
-      <h4>USB Drive (No WiFi Needed)</h4>
-      <p>The most reliable method — works even with no power grid or cellular service.</p>
+      <div class="share-method-icon"><svg class="hi" aria-hidden="true"><use href="#i-file"/></svg></div>
+      <h4>USB stick (no internet or Wi-Fi needed)</h4>
+      <p>Works even when the power and phone networks are down.</p>
       <ol class="share-steps">
-        <li>Download ARK to your computer</li>
-        <li>Copy <em>ARK-CRISIS-SUITE.html</em> to a USB drive</li>
-        <li>Walk the USB drive to whoever needs it</li>
-        <li>They plug in, open a browser, drag in the file — done</li>
+        <li>Save a copy of ARK on a computer</li>
+        <li>Copy <em>ARK-CRISIS-SUITE.html</em> to a USB stick</li>
+        <li>Carry the stick to whoever needs it</li>
+        <li>They plug it in and open the file in a web browser</li>
       </ol>
-      <div class="mt-8" style="font-size:12px;color:var(--text-secondary);background:var(--bg-elevated);border-radius:6px;padding:10px">
-        💡 Tip: Label the USB drive "ARK CRISIS SUITE — OPEN IN BROWSER". Put a text file on the drive with the same instructions. Keep copies on multiple drives.
+      <div class="info-box font-xs mt-8" style="margin-bottom:0">Tip: write "ARK. Open in a web browser" on the stick. Keep copies on more than one stick.</div>
+    </div>
+
+    <!-- QR Code -->
+    <div class="share-method">
+      <div class="share-method-icon"><svg class="hi" aria-hidden="true"><use href="#i-qr"/></svg></div>
+      <h4>QR code (needs a hub)</h4>
+      <p class="mb-8">If this device has joined an ARK Hub, others on the same Wi-Fi can scan a code to get ARK from the hub. No internet needed.</p>
+      <div id="share-qr-container">
+        <button class="btn btn-secondary btn-block" onclick="ShareARK.generateQR()"><svg class="hi" aria-hidden="true"><use href="#i-qr"/></svg> Show QR code</button>
+        <canvas id="share-qr-canvas" style="display:none;max-width:200px;margin:12px auto;"></canvas>
+        <div class="mt-8 font-xs text-secondary" id="share-qr-status" role="status" style="text-align:center"></div>
+      </div>
+    </div>
+
+    <!-- One-tap share buttons -->
+    <div class="share-method">
+      <div class="share-method-icon"><svg class="hi" aria-hidden="true"><use href="#i-send"/></svg></div>
+      <h4>Send a link (needs internet)</h4>
+      <p style="margin-bottom:12px">Sends a link to <strong>arks.solutions</strong>. Good for getting people ready before anything happens. The link only opens while the internet works.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn btn-secondary" onclick="ShareARK.shareViaSMS()"><svg class="hi" aria-hidden="true"><use href="#i-messages"/></svg> Text</button>
+        <button class="btn btn-secondary" onclick="ShareARK.shareViaEmail()"><svg class="hi" aria-hidden="true"><use href="#i-send"/></svg> Email</button>
+        <button class="btn btn-secondary" onclick="ShareARK.shareViaFacebook()"><svg class="hi" aria-hidden="true"><use href="#i-share"/></svg> Facebook</button>
+        <button class="btn btn-secondary" onclick="ShareARK.shareViaInstagram()"><svg class="hi" aria-hidden="true"><use href="#i-camera"/></svg> Instagram</button>
       </div>
     </div>
 
     <!-- Share Text Template -->
     <div class="share-method">
-      <div class="share-method-icon">✍️</div>
-      <h4>Message Template</h4>
-      <p>Copy this message to send with the file:</p>
-      <div class="share-code" id="share-template-text" onclick="ShareARK.copyTemplate()">I'm sending you ARK Crisis Suite — a free offline emergency communication app. Open the HTML file in any browser — no install needed. Works without internet. Use it to coordinate with neighbors during emergencies. — Tap to copy</div>
-      <button class="btn btn-secondary btn-sm" onclick="ShareARK.copyTemplate()" style="margin-top:6px">📋 Copy Message</button>
+      <div class="share-method-icon"><svg class="hi" aria-hidden="true"><use href="#i-edit"/></svg></div>
+      <h4>A note to send with the file</h4>
+      <p>Copy this and send it along with the file:</p>
+      <div class="share-code" id="share-template-text" onclick="ShareARK.copyTemplate()">I'm sending you ARK. It is a free emergency toolkit that works with no internet. In a crisis it makes its own local network from the devices around you: one laptop is the hub and nearby phones join it over Wi-Fi. Open the file in any web browser. Nothing to install. Keep it on your phone.</div>
+      <button class="btn btn-secondary btn-sm" onclick="ShareARK.copyTemplate()" style="margin-top:6px"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg> Copy this note</button>
     </div>
+
+    <button class="btn btn-secondary btn-block" onclick="ShareARK.closeModal()">Done</button>
   </div>
 </div>
 

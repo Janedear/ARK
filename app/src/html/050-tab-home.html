@@ -5,7 +5,7 @@
   <div class="home-hero halo-hero">
     <div class="hero-content">
       <div class="kicker">Makes its own internet in a crisis</div>
-      <h1>Prepared for the unexpected.<em>Connected when it matters.</em></h1>
+      <h1>Prepared for the unexpected. <em>Connected when it matters.</em></h1>
       <p class="hero-sub">When the internet goes down, ARK makes its own — from the devices around you.</p>
     </div>
     <button class="halo-mascot" onclick="UI.switchTab('ai')" aria-label="Ask Halo, the built-in assistant" title="Ask Halo"></button>
@@ -37,7 +37,7 @@
     <button class="home-tile" onclick="UI.switchTab('network')">
       <svg class="hi tile-icon" aria-hidden="true"><use href="#i-nodes"/></svg>
       <span class="tile-label">ARK Hub <svg class="hi" aria-hidden="true"><use href="#i-chevron"/></svg></span>
-      <span class="tile-sub"><span id="hero-status-badge">Not connected</span> · <span id="hero-sync-badge">0 Peers</span><span id="hero-hub-badge" style="display:none"></span></span>
+      <span class="tile-sub"><span id="hero-status-badge">Not connected</span> · <span id="hero-sync-badge">0 linked hubs</span><span id="hero-hub-badge" style="display:none"></span></span>
     </button>
   </div>
 
@@ -54,56 +54,58 @@
   </svg>
 
   <div id="install-banner" class="card mb-12" style="display:none;background:var(--accent-glow);border-color:var(--accent)">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-      <div style="font-weight:700">📲 Save ARK to Your Home Screen</div>
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('install-banner').style.display='none'" aria-label="Dismiss install banner" style="padding:2px 6px;min-height:0;line-height:1;font-size:16px;margin:-2px -4px 0 8px">×</button>
+    <div class="flex gap-8" style="justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+      <div class="bold"><svg class="hi" aria-hidden="true"><use href="#i-download"/></svg> Keep ARK on your home screen</div>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('install-banner').style.display='none'" aria-label="Hide this install message" style="margin:-8px -8px 0 0"><svg class="hi" aria-hidden="true"><use href="#i-x"/></svg></button>
     </div>
-    <div class="font-sm mb-8">Install ARK for one-tap access — works fully offline, no app store needed.</div>
-    <button class="btn btn-primary btn-sm" onclick="installPWA()">Install Now</button>
+    <div class="font-sm mb-8">Install ARK so it opens with one tap, even with no internet. No app store needed.</div>
+    <button class="btn btn-primary btn-sm" onclick="installPWA()">Install ARK</button>
   </div>
 
-  <div class="offline-banner" id="offline-banner">
-    ⚠️ <strong>Offline mode</strong> — Hub not reachable. All data saved locally. Messages will sync when connection returns.
+  <div class="offline-banner" id="offline-banner" role="status">
+    <svg class="hi" aria-hidden="true"><use href="#i-wifi-off"/></svg>
+    <span><strong>No internet right now.</strong> ARK still works, and what you save stays on this device. To message people nearby, join an ARK Hub.</span>
   </div>
 
   <!-- Alert Level -->
   <div id="alert-display" class="alert-banner alert-1">
     <div class="alert-level-num" id="alert-num">1</div>
     <div class="alert-info">
-      <h3 id="alert-title">Normal — No Active Emergency</h3>
-      <p id="alert-desc">System running. Monitor conditions. Keep kit ready.</p>
+      <h3 id="alert-title">Level 1 — Normal</h3>
+      <p id="alert-desc">No active emergency. Monitor conditions. Keep kit ready.</p>
     </div>
-    <button class="btn btn-secondary btn-sm" onclick="UI.openAlertEditor()" aria-label="Alert level: tap to change">Set Level</button>
+    <button class="btn btn-secondary btn-sm" onclick="UI.openAlertEditor()" aria-label="Change your alert level">Change</button>
   </div>
 
   <!-- Quick Actions -->
   <div class="card">
-    <div class="card-title card-header"><span>⚡ Quick Actions</span></div>
+    <div class="card-title card-header"><span>Quick actions</span></div>
     <div class="grid-4">
-      <button class="quick-action urgent" onclick="UI.quickPost('help')" aria-label="Request Help">
-        <div class="qa-icon" aria-hidden="true">🆘</div>
-        <div class="qa-label">Request Help</div>
+      <button class="quick-action urgent" onclick="UI.quickPost('help')" aria-label="Ask for help. Opens a message to people on your hub">
+        <div class="qa-icon" aria-hidden="true"><svg class="hi"><use href="#i-sos"/></svg></div>
+        <div class="qa-label">Ask for help</div>
       </button>
-      <button class="quick-action" onclick="UI.quickPost('safe')" aria-label="Mark yourself as safe">
-        <div class="qa-icon" aria-hidden="true">✅</div>
-        <div class="qa-label">I'm Safe</div>
+      <button class="quick-action" onclick="UI.quickPost('safe')" aria-label="Say you are safe. Opens a message to people on your hub">
+        <div class="qa-icon" aria-hidden="true"><svg class="hi"><use href="#i-check"/></svg></div>
+        <div class="qa-label">I'm safe</div>
       </button>
-      <button class="quick-action" onclick="UI.switchTab('household')" aria-label="Register your household">
-        <div class="qa-icon" aria-hidden="true">🏠</div>
-        <div class="qa-label">Register HH</div>
+      <button class="quick-action" onclick="UI.switchTab('household')" aria-label="Open my household and emergency plan">
+        <div class="qa-icon" aria-hidden="true"><svg class="hi"><use href="#i-house"/></svg></div>
+        <div class="qa-label">My household</div>
       </button>
-      <button class="quick-action" onclick="UI.quickPost('offers')" aria-label="Offer help to others">
-        <div class="qa-icon" aria-hidden="true">🤝</div>
-        <div class="qa-label">Offer Help</div>
+      <button class="quick-action" onclick="UI.quickPost('offers')" aria-label="Offer help. Opens a message to people on your hub">
+        <div class="qa-icon" aria-hidden="true"><svg class="hi"><use href="#i-heart"/></svg></div>
+        <div class="qa-label">Offer help</div>
       </button>
     </div>
+    <div class="font-xs text-muted mt-8">Messages go to people on your local ARK Hub. ARK is not an emergency service. In danger, call 911 or your local emergency number if you can.</div>
   </div>
 
   <!-- Message Stats -->
   <div class="card" id="msg-stats-card">
     <div class="card-header">
-      <div class="card-title"><span class="card-icon">💬</span>Message Board</div>
-      <button class="btn btn-ghost btn-sm" onclick="UI.switchTab('messages')">View All →</button>
+      <div class="card-title"><span class="card-icon" aria-hidden="true"><svg class="hi"><use href="#i-messages"/></svg></span>Message board</div>
+      <button class="btn btn-ghost btn-sm" onclick="UI.switchTab('messages')">View all <svg class="hi" aria-hidden="true"><use href="#i-arrow-right"/></svg></button>
     </div>
     <div id="msg-stats-content" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
       <div class="font-xs text-muted" id="msg-stats-loading">Loading…</div>
@@ -113,10 +115,10 @@
   <!-- Checklists -->
   <div class="card">
     <div class="card-header">
-      <div class="card-title"><span class="card-icon">✅</span>Emergency Checklists <span id="checklist-header-date" class="checklist-date"></span></div>
+      <div class="card-title"><span class="card-icon" aria-hidden="true"><svg class="hi"><use href="#i-list-check"/></svg></span>Emergency checklists <span id="checklist-header-date" class="checklist-date"></span></div>
       <div class="flex gap-8">
-        <button class="btn btn-ghost btn-sm" onclick="Checklist.printCurrent()" title="Print active checklist">🖨️</button>
-        <button class="btn btn-ghost btn-sm" onclick="Checklist.reset()" title="Reset active checklist">↺ Reset</button>
+        <button class="btn btn-ghost btn-sm" onclick="Checklist.printCurrent()" title="Print this checklist" aria-label="Print this checklist"><svg class="hi" aria-hidden="true"><use href="#i-printer"/></svg></button>
+        <button class="btn btn-ghost btn-sm" onclick="Checklist.reset()" title="Untick everything in this checklist"><svg class="hi" aria-hidden="true"><use href="#i-refresh"/></svg> Reset</button>
       </div>
     </div>
     <!-- Checklist selector tabs -->
@@ -128,75 +130,74 @@
     </div>
   </div>
 
-  <!-- System Status -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title mb-8"><span class="card-icon">🕐</span> System Time</div>
-      <div style="font-size:28px;font-weight:700;font-family:monospace;color:var(--accent)" id="home-clock">--:--:--</div>
-      <div class="text-muted font-sm mt-8" id="home-date">---</div>
-      <div class="text-muted font-sm" id="home-tz">---</div>
-    </div>
-    <div class="card" id="home-hub-card">
-      <div class="card-title mb-8"><span class="card-icon">🛰</span> Network</div>
-      <div class="font-sm text-secondary" id="last-sync-display">Not synced</div>
-      <div class="font-xs text-muted mt-4" id="hub-url-display">Hub: not configured</div>
-      <div id="softhub-home-status" class="font-xs mt-4" style="color:var(--text-muted)">📡 Not connected to a hub — messages stay on this device</div>
-      <div class="mt-8 flex gap-8 wrap" id="hub-home-actions">
-        <button class="btn btn-secondary btn-sm" onclick="Hub.sync(true)" id="hub-sync-btn" style="display:none">🔄 Sync</button>
-        <button class="btn btn-primary btn-sm" onclick="UI.switchTab('network')" id="hub-connect-btn">📡 Network →</button>
+  <!-- Quick Reference -->
+  <div class="card">
+    <div class="card-title mb-8"><span class="card-icon" aria-hidden="true"><svg class="hi"><use href="#i-phone"/></svg></span> Emergency numbers (US)</div>
+    <div id="quick-ref-content">
+      <div class="font-xs text-muted mb-8">Tap a number to call. Calls use the phone network, not ARK.</div>
+      <div class="grid-2 font-sm">
+        <div><a class="text-accent bold" href="tel:911" style="display:inline-block;padding:10px 0">911</a> — Emergency services</div>
+        <div><a class="text-accent bold" href="tel:988" style="display:inline-block;padding:10px 0">988</a> — Suicide and crisis lifeline</div>
+        <div><a class="text-accent bold" href="tel:+18002221222" style="display:inline-block;padding:10px 0">1-800-222-1222</a> — Poison Control</div>
+        <div><a class="text-accent bold" href="tel:211" style="display:inline-block;padding:10px 0">211</a> — Local assistance</div>
+        <div><a class="text-accent bold" href="tel:+18006213362" style="display:inline-block;padding:10px 0">1-800-621-3362</a> — FEMA</div>
+        <div><a class="text-accent bold" href="tel:+18007332767" style="display:inline-block;padding:10px 0">1-800-733-2767</a> — Red Cross</div>
       </div>
     </div>
   </div>
 
-  <!-- Quick Reference -->
-  <div class="card">
-    <div class="card-title mb-8"><span class="card-icon">📋</span> Quick Reference</div>
-    <div id="quick-ref-content">
-      <div class="font-sm bold mb-8">Emergency Numbers (US)</div>
-      <div class="grid-2 font-sm">
-        <div><span class="text-accent bold">911</span> — Emergency services</div>
-        <div><span class="text-accent bold">988</span> — Crisis/Mental health</div>
-        <div><span class="text-accent bold">1-800-222-1222</span> — Poison Control</div>
-        <div><span class="text-accent bold">211</span> — Local assistance</div>
-        <div><span class="text-accent bold">1-800-621-3362</span> — FEMA</div>
-        <div><span class="text-accent bold">1-800-733-2767</span> — Red Cross</div>
+  <!-- System Status -->
+  <div class="grid-2">
+    <div class="card" id="home-hub-card">
+      <div class="card-title mb-8"><span class="card-icon" aria-hidden="true"><svg class="hi"><use href="#i-nodes"/></svg></span> ARK Hub</div>
+      <div class="font-sm text-secondary" id="last-sync-display">No hub reached yet</div>
+      <div class="font-xs text-muted mt-4" id="hub-url-display">Hub: not joined yet</div>
+      <div id="softhub-home-status" class="font-xs text-muted mt-4">Not connected to a hub. Messages stay on this device.</div>
+      <div class="mt-8 flex gap-8 wrap" id="hub-home-actions">
+        <button class="btn btn-secondary btn-sm" onclick="Hub.sync(true)" id="hub-sync-btn" style="display:none"><svg class="hi" aria-hidden="true"><use href="#i-refresh"/></svg> Sync now</button>
+        <button class="btn btn-primary btn-sm" onclick="UI.switchTab('network')" id="hub-connect-btn"><svg class="hi" aria-hidden="true"><use href="#i-hub"/></svg> Join a hub</button>
       </div>
+    </div>
+    <div class="card">
+      <div class="card-title mb-8"><span class="card-icon" aria-hidden="true"><svg class="hi"><use href="#i-clock"/></svg></span> Date and time</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--text-primary)" id="home-clock">--:--:--</div>
+      <div class="text-muted font-sm mt-8" id="home-date">---</div>
+      <div class="text-muted font-sm" id="home-tz">---</div>
     </div>
   </div>
 
   <!-- SHARE ARK CARD -->
   <div class="card">
-    <div class="card-header">
-      <span class="card-icon">📡</span>
-      <span class="card-title">Share ARK — Build Your Network</span>
-    </div>
-    <p class="font-sm" style="color:var(--text-secondary);margin-bottom:14px;line-height:1.5">The more people have ARK, the stronger your community's resilience. Share this single file via text, AirDrop, USB, or email — no internet needed to receive it.</p>
-    <div class="grid-2 gap-8 mb-12">
-      <button class="btn btn-primary" onclick="ShareARK.openModal()">📡 All Share Options</button>
-      <button class="btn btn-secondary" onclick="ShareARK.downloadFile()">⬇ Download to Share</button>
-    </div>
-    <div class="font-sm" style="background:var(--bg-elevated);border-radius:8px;padding:12px;color:var(--text-secondary)">
-      <strong style="color:var(--text-primary)">Why share?</strong> Each copy you share creates another node in your community network. When someone runs ARK and connects to the same local hub, your whole neighborhood gains resilience.
+    <div class="kicker mb-12">How ARK connects people</div>
+    <div class="card-title mb-8">In a crisis, ARK makes its own internet from the devices around you.</div>
+    <ol class="font-sm text-secondary" style="margin:0 0 12px 0;padding-left:20px;line-height:1.6">
+      <li>One laptop becomes the hub.</li>
+      <li>Nearby phones join it over Wi-Fi.</li>
+      <li>Hubs pass messages on to each other, by network, radio, or a USB stick.</li>
+    </ol>
+    <p class="font-sm text-secondary" style="margin-bottom:14px;line-height:1.5">The network is local. It needs an ARK Hub running on a laptop or Raspberry Pi. A phone alone cannot be the hub. The more neighbors who have ARK, the more it helps, so pass it on.</p>
+    <div class="grid-2 gap-8">
+      <button class="btn btn-primary" onclick="ShareARK.openModal()"><svg class="hi" aria-hidden="true"><use href="#i-share"/></svg> Share ARK</button>
+      <button class="btn btn-secondary" onclick="ShareARK.downloadFile()"><svg class="hi" aria-hidden="true"><use href="#i-download"/></svg> Save a copy to share</button>
     </div>
   </div>
 
   <!-- SATELLITE RELAY MODULE -->
   <div class="card">
     <div class="card-header">
-      <span class="card-icon">🛰️</span>
-      <span class="card-title">Satellite Relay (Advanced)</span>
+      <span class="card-icon" aria-hidden="true"><svg class="hi"><use href="#i-radio"/></svg></span>
+      <span class="card-title">Satellite relay (advanced)</span>
     </div>
-    <div class="ob-info" style="margin:0 0 10px 0">When all other networks fail, licensed amateur radio operators can relay messages via amateur satellites and the ISS.</div>
-    <div class="font-sm mb-12" style="color:var(--text-secondary);line-height:1.5">
-      <strong style="color:var(--text-primary)">Free options available:</strong><br>
-      🛸 <strong>ISS APRS</strong> — ISS relays short digital packets when overhead (no fee, requires amateur license)<br>
-      📡 <strong>AMSAT CubeSats</strong> — Some support digital packet relay (see network tab)<br>
-      🍎 <strong>iPhone Satellite</strong> — Emergency SOS and Messages on iPhone 14+ (no ARK control)<br>
+    <div class="ob-info" style="margin:0 0 10px 0">ARK does not send anything by satellite itself. This is reference information. When all other networks fail, licensed amateur radio operators can relay short messages through amateur satellites and the ISS.</div>
+    <div class="font-sm mb-12 text-secondary" style="line-height:1.5">
+      <strong>ISS APRS</strong> — the ISS relays short digital packets when it is overhead. No fee. Needs an amateur radio license.<br>
+      <strong>AMSAT CubeSats</strong> — some support digital packet relay. See the Radio section.<br>
+      <strong>iPhone satellite</strong> — Emergency SOS by satellite on iPhone 14 and newer. This is Apple's feature, separate from ARK.<br>
     </div>
-    <div style="font-size:12px;color:var(--text-muted);background:var(--bg-elevated);border-radius:6px;padding:10px;margin-bottom:10px">
-      ⚖️ <strong>Legal note:</strong> Amateur satellite relays in the US require an FCC amateur radio license. Encryption and third-party commercial traffic are prohibited under Part 97. Satellite relay in ARK is for public emergency text messages only.
+    <div class="info-box font-xs" style="margin-bottom:10px">
+      <strong>Legal note:</strong> In the US, sending through amateur satellites needs an FCC amateur radio license. Encryption and commercial traffic are not allowed under Part 97.
     </div>
-    <button class="btn btn-secondary btn-block" onclick="UI.switchTab('radio')">📻 View Radio &amp; Satellite Reference →</button>
+    <button class="btn btn-secondary btn-block" onclick="UI.switchTab('radio')"><svg class="hi" aria-hidden="true"><use href="#i-radio"/></svg> Open radio and satellite reference</button>
   </div>
 
 </div><!-- /tab-home -->

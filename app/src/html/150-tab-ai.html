@@ -2,79 +2,83 @@
 <div class="tab-panel" id="tab-ai" role="tabpanel" aria-labelledby="navtab-ai" tabindex="-1">
 
   <div class="flex-between mb-12 wrap gap-8">
-    <h2 class="section-title" style="margin:0"><span class="title-icon">🤖</span>AI Assistant</h2>
-    <span id="halo-mode-badge" class="badge badge-green font-xs ai-mode-pill">✓ HALO Lite — offline ready</span>
+    <h2 class="section-title" style="margin:0">Ask Halo</h2>
+    <span id="halo-mode-badge" class="badge badge-green font-xs ai-mode-pill">Halo — works offline</span>
   </div>
 
-  <!-- Chat UI — always visible, HALO Lite works instantly -->
+  <!-- Chat UI — always visible, the built-in Halo answers work instantly -->
   <div id="ai-chat-section">
     <div class="card mb-8" style="padding:0;overflow:hidden">
-      <div id="ai-messages" style="height:320px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px">
+      <div id="ai-messages" role="log" aria-live="polite" aria-label="Conversation with Halo" tabindex="0" style="height:320px;height:min(52vh,420px);min-height:220px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px">
         <div class="ai-msg ai-msg-sys">
-          👋 I'm HALO — your offline crisis assistant. Ask me anything about first aid, water, survival, shelter, or your stored data. No download required.
+          I'm Halo, the guide built into ARK. Ask me about first aid, water, shelter, or how ARK works. My answers are stored on this device, so I work with no internet. I am not an emergency service — if you can reach 911, call.
         </div>
       </div>
     </div>
 
-    <!-- Context injector -->
-    <div class="flex gap-6 mb-6 wrap">
-      <button class="btn btn-ghost btn-sm" id="ai-ctx-btn-medical" onclick="ARKai.injectContext('medical')" title="Feed me the medical reference data">💊 Medical</button>
-      <button class="btn btn-ghost btn-sm" id="ai-ctx-btn-inventory" onclick="ARKai.injectContext('inventory')" title="Tell AI about your current inventory">📦 Inventory</button>
-      <button class="btn btn-ghost btn-sm" id="ai-ctx-btn-household" onclick="ARKai.injectContext('household')" title="Tell AI about your household members">🏘️ Household</button>
-      <button class="btn btn-ghost btn-sm" id="ai-ctx-btn-situation" onclick="ARKai.injectContext('situation')" title="Set current alert level as context">⚠️ Situation</button>
-      <button class="btn btn-secondary btn-sm" onclick="ARKai.clearChat()" title="Start a new conversation">🗑️ Clear</button>
-    </div>
-    <!-- Active context badge row -->
-    <div id="ai-ctx-badges" class="ai-ctx-badges"></div>
-
     <!-- Input -->
     <div class="flex gap-8">
-      <textarea id="ai-input" class="form-input" rows="2" style="flex:1;resize:none" placeholder="Ask anything — first aid, water purification, what to do if…"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();ARKai.send()}"
+      <textarea id="ai-input" class="form-input" rows="2" maxlength="2000" style="flex:1;min-width:0;resize:none" placeholder="Ask Halo — for example: how do I stop bleeding?"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();ARKai.send()}"
         oninput="ARKai.onInputChange(this)"
-        aria-label="AI chat input"></textarea>
-      <button class="btn btn-primary" id="ai-send-btn" onclick="ARKai.send()" style="align-self:flex-end" aria-label="Send message" disabled>Send</button>
+        aria-label="Your question for Halo" enterkeyhint="send"></textarea>
+      <button class="btn btn-primary" id="ai-send-btn" onclick="ARKai.send()" style="align-self:flex-end" aria-label="Send your question" disabled><svg class="hi" aria-hidden="true"><use href="#i-send"/></svg> Send</button>
     </div>
-    <div class="font-xs text-muted mt-4">Enter sends · Shift+Enter new line</div>
+    <div class="font-xs text-muted mt-4 mb-12">In a hurry? One or two plain words are enough, like "burn" or "choking".</div>
+
+    <!-- Context injector -->
+    <div class="form-label" id="ai-ctx-label">Let Halo use what you saved in ARK</div>
+    <div class="flex gap-6 mb-6 wrap" role="group" aria-labelledby="ai-ctx-label">
+      <button class="btn btn-ghost btn-sm" id="ai-ctx-btn-medical" onclick="ARKai.injectContext('medical')" title="Let Halo use your household's saved medical details"><svg class="hi" aria-hidden="true"><use href="#i-pill"/></svg> Medical</button>
+      <button class="btn btn-ghost btn-sm" id="ai-ctx-btn-inventory" onclick="ARKai.injectContext('inventory')" title="Let Halo use your saved supplies"><svg class="hi" aria-hidden="true"><use href="#i-box"/></svg> Supplies</button>
+      <button class="btn btn-ghost btn-sm" id="ai-ctx-btn-household" onclick="ARKai.injectContext('household')" title="Let Halo use your household plan and members"><svg class="hi" aria-hidden="true"><use href="#i-users"/></svg> Household</button>
+      <button class="btn btn-ghost btn-sm" id="ai-ctx-btn-situation" onclick="ARKai.injectContext('situation')" title="Let Halo use your current alert level"><svg class="hi" aria-hidden="true"><use href="#i-alert"/></svg> Situation</button>
+      <button class="btn btn-secondary btn-sm" onclick="ARKai.clearChat()" title="Clear this conversation and start again"><svg class="hi" aria-hidden="true"><use href="#i-trash"/></svg> Clear chat</button>
+    </div>
+    <!-- Active context badge row -->
+    <div id="ai-ctx-badges" class="ai-ctx-badges" aria-live="polite"></div>
   </div>
 
-  <!-- Suggested prompts -->
+  <!-- Suggested prompts — one tap asks the question -->
   <div class="card mt-12" id="ai-prompts-card">
-    <div class="card-title mb-8">💡 Try asking…</div>
+    <div class="card-title mb-8">Tap a question to ask it</div>
     <div class="flex gap-6 wrap" id="ai-prompt-chips">
-      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">How do I purify water without equipment?</button>
-      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Signs of dehydration in adults vs children</button>
-      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">How do I treat a deep wound with no doctor?</button>
-      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">What to do if someone goes into shock?</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">How do I stop bleeding from a deep wound?</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Someone is not breathing — CPR steps</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Someone is choking</button>
       <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Heart attack signs and what to do</button>
-      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Stroke signs — FAST test</button>
-      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Severe allergic reaction / anaphylaxis treatment</button>
-      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Build a fire with no lighter or matches</button>
-      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">What to do during and after an earthquake</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Stroke signs</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Severe allergic reaction</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">What to do if someone goes into shock?</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">How do I treat a burn?</button>
       <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">I smell gas — what do I do?</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">How do I make water safe to drink?</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Signs of dehydration</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">What to do during and after an earthquake</button>
       <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">How do I signal for help without a phone?</button>
-      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">Someone was bitten by a snake</button>
+      <button class="btn btn-ghost btn-sm" onclick="ARKai.quickPrompt(this)">How does ARK work with no internet?</button>
     </div>
   </div>
 
-  <!-- HALO+ Upgrade — optional LLM -->
+  <!-- Halo+ — optional on-device language model -->
   <div class="card mt-12" id="ai-upgrade-card">
-    <div class="flex-between mb-8">
-      <div class="card-title" style="margin:0">🧠 HALO+ Upgrade <span class="badge badge-muted font-xs" style="vertical-align:middle">Optional</span></div>
-      <span id="ai-status-badge" class="badge badge-muted">Not loaded</span>
+    <div class="flex-between mb-8 wrap gap-8">
+      <div class="card-title" style="margin:0">Halo+ <span class="badge badge-muted font-xs" style="vertical-align:middle">Optional</span></div>
+      <span id="ai-status-badge" class="badge badge-muted">Not downloaded</span>
     </div>
-    <p class="font-sm text-secondary mb-8">Upgrade to a full neural language model (Llama&nbsp;3.2). Needs internet to download (650&nbsp;MB – 1.8&nbsp;GB depending on model) — do this <em>before</em> an emergency, on Wi-Fi. Once downloaded it runs on your device with no internet, as long as you open ARK the same way you did when you downloaded it. Needs a recent Chrome or Edge on a fairly new phone or computer. The built-in assistant above always works, with or without this.</p>
+    <p class="font-sm text-secondary mb-8">Halo+ adds a larger AI model (Llama&nbsp;3.2) that runs on this device. It needs internet once to download (about 600&nbsp;MB to 1.8&nbsp;GB), so do this <em>before</em> an emergency, on Wi-Fi. After that it works with no internet, as long as you open ARK the same way you did when you downloaded it. Each time you open ARK, tap Start Halo+ to switch it on. Try this once with Wi-Fi turned off before you rely on it. It needs a recent Chrome or Edge on a fairly new phone or computer.</p>
+    <p class="font-sm text-secondary mb-8">Halo+ can answer more kinds of questions, but it can also get things wrong. The built-in Halo above always works, with or without this.</p>
     <div class="flex gap-8 mb-8 wrap">
-      <select id="ai-model-select" class="form-input" style="flex:1;min-width:180px">
-        <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B — Fast (~650 MB)</option>
-        <option value="Llama-3.2-3B-Instruct-q4f16_1-MLC">Llama 3.2 3B — Smarter (~1.8 GB)</option>
-        <option value="TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC">TinyLlama 1.1B — Minimal footprint</option>
+      <select id="ai-model-select" class="form-input" style="flex:1;min-width:180px" aria-label="Choose a model to download">
+        <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B — Fast (about 650 MB)</option>
+        <option value="Llama-3.2-3B-Instruct-q4f16_1-MLC">Llama 3.2 3B — Smarter (about 1.8 GB)</option>
+        <option value="TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC">TinyLlama 1.1B — Smallest (about 600 MB)</option>
       </select>
-      <button class="btn btn-primary" id="ai-load-btn" onclick="ARKai.load()">⬇ Load Model</button>
+      <button class="btn btn-primary" id="ai-load-btn" onclick="ARKai.load()"><svg class="hi" aria-hidden="true"><use href="#i-download"/></svg> Download</button>
     </div>
     <div id="ai-progress-row" class="hidden">
-      <div class="font-sm mb-4" id="ai-progress-label">Downloading AI model… This only happens once.</div>
-      <div style="background:var(--bg-secondary);border-radius:4px;height:10px;overflow:hidden">
+      <div class="font-sm mb-4" id="ai-progress-label">Downloading the model. This only happens once.</div>
+      <div style="background:var(--bg-secondary);border-radius:999px;height:10px;overflow:hidden">
         <div id="ai-progress-bar" style="height:100%;background:var(--accent);width:0%;transition:width 0.3s"></div>
       </div>
       <div class="flex-between mt-4">
@@ -82,7 +86,7 @@
         <div class="font-xs text-muted" id="ai-progress-mb"></div>
       </div>
     </div>
-    <div class="font-xs text-muted mt-4">⚠️ Not a substitute for 911 or professional emergency services.</div>
+    <div class="font-xs text-muted mt-4">Halo is a guide, not a doctor and not an emergency service. If you can reach 911, call.</div>
   </div>
 
 </div><!-- /tab-ai -->
@@ -90,13 +94,13 @@
 </div><!-- /app -->
 
 <!-- Storage warning banner (shown when storage > 80%) -->
-<div id="storage-warning-banner" class="hidden" style="background:rgba(210,153,34,0.15);border-top:1px solid var(--yellow);color:var(--yellow);font-size:12px;text-align:center;padding:6px 12px;position:sticky;bottom:0;z-index:99">
-  ⚠️ Storage nearly full — <button class="btn btn-ghost btn-sm font-xs" onclick="Settings.exportAll()" style="color:var(--yellow);text-decoration:underline;padding:0">back up your data</button> then clear old messages.
+<div id="storage-warning-banner" class="hidden" role="status" style="background:var(--bg-card);border-top:1px solid var(--yellow);color:var(--text-primary);font-size:13px;line-height:1.5;text-align:center;padding:8px 12px;position:sticky;bottom:0;z-index:99">
+  <svg class="hi" aria-hidden="true" style="color:var(--yellow)"><use href="#i-alert"/></svg> ARK's storage on this device is nearly full. <button class="btn btn-ghost btn-sm font-xs" onclick="Settings.exportAll()" style="color:inherit;text-decoration:underline;padding:0 4px;border:0">Back up your data</button> then delete old messages.
 </div>
 
 <!-- Storage unavailable banner (shown when localStorage cannot be used) -->
-<div id="storage-unavailable-banner" class="hidden" role="alert" style="background:rgba(220,53,69,0.15);border-top:1px solid var(--danger,#dc3545);color:var(--danger,#dc3545);font-size:12px;text-align:center;padding:6px 12px;position:sticky;bottom:0;z-index:100">
-  ⚠️ Browser storage is unavailable (private browsing?) — changes last only until you close this tab. <button class="btn btn-ghost btn-sm" onclick="Settings.exportAll()" style="font-size:11px;color:inherit;text-decoration:underline;padding:0">Export a backup</button> before leaving.
+<div id="storage-unavailable-banner" class="hidden" role="alert" style="background:var(--bg-card);border-top:1px solid var(--red);color:var(--text-primary);font-size:13px;line-height:1.5;text-align:center;padding:8px 12px;position:sticky;bottom:0;z-index:100">
+  <svg class="hi" aria-hidden="true" style="color:var(--red)"><use href="#i-alert"/></svg> This browser is not saving ARK's data (private browsing may be on). What you enter will be lost when you close this tab. <button class="btn btn-ghost btn-sm font-xs" onclick="Settings.exportAll()" style="color:inherit;text-decoration:underline;padding:0 4px;border:0">Save a backup file</button> before you leave.
 </div>
 
 <!-- Toast notification -->

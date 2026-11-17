@@ -1,9 +1,22 @@
 // === INDEXEDDB WRAPPER ===
 const DB = {
   _db: null,
+  _opening: null,
   async open() {
     if (this._db) return this._db;
+    // Many callers ask at once (every map piece does); they all share one open request.
+    if (this._opening) return this._opening;
+    this._opening = this._openOnce().then(
+      db => { this._opening = null; return db; },
+      err => { this._opening = null; throw err; } // a later call may try again
+    );
+    return this._opening;
+  },
+  _openOnce() {
     return new Promise((res, rej) => {
+      // Some phones never answer an open request. Give up after a while so nothing waits forever
+      // (the map then loads from the internet, and a backup is still saved without messages).
+      setTimeout(() => rej(new Error('IndexedDB did not open in time')), 8000);
       const req = indexedDB.open('ARK_DB', 3);
       req.onupgradeneeded = e => {
         const db = e.target.result;
@@ -23,6 +36,9 @@ const DB = {
       };
       req.onsuccess = e => {
         this._db = e.target.result;
+        // If another tab needs to upgrade or erase the database, let go so it is not left waiting.
+        this._db.onversionchange = () => { try { this._db.close(); } catch (_) {} this._db = null; };
+        this._db.onclose = () => { this._db = null; };
         // Saved map tiles are kept: an emergency can come long after the map was cached,
         // and an old map is far better than no map.
         res(this._db);
@@ -36,7 +52,7 @@ const DB = {
   async getTile(key) {
     try {
       const db = await this.open();
-      return new Promise((res) => {
+      return await new Promise((res) => {
         const req = db.transaction('map_tiles','readonly').objectStore('map_tiles').get(key);
         req.onsuccess = () => res(req.result || null);
         req.onerror = () => res(null);
@@ -46,7 +62,7 @@ const DB = {
   async putTile(key, blob) {
     try {
       const db = await this.open();
-      return new Promise((res) => {
+      return await new Promise((res) => {
         const req = db.transaction('map_tiles','readwrite').objectStore('map_tiles').put({key, blob, ts: Date.now()});
         req.onsuccess = () => res();
         req.onerror = () => res();
@@ -80,7 +96,7 @@ const DB = {
   async put(store, item) {
     try {
       const db = await this.open();
-      return new Promise((res) => {
+      return await new Promise((res) => {
         const tx = db.transaction(store,'readwrite');
         const req = tx.objectStore(store).put(item);
         req.onsuccess = () => res(req.result);
@@ -91,7 +107,7 @@ const DB = {
   async clear(store) {
     try {
       const db = await this.open();
-      return new Promise((res) => {
+      return await new Promise((res) => {
         const tx = db.transaction(store,'readwrite');
         const req = tx.objectStore(store).clear();
         req.onsuccess = () => res();

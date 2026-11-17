@@ -3,20 +3,23 @@ const Store = {
   _mem: new Map(),        // fallback when localStorage is unavailable
   lastSave: null,         // ISO timestamp of last successful Store.set() this session
   _lastErrToast: 0,       // throttle error toasts (Store.set can fire in loops)
+  _frozen: false,         // true only between an erase and the reload that follows it
   get persistent() { return _lsAvailable; },
 
   _errToast(msg) {
     const now = Date.now();
     if (now - this._lastErrToast < 10000) return;
     this._lastErrToast = now;
-    try { Toast.show(msg, 'error', 5000); } catch(_) {}
+    try { Toast.show(msg, 'error', 7000); } catch(_) {}
   },
 
   // Returns true on success, false on failure.
   set(key, val) {
+    // After "Erase everything", nothing may be written back while the page reloads.
+    if (this._frozen) return true;
     let json;
     try { json = JSON.stringify(val); }
-    catch(e) { console.error('Store.set: value not serializable', key, e); this._errToast('Could not save "' + key + '" — data format error'); return false; }
+    catch(e) { console.error('Store.set: value not serializable', key, e); this._errToast('That could not be saved. Please try again.'); return false; }
     if (json === undefined) json = 'null';
     if (!_lsAvailable) { this._mem.set('ark_' + key, json); this._markSaved(); return true; }
     try {
@@ -26,12 +29,12 @@ const Store = {
     } catch(e) {
       if (_isQuotaError(e)) {
         console.error('Store.set: quota exceeded', key, e);
-        this._errToast('Storage full — delete old data (export a backup first)');
+        this._errToast('This device has no room left for ARK. Open Settings and save a backup. Then remove photos from missing person reports, or tap Delete saved map.');
         const banner = document.getElementById('storage-warning-banner');
         if (banner) banner.classList.remove('hidden');
       } else {
         console.error('Store.set failed', key, e);
-        this._errToast('Save failed — your last change may not be kept');
+        this._errToast('Your last change could not be saved. Try again. If it keeps happening, save a backup in Settings.');
       }
       return false;
     }
@@ -44,7 +47,7 @@ const Store = {
   },
 
   lastSaveLabel() {
-    const mode = _lsAvailable ? '' : ' (memory only — not persisted)';
+    const mode = _lsAvailable ? '' : ' (not kept after you close ARK)';
     if (!this.lastSave) return 'Last saved: nothing saved yet this session' + mode;
     return 'Last saved: ' + new Date(this.lastSave).toLocaleString() + mode;
   },

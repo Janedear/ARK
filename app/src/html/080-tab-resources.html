@@ -2,66 +2,66 @@
 <div class="tab-panel" id="tab-resources" role="tabpanel" aria-labelledby="navtab-resources" tabindex="-1">
 
   <div class="flex-between mb-12 wrap gap-8">
-    <h2 class="section-title"><span class="title-icon">📦</span>Inventory Tracker</h2>
-    <div class="flex gap-8">
-      <button class="btn btn-secondary btn-sm" onclick="Resources.shareWithHub()">📡 Share with Hub</button>
-      <button class="btn btn-ghost btn-sm" onclick="PrintARK.inventory()" title="Print inventory list">🖨️ Print List</button>
+    <h2 class="section-title">Your supplies</h2>
+    <div class="flex gap-8 wrap">
+      <button class="btn btn-secondary btn-sm" onclick="Resources.shareWithHub()" title="Send your supply numbers to your ARK Hub"><svg class="hi" aria-hidden="true"><use href="#i-hub"/></svg> Share with hub</button>
+      <button class="btn btn-ghost btn-sm" onclick="PrintARK.inventory()" title="Print your supply list"><svg class="hi" aria-hidden="true"><use href="#i-printer"/></svg> Print list</button>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-header">
-      <div class="card-title"><span class="card-icon">📊</span>Current Supplies</div>
-      <div class="text-muted font-xs" id="resources-updated">Not yet updated</div>
+    <div class="card-header wrap gap-8">
+      <div class="card-title"><svg class="hi" aria-hidden="true"><use href="#i-box"/></svg>What you have now</div>
+      <div class="text-muted font-xs" id="resources-updated">Not saved yet</div>
     </div>
 
-    <div id="resource-meters">
+    <div id="resource-meters" aria-live="polite">
       <!-- filled by JS -->
     </div>
 
     <div class="mt-12">
-      <button class="btn btn-primary" onclick="Resources.openEdit()">✏️ Update Inventory</button>
+      <button class="btn btn-primary" onclick="Resources.openEdit()"><svg class="hi" aria-hidden="true"><use href="#i-edit"/></svg> Update supplies</button>
     </div>
   </div>
 
   <!-- Quick preset kits -->
   <div class="card">
-    <div class="card-header">
-      <div class="card-title"><span class="card-icon">⚡</span>Quick Presets</div>
-      <div class="text-muted font-xs">Load a starting point</div>
+    <div class="card-header wrap gap-8">
+      <div class="card-title"><svg class="hi" aria-hidden="true"><use href="#i-list-check"/></svg>Kit targets</div>
+      <div class="text-muted font-xs">What a kit should hold</div>
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px">
-      <button class="btn btn-secondary btn-sm" onclick="Resources.loadPreset('72hr')" title="FEMA recommended 72-hour emergency kit">🧳 72-Hour Kit</button>
-      <button class="btn btn-secondary btn-sm" onclick="Resources.loadPreset('2week')" title="2-week extended preparedness supply">📦 2-Week Supply</button>
-      <button class="btn btn-secondary btn-sm" onclick="Resources.loadPreset('month')" title="30-day long-term preparedness">🏠 30-Day Plan</button>
+    <div class="flex wrap gap-8">
+      <button class="btn btn-secondary btn-sm" onclick="Resources.loadPreset('72hr')" title="A 3-day emergency kit">3-day kit</button>
+      <button class="btn btn-secondary btn-sm" onclick="Resources.loadPreset('2week')" title="A 2-week supply">2-week supply</button>
+      <button class="btn btn-secondary btn-sm" onclick="Resources.loadPreset('month')" title="A 30-day supply">30-day supply</button>
     </div>
-    <div class="text-muted font-xs mt-8">Presets fill the form below with FEMA-recommended quantities for 1 person — adjust to your household size before saving.</div>
+    <div class="text-muted font-xs mt-8">Tap one to fill the form with a target for your household. Water follows the FEMA guide of 1 gallon per person per day. The other numbers are starting points. Change every number to what you really have before you save.</div>
   </div>
 
   <!-- Edit form (hidden by default) -->
   <div class="card hidden" id="resource-edit-card">
     <div class="card-header">
-      <div class="card-title"><span class="card-icon">✏️</span>Update Inventory</div>
-      <button class="btn btn-ghost btn-sm" onclick="Resources.closeEdit()" aria-label="Close" style="padding:4px 8px">✕</button>
+      <div class="card-title"><svg class="hi" aria-hidden="true"><use href="#i-edit"/></svg>Update supplies</div>
+      <button class="btn btn-ghost btn-sm" onclick="Resources.closeEdit()" aria-label="Close without saving" title="Close without saving"><svg class="hi" aria-hidden="true"><use href="#i-x"/></svg></button>
     </div>
     <div class="grid-2">
       <div class="form-group">
-        <label class="form-label">💧 Water (gallons)</label>
-        <input class="form-input" id="res-water" type="number" min="0" step="0.5" placeholder="0">
-        <div class="text-muted font-xs" style="margin-top:3px">FEMA: 1 gal/person/day</div>
+        <label class="form-label" for="res-water">Water (gallons)</label>
+        <input class="form-input" id="res-water" type="number" inputmode="decimal" min="0" step="0.5" placeholder="0">
+        <div class="text-muted font-xs" style="margin-top:3px">FEMA: 1 gallon per person per day</div>
       </div>
       <div class="form-group">
-        <label class="form-label">🍽️ Food (days of supply)</label>
-        <input class="form-input" id="res-food" type="number" min="0" step="0.5" placeholder="0">
-        <div class="text-muted font-xs" style="margin-top:3px">Total days for the household</div>
+        <label class="form-label" for="res-food">Food (days it will last)</label>
+        <input class="form-input" id="res-food" type="number" inputmode="decimal" min="0" step="0.5" placeholder="0">
+        <div class="text-muted font-xs" style="margin-top:3px">Days of food for your whole household</div>
       </div>
       <div class="form-group">
-        <label class="form-label">⛽ Fuel (gallons)</label>
-        <input class="form-input" id="res-fuel" type="number" min="0" step="0.5" placeholder="0">
-        <div class="text-muted font-xs" style="margin-top:3px">Gas, propane, kerosene combined</div>
+        <label class="form-label" for="res-fuel">Fuel (gallons)</label>
+        <input class="form-input" id="res-fuel" type="number" inputmode="decimal" min="0" step="0.5" placeholder="0">
+        <div class="text-muted font-xs" style="margin-top:3px">Gas, propane and kerosene added together</div>
       </div>
       <div class="form-group">
-        <label class="form-label">🏥 Medical Supplies (0–5)</label>
+        <label class="form-label" for="res-medical">Medical supplies (0–5)</label>
         <select class="form-input" id="res-medical">
           <option value="0">0 — None</option>
           <option value="1">1 — Minimal (bandages only)</option>
@@ -72,36 +72,35 @@
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">🏠 Shelter Capacity (people)</label>
-        <input class="form-input" id="res-shelter" type="number" min="0" placeholder="0">
+        <label class="form-label" for="res-shelter">Shelter (people)</label>
+        <input class="form-input" id="res-shelter" type="number" inputmode="numeric" min="0" placeholder="0">
         <div class="text-muted font-xs" style="margin-top:3px">How many people can shelter here</div>
       </div>
       <div class="form-group">
-        <label class="form-label">🔋 Power (hours of backup)</label>
-        <input class="form-input" id="res-power" type="number" min="0" placeholder="0">
-        <div class="text-muted font-xs" style="margin-top:3px">Generator, battery bank, solar hours</div>
+        <label class="form-label" for="res-power">Backup power (hours)</label>
+        <input class="form-input" id="res-power" type="number" inputmode="decimal" min="0" placeholder="0">
+        <div class="text-muted font-xs" style="margin-top:3px">Generator, battery bank or solar</div>
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">📝 Notes</label>
-      <textarea class="form-input" id="res-notes" maxlength="500" placeholder="Storage locations, expiry notes, special items..."></textarea>
+      <label class="form-label" for="res-notes">Notes</label>
+      <textarea class="form-input" id="res-notes" maxlength="500" placeholder="Where things are stored, expiry dates, special items..."></textarea>
     </div>
-    <div class="flex gap-8">
-      <button class="btn btn-primary" onclick="Resources.save()">💾 Save Inventory</button>
+    <div class="flex gap-8 wrap">
+      <button class="btn btn-primary" onclick="Resources.save()"><svg class="hi" aria-hidden="true"><use href="#i-check"/></svg> Save supplies</button>
       <button class="btn btn-secondary" onclick="Resources.closeEdit()">Cancel</button>
     </div>
   </div>
 
   <!-- Inventory History & Export -->
   <div class="card">
-    <div class="card-header">
-      <div class="card-title"><span class="card-icon">📈</span>Snapshot History</div>
+    <div class="card-header wrap gap-8">
+      <div class="card-title"><svg class="hi" aria-hidden="true"><use href="#i-clock"/></svg>Past saves</div>
       <div class="flex gap-8">
-        <button class="btn btn-ghost btn-sm" onclick="Resources.exportJSON()" title="Export inventory as JSON">⬇ Export</button>
-        <button class="btn btn-ghost btn-sm" onclick="Resources.importJSON()" title="Import inventory from JSON">⬆ Import</button>
+        <button class="btn btn-ghost btn-sm" onclick="Resources.exportJSON()" title="Save a backup file of your supplies"><svg class="hi" aria-hidden="true"><use href="#i-download"/></svg> Back up</button>
+        <button class="btn btn-ghost btn-sm" onclick="Resources.importJSON()" title="Load a backup file of your supplies"><svg class="hi" aria-hidden="true"><use href="#i-upload"/></svg> Restore</button>
       </div>
     </div>
-    <div id="res-history" class="font-sm text-secondary">No history yet — save a snapshot to track changes.</div>
+    <div id="res-history" class="font-sm text-secondary">Nothing saved yet. Each time you save, the numbers are kept here so you can see what changed.</div>
   </div>
 </div><!-- /tab-resources -->
-

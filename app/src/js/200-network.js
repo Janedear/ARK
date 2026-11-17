@@ -3,10 +3,30 @@ const Network = {
   async connectHub() {
     const hubInputEl = document.getElementById('hub-url-input');
     let url = hubInputEl ? hubInputEl.value.trim() : '';
-    if (!url) { Toast.show('Enter a hub address (e.g. 192.168.1.100:3000)', 'error'); return; }
+    if (!url) {
+      Toast.show('Type the hub address first. It is shown on the hub\'s screen, for example 192.168.1.20:8080', 'error', 6000);
+      if (hubInputEl) hubInputEl.focus();
+      return;
+    }
     // Normalize: strip trailing slash, add http:// if scheme is missing
+    // Phone keyboards slip spaces into number addresses ("192.168. 1.20"). Take them out.
+    if (/^[\d.:\s]+$/.test(url)) url = url.replace(/\s+/g, '');
+    // An address copied from a browser often ends in a page name. The hub is the part before it.
+    url = url.replace(/[?#].*$/, '').replace(/\/[^\/]*\.html?$/i, '');
     url = url.replace(/\/+$/, '');
-    if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
+    if (!/^https?:\/\//i.test(url)) {
+      // People often leave off the ":8080" at the end. A bare number address gets the hub's standard port.
+      if (/^\d{1,3}(\.\d{1,3}){3}$/.test(url)) url += ':8080';
+      url = 'http://' + url;
+    }
+    // Never save something that cannot be an address — it would fail forever with no clear reason.
+    let okAddr = false;
+    try { okAddr = !/\s/.test(url) && !!new URL(url).hostname; } catch(e) {}
+    if (!okAddr) {
+      Toast.show('That does not look like a hub address. Type it exactly as shown on the hub\'s screen, for example 192.168.1.20:8080', 'error', 7000);
+      if (hubInputEl) hubInputEl.focus();
+      return;
+    }
     if (hubInputEl) hubInputEl.value = url; // show normalized URL to user
     Store.set('hub_url', url);
     if (Hub.blockedBySecurePage()) { Hub.updateSyncDisplay(); Hub.explainSecurePage(); return; }
@@ -15,20 +35,21 @@ const Network = {
     const settingsEl = document.getElementById('set-hub-url');
     if (settingsEl) settingsEl.value = url;
     document.getElementById('hub-url-display') && (document.getElementById('hub-url-display').textContent = 'Hub: ' + url);
-    Toast.show('Connecting to hub…', 'info');
+    Toast.show('Looking for the hub…', 'info');
     const btn = document.querySelector('button[onclick*="Network.connectHub("]');
-    BtnLoading.start(btn, '⏳ Connecting…');
+    BtnLoading.start(btn, 'Joining…');
+    Hub.startAutoSync(); // make sure ARK keeps checking this hub, also after leaving another one
     try { await Hub.sync(true); } finally { BtnLoading.stop(btn); Hub.updateSyncDisplay(); }
   },
 
   async scanHub() {
     const btn = document.querySelector('button[onclick*="Network.scanHub("]');
     if (btn && btn.dataset.loading === '1') return;
-    BtnLoading.start(btn, '⏳ Scanning…');
+    BtnLoading.start(btn, 'Looking…');
     try { await this._scanHub(); }
     catch (e) {
       console.warn('Network.scanHub error:', e);
-      Toast.show('Hub scan failed — enter the hub URL manually above', 'error', 4000);
+      Toast.show('Could not look for hubs. Type the address shown on the hub\'s screen into the box above.', 'error', 6000);
     }
     finally { BtnLoading.stop(btn); }
   },
@@ -36,10 +57,10 @@ const Network = {
   async _scanHub() {
     const results = document.getElementById('scan-results');
     if (location.protocol === 'https:') {
-      if (results) results.innerHTML = '<div class="font-sm text-secondary">Auto-scan cannot work from a secure website. Join the hub\'s Wi-Fi and type the address shown on the hub\'s screen (for example <strong>http://10.42.0.1:8080</strong>) straight into your browser.</div>';
+      if (results) results.innerHTML = '<div class="font-sm text-secondary">ARK cannot look for hubs from a secure website. Join the hub\'s Wi-Fi and type the address shown on the hub\'s screen (for example <strong>http://10.42.0.1:8080</strong>) straight into your browser.</div>';
       return;
     }
-    if (results) results.innerHTML = '<div class="font-sm text-secondary">🔍 Scanning for ARK hubs…</div>';
+    if (results) results.innerHTML = '<div class="font-sm text-secondary" role="status">Looking for ARK Hubs on this Wi-Fi…</div>';
 
     const found = new Map(); // url → label
 
@@ -59,33 +80,77 @@ const Network = {
     }
 
     // 2. Common IP sweep (parallel, 1.5 s timeout each)
-    const common = ['10.42.0.1','192.168.1.1','192.168.0.1','192.168.4.1','172.16.0.1','10.0.0.1'];
-    if (results) results.innerHTML = `<div class="font-sm text-secondary">🔍 Checking ${common.length} common hub addresses…</div>`;
+    const common = ['10.42.0.1','192.168.1.1','192.168.0.1','192.168.4.1','172.16.0.1','10.0.0.1'].map(ip => 'http://' + ip + ':8080');
+    // ARK opened straight from a hub? Check that address too, so a hub you left can be found again.
+    if (location.protocol === 'http:' && location.host && common.indexOf(location.origin) === -1) common.unshift(location.origin);
+    if (results) results.innerHTML = `<div class="font-sm text-secondary" role="status">Looking for ARK Hubs on this Wi-Fi…</div>`;
     let checked = 0;
-    await Promise.all(common.map(async ip => {
-      const url = 'http://' + ip + ':8080';
+    await Promise.all(common.map(async url => {
       if (found.has(url)) { checked++; return; }
       const ctrl = new AbortController();
       const tid = setTimeout(() => ctrl.abort(), 1500);
       try {
         const r = await fetch(url + '/api/status', {signal: ctrl.signal});
-        if (r.ok) { const st = await r.json().catch(() => ({})); found.set(url, st.name || url); }
+        // Many Wi-Fi routers answer every address with their own page. Only list real ARK Hubs.
+        if (r.ok) { const st = await r.json().catch(() => null); if (this._looksLikeHub(st)) found.set(url, st.name || url); }
       } catch {}
       finally {
         clearTimeout(tid);
         checked++;
-        if (results && found.size === 0) results.innerHTML = `<div class="font-sm text-secondary">🔍 Checked ${checked}/${common.length}…</div>`;
+        if (results && found.size === 0) results.innerHTML = `<div class="font-sm text-secondary" role="status">Looking for ARK Hubs on this Wi-Fi… ${checked} of ${common.length}</div>`;
       }
     }));
 
     if (!results) return;
     if (found.size) {
       results.innerHTML = [...found.entries()].map(([u, label]) =>
-        `<div class="font-sm mb-8"><span class="text-green">✓ </span><b>${esc(label)}</b> — <a href="#" class="text-accent" data-url="${esc(u)}" onclick="Network.useHub(this.dataset.url);return false">${esc(u)}</a></div>`
+        `<div class="peer-item"><span class="font-sm" style="flex:1;min-width:0;word-break:break-all">${label && label !== u ? '<strong>' + esc(label) + '</strong><br>' : ''}${esc(u)}</span><button class="btn btn-primary btn-sm" style="flex-shrink:0" data-url="${esc(u)}" onclick="Network.useHub(this.dataset.url)">Join</button></div>`
       ).join('');
     } else {
-      results.innerHTML = '<div class="font-sm text-secondary">No hubs found. Enter the hub URL manually above.</div>';
+      results.innerHTML = '<div class="font-sm text-secondary" style="line-height:1.6">No hub found. Check this device is on the same Wi-Fi as the hub. Then type the address shown on the hub\'s screen into the box above.</div>';
     }
+  },
+
+  // True when an /api/status answer really comes from an ARK Hub.
+  _looksLikeHub(st) {
+    return !!st && typeof st === 'object' && !Array.isArray(st) && ('hub_device' in st || 'packets' in st);
+  },
+
+  // Opened straight from a hub (for example http://192.168.1.20:8080)? Then join that hub
+  // without making the person type its address again. Skipped if they chose to leave it.
+  _joiningOwn: false,
+  async joinOwnHub() {
+    if (this._joiningOwn) return false;
+    this._joiningOwn = true;
+    try {
+      if (location.protocol !== 'http:' || Store.get('hub_url') || Store.get('offline_mode', false)) return false;
+      const origin = location.origin;
+      if (!origin || origin === 'null' || Store.get('hub_left', '') === origin) return false;
+      const r = await fetch(origin + '/api/status', {signal: timeoutSignal(4000)});
+      if (!r.ok) return false;
+      const st = await r.json();
+      if (!this._looksLikeHub(st) || Store.get('hub_url')) return false;
+      Store.set('hub_url', origin);
+      SoftHub.yield_to_external();
+      const el = document.getElementById('hub-url-input'); if (el) el.value = origin;
+      Hub.startAutoSync();
+      Hub.updateSyncDisplay();
+      Toast.show('You are joined to the ARK Hub on this Wi-Fi. Messages you post can be read by everyone on it.', 'success', 6000);
+      Hub.sync();
+      return true;
+    } catch (e) { return false; }
+    finally { this._joiningOwn = false; }
+  },
+
+  // "localhost" only means something on the hub laptop itself. Handing it to a neighbour would send them nowhere.
+  _hubIsThisDeviceOnly(url) {
+    try { return /^(localhost|127\.\d+\.\d+\.\d+|\[::1\])$/i.test(new URL(url).hostname); } catch (e) { return false; }
+  },
+  _shareQRHtml(url) {
+    if (this._hubIsThisDeviceOnly(url)) {
+      return '<div class="warn-box">This address (' + esc(url) + ') only works on this laptop. Give other people the address shown in the hub window instead. It looks like <strong>http://192.168.1.20:8080</strong>.</div>';
+    }
+    return this.makeQRSVG(url);
   },
 
   useHub(url) {
@@ -95,18 +160,18 @@ const Network = {
 
   generateHubQR() {
     const url = Store.get('hub_url', '');
-    if (!url) { Toast.show('No hub URL yet — connect to a hub above first, then generate its QR code', 'warning', 4000); return; }
+    if (!url) { Toast.show('Join a hub first. Then ARK can show its QR code for others to scan.', 'warning', 5000); return; }
     const display = document.getElementById('qr-hub-display');
     const btn = document.querySelector('button[onclick*="Network.generateHubQR("]');
     if (btn && btn.dataset.loading === '1') return;
-    BtnLoading.start(btn, '⏳ Generating…');
+    BtnLoading.start(btn, 'Drawing…');
     // Yield a frame so the loading label paints before the synchronous QR encode runs
     setTimeout(() => {
       try {
-        if (display) display.innerHTML = this.makeQRSVG(url);
+        if (display) { display.innerHTML = this._shareQRHtml(url); display.dataset.qrFor = url; }
       } catch (e) {
         console.warn('Network.generateHubQR error:', e);
-        Toast.show('QR generation failed — share the hub URL as text instead', 'error', 4000);
+        Toast.show('Could not draw the QR code. Read the hub address out loud or write it down instead.', 'error', 6000);
       } finally {
         BtnLoading.stop(btn);
       }
@@ -134,15 +199,13 @@ const Network = {
           <rect width="${total}" height="${total}" fill="#fff"/>
           <g fill="#000">${rects}</g>
         </svg>
-        <div style="font-size:10px;color:#333;margin-top:4px;max-width:${total}px;word-break:break-all;font-family:monospace">${esc(text)}</div>
+        <div style="font-size:13px;font-weight:600;color:#000;margin-top:6px;max-width:${total}px;word-break:break-all;font-family:monospace">${esc(text)}</div>
       </div>`;
     } catch(e) {
       // Graceful fallback: show URL in a box if QR encoding fails
       return `<div style="background:#fff;padding:10px;border-radius:6px;display:inline-block;text-align:center">
-        <div class="flex-center" style="width:128px;height:128px;background:#fff;border:2px solid #000;padding:8px">
-          <div style="font-size:9px;color:#000;word-break:break-all;font-family:monospace">${esc(text)}</div>
-        </div>
-        <div style="font-size:10px;color:#333;margin-top:4px">Share this URL</div>
+        <div style="font-size:13px;color:#000;margin-bottom:6px">The QR code could not be drawn. Tell people to type this address into their browser:</div>
+        <div style="font-size:15px;font-weight:600;color:#000;word-break:break-all;font-family:monospace;border:2px solid #000;padding:8px">${esc(text)}</div>
       </div>`;
     }
   },
@@ -173,6 +236,8 @@ const Network = {
         const detector = new BarcodeDetector({formats: ['qr_code']});
         const scanFrame = async () => {
           if (!video.srcObject) return; // stopped
+          // Left the Network screen with the camera still on: switch it off to save battery.
+          if (typeof UI !== 'undefined' && UI.currentTab && UI.currentTab !== 'network') { this.stopQRScan(); return; }
           try {
             const codes = await detector.detect(video);
             if (codes.length > 0) {
@@ -182,7 +247,7 @@ const Network = {
                 this.stopQRScan();
                 const urlInput = document.getElementById('hub-url-input');
                 if (urlInput) urlInput.value = rawValue;
-                Toast.show('QR code scanned — tap Connect to join', 'success', 4000);
+                Toast.show('Hub address found. Check it, then tap Join.', 'success', 5000);
                 return; // stop scanning
               }
             }
@@ -190,13 +255,13 @@ const Network = {
           this._qrScanTimer = setTimeout(scanFrame, 400);
         };
         video.addEventListener('loadedmetadata', () => { scanFrame(); }, {once: true});
-        Toast.show('Camera started — point at a hub QR code', 'info');
+        Toast.show('Point the camera at the hub\'s QR code', 'info', 4000);
       } else {
         // No BarcodeDetector — inform user it won't auto-read
-        Toast.show('Camera started — your browser does not support QR decoding. Enter the address manually.', 'warning', 6000);
+        Toast.show('This browser cannot read QR codes. Type the hub address into the box above.', 'warning', 6000);
       }
     } catch(e) {
-      Toast.show('Camera not available — ' + (e.name === 'NotAllowedError' ? 'camera permission denied' : e.message) + '. Enter the hub address manually.', 'error', 5000);
+      Toast.show((e && e.name === 'NotAllowedError' ? 'ARK is not allowed to use the camera. Allow it in your browser, or type the hub address into the box above.' : 'Could not start the camera. Type the hub address into the box above instead.'), 'error', 7000);
     }
   },
 
@@ -214,14 +279,15 @@ const Network = {
   // Plain-language steps for setting up a real hub (the only way to link different devices offline).
   showHubHelp() {
     Modal.open(
-      '<p style="line-height:1.6;margin-bottom:10px">A phone or browser cannot be a hub by itself. One <strong>laptop or Raspberry Pi</strong> runs the free ARK Hub program, and every phone on the same Wi-Fi can then share messages — with no internet at all.</p>' +
+      '<p style="line-height:1.6;margin-bottom:10px"><strong>In a crisis, ARK makes its own internet from the devices around you.</strong> One <strong>laptop or Raspberry Pi</strong> becomes the hub by running the free ARK Hub program. Nearby phones join it over Wi-Fi, and hubs pass messages on to each other.</p>' +
+      '<p class="font-sm text-secondary" style="line-height:1.6;margin-bottom:10px">This network is local. It reaches the people joined to your hubs, not the wider internet. A phone on its own cannot be the hub.</p>' +
       '<ol style="line-height:1.7;padding-left:20px;margin-bottom:12px">' +
       '<li><strong>Before an emergency</strong> (needs internet once): on the laptop, download the <strong>ARK Hub kit</strong> from <strong>arks.solutions/hub</strong> and unzip it.</li>' +
       '<li><strong>Start it:</strong> on Windows double-click <strong>start-hub.cmd</strong> in the hub folder. On Mac, Linux or Raspberry Pi run <strong>sh hub/start-hub.sh</strong>.</li>' +
       '<li>The hub window shows an address such as <strong>http://192.168.1.20:8080</strong>.</li>' +
       '<li><strong>Everyone else</strong> joins the same Wi-Fi (a router with no internet is fine) and types that address into their browser.</li>' +
       '</ol>' +
-      '<p class="font-xs text-muted" style="line-height:1.5;margin-bottom:12px">Practise once while things are normal. The hub message board is public to everyone on that Wi-Fi.</p>' +
+      '<p class="font-xs text-muted" style="line-height:1.5;margin-bottom:12px">Practise once while things are normal. Everyone on that Wi-Fi can read the hub message board. Nobody monitors it, and it is not an emergency service.</p>' +
       '<button class="btn btn-primary" onclick="Modal.close()">Got it</button>',
       'How to set up a hub');
   },
@@ -255,7 +321,8 @@ const Network = {
     Store.set('hub_url', hubUrl);
     Hub.updateSyncDisplay && Hub.updateSyncDisplay();
     SoftHub.yield_to_external && SoftHub.yield_to_external();
-    Toast.show('🔗 Connecting to hub…', 'info', 3000);
+    Toast.show('Looking for the hub…', 'info', 3000);
+    Hub.startAutoSync();
     try { await Hub.sync(true); } catch(e) {}
     // Update the hub URL input if visible
     const urlInput = document.getElementById('hub-url-input');
@@ -281,7 +348,7 @@ const Network = {
     if (active) active.style.display = isHub ? ''     : 'none';
     if (badge)  { badge.style.display = isHub ? '' : 'none'; }
     if (homeStatus) {
-      homeStatus.textContent = Hub.url ? '📡 Hub: ' + Hub.url : '📡 Not connected to a hub — messages stay on this device';
+      homeStatus.textContent = Hub.url ? 'Hub: ' + Hub.url : 'Not joined to a hub. Messages stay on this device.';
       homeStatus.style.color = Hub.url ? 'var(--accent)' : 'var(--text-muted)';
     }
     // Show QR share card when soft-hub OR connected to external hub
@@ -308,10 +375,11 @@ const Network = {
         }
       }
     } else if (hasExternalHub) {
-      // For external hub: auto-populate share QR with the connected hub URL
+      // Show the QR code of the hub we are joined to. Redraw it when the hub changes, so
+      // neighbours are never handed the code of a hub we already left.
       const qrShare2 = document.getElementById('qr-hub-display');
-      if (qrShare2 && !qrShare2.querySelector('svg')) {
-        try { qrShare2.innerHTML = this.makeQRSVG(Hub.url); } catch(e) {}
+      if (qrShare2 && qrShare2.dataset.qrFor !== Hub.url) {
+        try { qrShare2.innerHTML = this._shareQRHtml(Hub.url); qrShare2.dataset.qrFor = Hub.url; } catch(e) {}
       }
     }
     // Update peer count badge
@@ -350,7 +418,7 @@ const Network = {
   copyHubIP() {
     const ip = Store.get('softhub_detected_ip', '');
     if (!ip) {
-      Toast.show('IP not detected yet — make sure Wi-Fi is connected and try again', 'warning', 4000);
+      Toast.show('ARK cannot see this device\'s address yet. Check Wi-Fi is on, then try again.', 'warning', 5000);
       return;
     }
     const addr = 'http://' + ip + ':8080';
@@ -382,7 +450,7 @@ const Network = {
     const statusEl = document.getElementById('bug-report-status');
     const btn      = document.querySelector('button[onclick*="submitBugReport"]');
     const text     = textEl ? textEl.value.trim() : '';
-    if (!text) { Toast.show('Please describe the bug first', 'warning'); return; }
+    if (!text) { Toast.show('Type what went wrong first, then press Send report', 'warning', 4000); if (textEl) textEl.focus(); return; }
     this._submitting = true;
 
     // Collect useful but non-identifying diagnostic context
@@ -403,8 +471,8 @@ const Network = {
       recentErrors: (window._arkErrors || []).slice(-5)
     };
 
-    BtnLoading.start(btn, '📤 Sending…');
-    if (statusEl) statusEl.textContent = '📤 Submitting…';
+    BtnLoading.start(btn, 'Sending…');
+    if (statusEl) statusEl.textContent = 'Sending…';
 
     let sent = false;
 
@@ -433,9 +501,9 @@ const Network = {
     BtnLoading.stop(btn);
 
     if (sent) {
-      if (statusEl) statusEl.textContent = '✅ Sent! Thank you for the report.';
+      if (statusEl) statusEl.textContent = 'Sent. Thank you for the report.';
       if (textEl) textEl.value = '';
-      Toast.show('Bug reported — we\'ll push a fix!', 'success', 5000);
+      Toast.show('Report sent. Thank you.', 'success', 4000);
     } else {
       // Fallback: pre-filled email — use capped report.bug (not raw text which may be huge)
       const body = encodeURIComponent(
@@ -449,7 +517,7 @@ const Network = {
       // Keep the text in the box: nothing has been sent yet.
       if (statusEl) {
         statusEl.textContent = '';
-        statusEl.appendChild(document.createTextNode('💾 Saved on this device — it will be sent automatically next time ARK is online. Or '));
+        statusEl.appendChild(document.createTextNode('Not sent yet (no internet). It is saved on this device and ARK will send it next time it is opened with internet. Or '));
         const mail = document.createElement('a');
         mail.href = 'mailto:hello@halosuite.ai?subject=ARK%20Bug%20Report&body=' + body;
         mail.textContent = 'send it by email now';
@@ -457,7 +525,7 @@ const Network = {
         statusEl.appendChild(mail);
         statusEl.appendChild(document.createTextNode('.'));
       }
-      Toast.show('Report saved — it will send when you are back online', 'info', 5000);
+      Toast.show('No internet, so the report is saved on this device. ARK will send it later.', 'info', 6000);
     }
 
     this._submitting = false;
@@ -515,8 +583,8 @@ const Network = {
   async checkForUpdates(silent = false) {
     const statusEl = document.getElementById('patch-status');
     const btn = document.querySelector('button[onclick*="checkForUpdates"]');
-    if (!silent) { if (statusEl) statusEl.textContent = '🔍 Checking for updates…'; }
-    if (btn && !silent) BtnLoading.start(btn, '🔍 Checking…');
+    if (!silent) { if (statusEl) statusEl.textContent = 'Checking for fixes…'; }
+    if (btn && !silent) BtnLoading.start(btn, 'Checking…');
 
     let patch = null;
 
@@ -541,7 +609,7 @@ const Network = {
 
     if (!patch) {
       if (!silent) {
-        if (statusEl) statusEl.textContent = '📡 No update server reachable. ' + (navigator.onLine ? 'Try again later.' : 'You\'re offline.');
+        if (statusEl) statusEl.textContent = navigator.onLine ? 'Could not check for fixes just now. ARK still works as it is. Try again later.' : 'Checking for fixes needs internet. ARK still works as it is.';
       }
       return false;
     }
@@ -560,11 +628,11 @@ const Network = {
       // Nothing newer than this copy of ARK: forget any remembered patch.
       Store.del('ark_patch_cache');
       if (!this._appliedPatchVersion) Store.del('ark_patch_level');
-      if (!silent && statusEl) statusEl.textContent = '✅ Up to date — v' + (this._appliedPatchVersion || currentV) + '.';
+      if (!silent && statusEl) statusEl.textContent = 'ARK is up to date (version ' + (this._appliedPatchVersion || currentV) + ').';
       return false;
     }
     if (this._appliedPatchVersion && !this._semverGt(patch.version, this._appliedPatchVersion)) {
-      if (!silent && statusEl) statusEl.textContent = '✅ Up to date — v' + this._appliedPatchVersion + '.';
+      if (!silent && statusEl) statusEl.textContent = 'ARK is up to date (version ' + this._appliedPatchVersion + ').';
       return false;
     }
 
@@ -682,17 +750,19 @@ const Network = {
     const summary = patch.summary || (applied + ' fix' + (applied !== 1 ? 'es' : '') + ' applied');
 
     if (applied > 0) {
-      if (statusEl) statusEl.textContent = '✅ Patch v' + patch.version + ' — ' + summary + (skipped ? ' (' + skipped + ' skipped)' : '') + '.';
+      if (statusEl) statusEl.textContent = 'Fix ' + patch.version + ' applied: ' + summary + '.';
       if (!silent) {
-        Toast.show('🔧 ARK patched to v' + patch.version + ': ' + summary, 'success', 7000);
+        Toast.show('ARK fix ' + patch.version + ' applied: ' + summary, 'success', 7000);
       } else {
         // Silent patch: show a brief non-intrusive status bar indicator
         const sb = document.getElementById('status-bar');
         if (sb) {
+          const oldNote = document.getElementById('ark-patch-note');
+          if (oldNote) oldNote.remove();
           const patchNote = document.createElement('span');
           patchNote.id = 'ark-patch-note';
           patchNote.style.cssText = 'margin-left:8px;font-size:.7rem;color:var(--accent,#8b6f3e);font-weight:600';
-          patchNote.textContent = '🔧 Patched v' + patch.version;
+          patchNote.textContent = 'Fix ' + patch.version + ' applied';
           sb.appendChild(patchNote);
           setTimeout(() => { patchNote.remove(); }, 10 * 60 * 1000); // remove after 10 min
         }
@@ -701,7 +771,7 @@ const Network = {
       console.info('[ARK] Patch', patch.version, 'applied:', applied, 'ops,', skipped, 'skipped,', errors.length, 'errors');
     } else if (skipped > 0) {
       if (!silent) {
-        if (statusEl) statusEl.textContent = '⚠️ Patch available but could not apply (' + skipped + ' ops skipped).';
+        if (statusEl) statusEl.textContent = 'A fix is available but this copy of ARK could not use it. Download a fresh copy of ARK when you have internet.';
       }
     }
 

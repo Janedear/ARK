@@ -121,8 +121,12 @@ function ark_cut(string $s, int $max): string
     if (strlen($s) <= $max) {
         return $s;
     }
-    // No mbstring on this server: cut by bytes, then drop the last character in case it was split.
-    return (string) preg_replace('/[À-ÿ]?[-¿]*$/', '', substr($s, 0, $max));
+    // No mbstring on this server: let the regex engine count whole characters instead.
+    if (preg_match('/^.{0,' . max(0, $max) . '}/us', $s, $m)) {
+        return $m[0];
+    }
+    // Not valid UTF-8 at all: cut by bytes and drop any half character left at the end.
+    return (string) preg_replace('/[\xC0-\xFF][\x80-\xBF]*\z/', '', substr($s, 0, $max));
 }
 
 function ark_h(?string $s): string
@@ -163,6 +167,44 @@ function ark_validate_patch(string $json): array
         return [null, '"summary" must be text.'];
     }
     return [['version' => $data['version'], 'summary' => $data['summary'] ?? '', 'patches' => $data['patches']], null];
+}
+
+/**
+ * Answer a "Connect to ARK" request. The page's script gets JSON (shape unchanged). A form that
+ * sent itself without the script gets a small ARK page a person can read.
+ */
+function ark_connect_reply(bool $asPage, int $status, array $body): void
+{
+    if (!$asPage) {
+        ark_json($status, $body);
+    }
+    $ok = $status === 200;
+    http_response_code($status);
+    header('Content-Type: text/html; charset=utf-8');
+    header('Cache-Control: no-store');
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: no-referrer');
+    $title = $ok ? 'Request received.' : 'Your request was not sent.';
+    echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
+        . '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">'
+        . '<meta name="theme-color" content="#fbf7ef"><link rel="icon" href="/icons/icon-192.png">'
+        . '<title>' . $title . ' ARK</title><link rel="stylesheet" href="/site.css"></head><body>'
+        . '<header class="nav"><div class="wrap"><a class="wordmark" href="/" aria-label="ARK home"><span class="ark">'
+        . '<svg viewBox="0 0 60 26" aria-hidden="true"><path d="M4 22 30 5l26 17"/><path d="M18 23l12-8 12 8" stroke-width="3.4"/></svg>'
+        . 'ARK</span><small>by HaloSuite</small></a></div></header>'
+        . '<main class="wrap"><div class="page-head"><div class="kicker">Connect to ARK</div>'
+        . '<div class="record' . ($ok ? ' done' : '') . '"' . ($ok ? '' : ' role="alert"') . '><strong>' . $title . '</strong>';
+    if ($ok) {
+        echo '<p>Thank you. A person at HaloSuite will reply to your work email after checking the details.'
+            . (isset($body['reference']) ? ' Your reference is <strong>' . ark_h((string) $body['reference']) . '</strong>. Please write it down.' : '')
+            . '</p><p><a href="/">Back to ARK</a></p>';
+    } else {
+        echo '<p>' . ark_h((string) ($body['error'] ?? 'Something went wrong. Please try again, or email hello@halosuite.ai.')) . '</p>'
+            . '<p>Use your browser’s Back button to return to the form. What you typed should still be there.</p>';
+    }
+    echo '<p>This form is not monitored for emergencies. In immediate danger, call 911 or your local emergency number.</p>'
+        . '</div></div></main></body></html>';
+    exit;
 }
 
 // ─── CORS preflight ─────────────────────────────────────────────────────────────────────────
@@ -214,8 +256,9 @@ if (isset($_GET['bugs'])) {
     }
     $id   = bin2hex(random_bytes(8));
     $file = ARK_DATA_DIR . '/bugs/' . gmdate('Y-m-d_H-i-s') . '_' . $id . '.json';
-    $ok   = @file_put_contents($file, json_encode(['id' => $id, 'received' => gmdate('c'), 'data' => $data],
-        JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), LOCK_EX);
+    $saved = json_encode(['id' => $id, 'received' => gmdate('c'), 'data' => $data],
+        JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    $ok   = is_string($saved) ? @file_put_contents($file, $saved, LOCK_EX) : false;
     if ($ok === false) {
         ark_json(503, ['error' => 'could not store report']);
     }
@@ -234,19 +277,31 @@ if (isset($_GET['bugs'])) {
 
 if (isset($_GET['connect'])) {
     if ($method !== 'POST') {
-        ark_json(405, ['error' => 'POST only']);
+        // A person who opens or reloads this address in a browser is taken to the form, not shown raw JSON.
+        if (($method === 'GET' || $method === 'HEAD') && stripos((string) ($_SERVER['HTTP_ACCEPT'] ?? ''), 'text/html') !== false) {
+            header('Cache-Control: no-store');
+            header('Location: /connect', true, 302);
+            exit;
+        }
+        ark_json(405, ['error' => 'Please use the form at /connect to send a request.']);
     }
+    // The page normally sends JSON. If its script could not run (old browser, script blocked),
+    // the form sends itself the plain way: accept that too and answer with a readable page.
+    $asPage = !empty($_POST);
     if (!ark_data_ready()) {
-        ark_json(503, ['error' => 'We could not save your request just now. Please email hello@halosuite.ai.']);
+        ark_connect_reply($asPage, 503, ['error' => 'We could not save your request just now. Please email hello@halosuite.ai.']);
     }
     $raw  = (string) file_get_contents('php://input', false, null, 0, 20001);
     $data = strlen($raw) <= 20000 ? json_decode($raw, true) : null;
+    if (!is_array($data) && $asPage) {
+        $data = $_POST;
+    }
     if (!is_array($data)) {
-        ark_json(400, ['error' => 'The form could not be read. Please try again.']);
+        ark_json(400, ['error' => 'The form could not be read. Please try again, or email hello@halosuite.ai.']);
     }
     // A hidden field people never see: anything that fills it in is a script, so quietly drop it.
     if (!empty($data['website'])) {
-        ark_json(200, ['status' => 'ok']);
+        ark_connect_reply($asPage, 200, ['status' => 'ok']);
     }
     $field = static fn(string $k, int $max): string => trim(ark_cut(is_string($data[$k] ?? null) ? $data[$k] : '', $max));
     $request = [
@@ -266,21 +321,23 @@ if (isset($_GET['connect'])) {
                  'email' => 'your work email', 'area' => 'the area you serve'];
     foreach ($required as $k => $label) {
         if ($request[$k] === '') {
-            ark_json(422, ['error' => "Please add $label."]);
+            ark_connect_reply($asPage, 422, ['error' => "Please add $label."]);
         }
     }
     if (!filter_var($request['email'], FILTER_VALIDATE_EMAIL)) {
-        ark_json(422, ['error' => 'That email address does not look right.']);
+        ark_connect_reply($asPage, 422, ['error' => 'That email address does not look right. Please check it and try again.']);
     }
     if (!ark_rate_ok('connect_' . ark_sender_key(), 5, 3600)) {
-        ark_json(429, ['error' => 'Too many requests from this connection. Please email hello@halosuite.ai instead.']);
+        ark_connect_reply($asPage, 429, ['error' => 'Too many requests from this connection. Please email hello@halosuite.ai instead.']);
     }
     $id = bin2hex(random_bytes(6));
-    $ok = @file_put_contents(ARK_DATA_DIR . '/connect/' . gmdate('Y-m-d_H-i-s') . '_' . $id . '.json',
-        json_encode(['id' => $id, 'received' => gmdate('c'), 'request' => $request],
-            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), LOCK_EX);
+    $saved = json_encode(['id' => $id, 'received' => gmdate('c'), 'request' => $request],
+        JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    $ok = is_string($saved)
+        ? @file_put_contents(ARK_DATA_DIR . '/connect/' . gmdate('Y-m-d_H-i-s') . '_' . $id . '.json', $saved, LOCK_EX)
+        : false;
     if ($ok === false) {
-        ark_json(503, ['error' => 'We could not save your request just now. Please email hello@halosuite.ai.']);
+        ark_connect_reply($asPage, 503, ['error' => 'We could not save your request just now. Please email hello@halosuite.ai.']);
     }
     $all = glob(ARK_DATA_DIR . '/connect/*.json') ?: [];
     if (count($all) > 500) {
@@ -289,7 +346,7 @@ if (isset($_GET['connect'])) {
             @unlink($old);
         }
     }
-    ark_json(200, ['status' => 'ok', 'reference' => strtoupper($id)]);
+    ark_connect_reply($asPage, 200, ['status' => 'ok', 'reference' => strtoupper($id)]);
 }
 
 // ─── /?admin — patch + bug-report panel ─────────────────────────────────────────────────────
@@ -300,7 +357,7 @@ if (isset($_GET['admin'])) {
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: no-referrer');
     header('X-Robots-Tag: noindex, nofollow');
-    header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
+    header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
 
     $storageOk  = ark_data_ready();
     $configFile = ARK_DATA_DIR . '/config.php';
@@ -330,7 +387,7 @@ if (isset($_GET['admin'])) {
         $action = is_string($_POST['do'] ?? null) ? $_POST['do'] : '';
 
         if (!$csrfOk) {
-            $error = 'This page expired. Please try again.';
+            $error = 'This page expired, so nothing was changed. Please try again.';
         } elseif ($action === 'login' && $configured) {
             $bucket = 'login_' . ark_sender_key();
             if (!ark_rate_ok($bucket, ARK_LOGIN_MAX_FAILS, ARK_LOGIN_LOCK_SECS, false)) {
@@ -346,13 +403,15 @@ if (isset($_GET['admin'])) {
             } else {
                 ark_rate_ok($bucket, ARK_LOGIN_MAX_FAILS, ARK_LOGIN_LOCK_SECS, true);
                 usleep(400000);
-                $error = 'Wrong password.';
+                $error = 'Wrong password. Please try again.';
             }
         } elseif ($action === 'logout') {
             $_SESSION = [];
             session_destroy();
             header('Location: ' . $self, true, 303);
             exit;
+        } elseif (!$signedIn && $action !== 'login') {
+            $error = 'You were signed out, so nothing was changed. Sign in and try again.';
         } elseif ($signedIn) {
             if ($action === 'push_patch') {
                 $draft = (string) ($_POST['patch_json'] ?? '');
@@ -360,14 +419,17 @@ if (isset($_GET['admin'])) {
                 if ($patch === null) {
                     $error = $problem;
                 } elseif (@file_put_contents(ark_patch_file(), json_encode($patch, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), LOCK_EX) === false) {
-                    $error = 'Could not save the patch (the server refused to write the file).';
+                    $error = 'Could not save the patch (the server refused to write the file). Check the permissions of the ark-data folder and try again.';
                 } else {
                     $notice = 'Patch v' . $patch['version'] . ' is live. Running copies pick it up within 2 hours, or on next open.';
                     $draft  = '';
                 }
             } elseif ($action === 'clear_patch') {
-                @file_put_contents(ark_patch_file(), ARK_EMPTY_PATCH, LOCK_EX);
-                $notice = 'Patch cleared. Copies that already applied it keep it until they are reloaded.';
+                if (@file_put_contents(ark_patch_file(), ARK_EMPTY_PATCH, LOCK_EX) === false) {
+                    $error = 'Could not remove the patch (the server refused to write the file). Check the permissions of the ark-data folder and try again.';
+                } else {
+                    $notice = 'Patch cleared. Copies that already applied it keep it until they are reloaded.';
+                }
             } elseif ($action === 'delete_bug') {
                 $name = basename((string) ($_POST['file'] ?? ''));
                 if (preg_match('/^[0-9_-]+_[0-9a-f]+\.json$/', $name)) {
@@ -424,29 +486,37 @@ if (isset($_GET['admin'])) {
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>ARK Admin</title>
 <style>
-:root{--bg:#faf9f5;--s:#fffefa;--b:#e2e0d6;--a:#292d2b;--t:#292a25;--tm:#6b7068;--d:#b24148;--ok:#227455}
-*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--t);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
-.hdr{background:var(--s);border-bottom:1px solid var(--b);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.hdr h1{font:400 22px Georgia,serif;letter-spacing:.02em;color:var(--t)}.wrap{max-width:860px;margin:0 auto;padding:24px 16px}
-.card{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:20px;margin-bottom:20px}
-.card h2{font-size:16px;font-weight:500;letter-spacing:-.02em;margin-bottom:10px}.login{max-width:360px;margin:60px auto}
-p{margin-bottom:10px}.muted{color:var(--tm);font-size:13px}
-input[type=password],textarea{width:100%;padding:10px 12px;border:1px solid var(--b);border-radius:8px;background:#fff;color:var(--t);font-size:16px;margin-bottom:12px}
+@font-face{font-family:"Geist";font-style:normal;font-weight:100 900;font-display:swap;src:url("/brand/geist-latin.woff2") format("woff2")}
+:root{--bg:#fbf7ef;--s:#fffdf8;--soft:#f3ecdd;--b:#eadfca;--bs:#d6c9ae;--a:#211f1b;--ah:#3a362f;--on:#fffdf8;--t:#1f1d19;--tm:#6a6459;--gold:#7a5a20;--gs:#c9a45c;--d:#b24148;--ok:#227455}
+*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--t);font:15px/1.55 "Geist",system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.hdr{background:var(--s);border-bottom:1px solid var(--b);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hdr h1{display:flex;align-items:center;gap:9px;font:800 24px/1 "Geist",system-ui,sans-serif;letter-spacing:-.045em;color:var(--t)}
+.hdr h1 svg{width:32px;height:15px;fill:none;stroke:var(--gs);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.hdr h1 small{font:600 10px/1 "Geist",system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--tm);padding-left:10px;margin-left:3px;border-left:1px solid var(--bs)}
+.wrap{max-width:860px;margin:0 auto;padding:24px 16px}
+.card{background:var(--s);border:1px solid var(--b);border-radius:16px;padding:20px;margin-bottom:20px}
+.card h2{font-size:17px;font-weight:650;letter-spacing:-.02em;margin-bottom:10px}.login{max-width:380px;margin:48px auto}
+p{margin-bottom:10px}.muted{color:var(--tm);font-size:13.5px}label.muted{display:block;font-weight:600;color:var(--t);margin-bottom:6px}
+a{color:var(--t);text-underline-offset:3px}
+code{font:13px/1.45 ui-monospace,Consolas,monospace;background:var(--soft);border:1px solid var(--b);border-radius:6px;padding:1px 5px}
+input[type=password],textarea{width:100%;min-height:48px;padding:11px 12px;border:1px solid var(--bs);border-radius:12px;background:var(--s);color:var(--t);font-size:16px;margin-bottom:12px}
 textarea{font:13px/1.45 ui-monospace,Consolas,monospace;resize:vertical}
-input:focus,textarea:focus{outline:2px solid var(--a);outline-offset:1px}
-button{padding:10px 16px;border-radius:7px;border:1px solid transparent;font-size:13px;font-weight:500;cursor:pointer;min-height:40px}
-.p{background:var(--a);color:#fff}.dg{background:var(--d);color:#fff}.g{background:transparent;border-color:var(--b);color:var(--tm)}
+input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
+button{padding:10px 18px;border-radius:12px;border:1px solid transparent;font:600 14px/1.3 "Geist",system-ui,sans-serif;cursor:pointer;min-height:44px}
+.p{background:var(--a);color:var(--on)}.p:hover{background:var(--ah)}.dg{background:var(--s);border-color:var(--d);color:var(--d)}.g{background:transparent;border-color:var(--bs);color:var(--t)}.g:hover{background:var(--soft)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}form.inline{display:inline}
-.msg{padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:14px;border:1px solid}
-.ok{background:#e6f4ea;border-color:var(--ok);color:var(--ok)}.err{background:#fdecea;border-color:var(--d);color:var(--d)}
-pre{background:#fff;border:1px solid var(--b);border-radius:8px;padding:10px;font:12px/1.45 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto;margin-bottom:12px}
-.badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;margin-left:6px;vertical-align:middle}
-.on{background:#e6f4ea;color:var(--ok)}.off{background:#ece6d8;color:var(--tm)}
-details{border:1px solid var(--b);border-radius:8px;margin-bottom:8px;background:#fff}
-summary{padding:10px 12px;cursor:pointer;font-size:13px}details pre{border:0;border-top:1px solid var(--b);border-radius:0;margin:0}
-details .row{padding:8px 12px;border-top:1px solid var(--b)}
+.msg{padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:14px;font-weight:500;border:1px solid;background:var(--s)}
+.ok{border-color:var(--ok);color:var(--ok)}.err{border-color:var(--d);color:var(--d)}
+pre{background:var(--bg);border:1px solid var(--b);border-radius:12px;padding:12px;font:12px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto;margin-bottom:12px}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.08em;margin-left:6px;vertical-align:middle;border:1px solid}
+.on{border-color:var(--ok);color:var(--ok)}.off{border-color:var(--bs);color:var(--tm)}
+details{border:1px solid var(--b);border-radius:12px;margin-bottom:8px;background:var(--s);overflow:hidden}
+summary{padding:13px 14px;cursor:pointer;font-size:14px;min-height:44px}details pre{border:0;border-top:1px solid var(--b);border-radius:0;margin:0}
+details .row{padding:10px 14px;border-top:1px solid var(--b)}
+.row a{display:inline-flex;align-items:center;min-height:44px;padding:0 8px}
 </style></head><body>
-<div class="hdr"><h1>ARK <small style="font:500 9px system-ui,sans-serif;letter-spacing:.17em;text-transform:uppercase;color:var(--tm);margin-left:6px">Admin</small></h1>
+<div class="hdr"><h1><svg viewBox="0 0 60 26" aria-hidden="true"><path d="M4 22 30 5l26 17"/><path d="M18 23l12-8 12 8" stroke-width="3.4"/></svg>ARK <small>Admin</small></h1>
 <?php if ($signedIn): ?><form method="post" action="<?= ark_h($self) ?>" class="inline"><input type="hidden" name="csrf" value="<?= ark_h($csrf) ?>"><input type="hidden" name="do" value="logout"><button class="g">Sign out</button></form><?php endif; ?>
 </div>
 <div class="wrap">
@@ -464,7 +534,8 @@ details .row{padding:8px 12px;border-top:1px solid var(--b)}
 <input type="hidden" name="csrf" value="<?= ark_h($csrf) ?>"><input type="hidden" name="do" value="login">
 <label class="muted" for="pw">Admin password</label>
 <input id="pw" type="password" name="password" required autofocus autocomplete="current-password">
-<button class="p" style="width:100%">Sign in</button></form></div>
+<button class="p" style="width:100%">Sign in</button></form>
+<p class="muted" style="margin:12px 0 0">Five wrong passwords lock sign-in for 15 minutes.</p></div>
 
 <?php else: ?>
 <div class="card"><h2>Live patch <span class="badge <?= $patchActive ? 'on' : 'off' ?>"><?= $patchActive ? 'ACTIVE' : 'NONE' ?></span></h2>
@@ -484,10 +555,11 @@ details .row{padding:8px 12px;border-top:1px solid var(--b)}
 <p class="muted">Verify who is asking before you reply: call the organisation on a number you find yourself, not one given in the form.</p>
 <?php if (!$links): ?><p class="muted">No requests yet.</p><?php else: ?>
 <?php foreach ($links as $l): $r = is_array($l['request'] ?? null) ? $l['request'] : []; ?>
-<details><summary><?= ark_h($l['received'] ?? $l['_file']) ?> — <?= ark_h(($r['organisation'] ?? '?') . ' · ' . ($r['name'] ?? '')) ?></summary>
+<details><summary><?= ark_h(is_string($l['received'] ?? null) ? $l['received'] : $l['_file']) ?> — <?= ark_h((is_string($r['organisation'] ?? null) ? $r['organisation'] : '?') . ' · ' . (is_string($r['name'] ?? null) ? $r['name'] : '')) ?></summary>
 <pre><?= ark_h(json_encode($r, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) ?></pre>
 <div class="row"><form method="post" action="<?= ark_h($self) ?>" class="inline" onsubmit="return confirm('Delete this request?')">
-<input type="hidden" name="csrf" value="<?= ark_h($csrf) ?>"><input type="hidden" name="do" value="delete_link"><input type="hidden" name="file" value="<?= ark_h($l['_file']) ?>"><button class="g">Delete</button></form></div>
+<input type="hidden" name="csrf" value="<?= ark_h($csrf) ?>"><input type="hidden" name="do" value="delete_link"><input type="hidden" name="file" value="<?= ark_h($l['_file']) ?>"><button class="g">Delete</button></form>
+<?php if (is_string($r['email'] ?? null) && $r['email'] !== ''): ?><a href="mailto:<?= ark_h(str_replace('%40', '@', rawurlencode($r['email']))) ?>?subject=<?= ark_h(rawurlencode('Your request to connect to ARK (ref ' . strtoupper(is_string($l['id'] ?? null) ? $l['id'] : '') . ')')) ?>">Reply by email</a><?php endif; ?></div>
 </details>
 <?php endforeach; ?>
 <?php endif; ?></div>
@@ -495,7 +567,7 @@ details .row{padding:8px 12px;border-top:1px solid var(--b)}
 <div class="card"><h2>Bug reports (<?= count($bugs) ?>)</h2>
 <?php if (!$bugs): ?><p class="muted">No reports yet.</p><?php else: ?>
 <?php foreach ($bugs as $b): ?>
-<details><summary><?= ark_h($b['received'] ?? $b['_file']) ?> — <?= ark_h(ark_cut(is_string($b['data']['bug'] ?? null) ? $b['data']['bug'] : '(no description)', 90)) ?></summary>
+<details><summary><?= ark_h(is_string($b['received'] ?? null) ? $b['received'] : $b['_file']) ?> — <?= ark_h(ark_cut(is_array($b['data'] ?? null) && is_string($b['data']['bug'] ?? null) ? $b['data']['bug'] : '(no description)', 90)) ?></summary>
 <pre><?= ark_h(json_encode($b['data'] ?? $b, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) ?></pre>
 <div class="row"><form method="post" action="<?= ark_h($self) ?>" class="inline" onsubmit="return confirm('Delete this report?')">
 <input type="hidden" name="csrf" value="<?= ark_h($csrf) ?>"><input type="hidden" name="do" value="delete_bug"><input type="hidden" name="file" value="<?= ark_h($b['_file']) ?>"><button class="g">Delete</button></form></div>

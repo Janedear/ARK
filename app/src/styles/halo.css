@@ -36,15 +36,19 @@
   --accent-glow:rgba(150,113,47,.10);
   --accent-rgb:150,113,47;
   --accent-serif:#a8823f;    /* the italic accent line */
+  --accent-text:#7a5a20;     /* gold for small text: the plain gold is only 4.4:1 on paper */
   /* Status — muted, never neon */
   --green:#227455;  --green-bg:rgba(34,116,85,.08);
   --red:#b24148;    --red-bg:rgba(178,65,72,.07);
   --yellow:#8a6a1e; --yellow-bg:rgba(138,106,30,.09);
   --blue:#3d5a80;   --blue-bg:rgba(61,90,128,.08);
+  --purple:#6b5a8e;
+  --red-line:rgba(178,65,72,.28); --green-line:rgba(34,116,85,.28);  /* hairline borders for soft status boxes */
   /* Action (buttons, bottom bar) */
   --action:#211f1b;
   --action-hover:#3a362f;
   --on-action:#fffdf8;
+  --on-color:#fffdf8;        /* text on a solid green / red / gold fill */
   --bar-active:#e6c377;
   /* Shape */
   --radius-sm:8px;
@@ -64,12 +68,14 @@
   --border:#353a40; --border-strong:#4a5058;
   --text-primary:#eeeae1; --text-secondary:#cdcbc3; --text-muted:#b4b6ba;
   --accent:#d5bb89; --accent-dark:#e1c58f; --accent-soft:#b99b62; --accent-serif:#d5bb89;
-  --accent-glow:rgba(213,187,137,.10); --accent-rgb:213,187,137;
+  --accent-glow:rgba(213,187,137,.10); --accent-rgb:213,187,137; --accent-text:#d5bb89;
   --green:#7ad4b1; --green-bg:rgba(122,212,177,.10);
   --red:#f39a9f;   --red-bg:rgba(243,154,159,.10);
   --yellow:#e1c58f; --yellow-bg:rgba(225,197,143,.10);
   --blue:#a9c1e6;  --blue-bg:rgba(169,193,230,.10);
-  --action:#e8dbc0; --action-hover:#f3e9d3; --on-action:#29241b; --bar-active:#e1c58f;
+  --purple:#c3b4e6; --red-line:rgba(243,154,159,.38); --green-line:rgba(122,212,177,.34);
+  --shadow-glow:0 0 0 3px rgba(213,187,137,.24);
+  --action:#e8dbc0; --action-hover:#f3e9d3; --on-action:#29241b; --on-color:#1b1f24; --bar-active:#e1c58f;
   --shadow-card:0 1px 0 rgba(255,255,255,.03) inset,0 4px 14px rgba(0,0,0,.25);
   --shadow-lg:0 16px 50px rgba(0,0,0,.45);
 }
@@ -80,7 +86,7 @@ h1,h2,h3,h4{font-weight:600;letter-spacing:-.03em;color:var(--text-primary)}
 h1{font-weight:650;letter-spacing:-.045em}
 strong,b,.bold{font-weight:600}
 a{color:var(--accent-dark);text-underline-offset:3px}
-::selection{background:var(--accent);color:#fffdf5}
+::selection{background:var(--accent);color:var(--on-color)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
 .text-serif-accent,.serif-accent{font-family:var(--font-serif);font-style:italic;font-weight:400;color:var(--accent-serif)}
 
@@ -93,7 +99,8 @@ a{color:var(--accent-dark);text-underline-offset:3px}
 .section-title{font-size:1.5rem;font-weight:650;letter-spacing:-.04em;line-height:1.15;margin-bottom:16px}
 .section-title .title-icon{display:none}
 .card-title{font-size:15.5px;font-weight:600;letter-spacing:-.02em}
-.card-icon{font-size:15px;opacity:.85}
+.card-icon{display:inline-flex;align-items:center;font-size:15px;color:var(--accent)}
+.card-icon .hi{width:18px;height:18px}
 .text-muted{color:var(--text-muted)}
 .text-secondary{color:var(--text-secondary)}
 
@@ -101,9 +108,9 @@ a{color:var(--accent-dark);text-underline-offset:3px}
 .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:20px}
 .card:hover{background:var(--bg-card);border-color:var(--border);transform:none}
 .warn-box,.info-box,.ob-warn,.ob-info,.ob-success{border-radius:var(--radius-md);font-size:13.5px;line-height:1.6}
-.warn-box,.ob-warn{background:var(--red-bg);border:1px solid rgba(178,65,72,.28);color:var(--text-primary)}
+.warn-box,.ob-warn{background:var(--red-bg);border:1px solid var(--red-line);color:var(--text-primary)}
 .info-box,.ob-info{background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-secondary)}
-.ob-success{background:var(--green-bg);border:1px solid rgba(34,116,85,.28);color:var(--text-primary)}
+.ob-success{background:var(--green-bg);border:1px solid var(--green-line);color:var(--text-primary)}
 
 /* ---------- 4. Buttons ---------- */
 .btn{border-radius:12px;font-family:var(--font);font-size:14px;font-weight:600;letter-spacing:0;line-height:1.5;padding:11px 18px;min-height:44px;gap:8px;box-shadow:none;transition:background .16s ease,color .16s ease,border-color .16s ease,transform .12s ease}
@@ -114,8 +121,8 @@ a{color:var(--accent-dark);text-underline-offset:3px}
 .btn-secondary:hover{background:var(--bg-secondary);border-color:var(--border-strong)}
 .btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid transparent}
 .btn-ghost:hover{background:var(--bg-secondary);color:var(--text-primary)}
-.btn-green{background:var(--green)!important;color:#fffdf5!important;border:1px solid var(--green)!important;font-weight:500!important}
-.btn-red{background:var(--red)!important;color:#fffdf5!important;border:1px solid var(--red)!important;font-weight:500!important}
+.btn-green{background:var(--green)!important;color:var(--on-color)!important;border:1px solid var(--green)!important;font-weight:500!important}
+.btn-red{background:var(--red)!important;color:var(--on-color)!important;border:1px solid var(--red)!important;font-weight:500!important}
 .btn-sm{min-height:38px;padding:8px 14px;font-size:12.5px}
 .btn-xs{min-height:32px;padding:5px 10px;font-size:12px;border-radius:9px}
 .btn:disabled,.btn[disabled]{opacity:.5;cursor:not-allowed}
@@ -133,25 +140,32 @@ a{color:var(--accent-dark);text-underline-offset:3px}
 .ch-tab.active,.guide-cat-btn.active{background:var(--action);border-color:var(--action);color:var(--on-action);font-weight:500}
 
 /* ---------- 7. Header ---------- */
-#status-bar{background:var(--bg-primary);border-bottom:1px solid var(--border);box-shadow:none;gap:12px;padding-top:10px;padding-bottom:10px;font-size:11.5px;color:var(--text-muted)}
+/* One fixed-height row. The section strip (#nav) sticks directly under it, so the bar must never wrap or grow. */
+#status-bar{background:var(--bg-primary);border-bottom:1px solid var(--border);box-shadow:none;gap:12px;font-size:11.5px;color:var(--text-muted);flex-wrap:nowrap;white-space:nowrap;overflow:hidden;height:calc(56px + env(safe-area-inset-top,0px));padding-top:calc(6px + env(safe-area-inset-top,0px));padding-bottom:6px}
+#status-bar .status-item,#status-bar .ark-brand,#status-bar > .btn{flex-shrink:0}
+#status-bar #offline-indicator,#ark-patch-note{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dark-mode #status-bar{background:var(--bg-primary)}
 #status-bar .ark-brand{display:inline-flex;align-items:center;gap:10px;font-weight:400;letter-spacing:0;color:var(--text-primary)}
 .brand-ark{display:inline-flex;align-items:center;gap:7px;font-family:var(--font);font-size:21px;font-weight:800;letter-spacing:-.04em;line-height:1}
 .brand-by{font-family:var(--font);font-size:9px;font-weight:500;letter-spacing:.17em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap}
-@media (max-width:380px){.brand-by{display:none}}
+@media (max-width:440px){.brand-by{display:none}}
 .brand-ark svg{flex:0 0 26px;width:26px;height:13px;fill:none;stroke:var(--accent-soft);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
-.sb-gear{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;color:var(--text-secondary);flex-shrink:0}
+.sb-gear{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;color:var(--text-secondary);flex-shrink:0}
 .sb-gear:hover{background:var(--bg-secondary);color:var(--text-primary)}
 .sb-gear .hi{width:19px;height:19px}
 #status-bar > .btn{min-height:34px;padding:6px 12px;font-size:11.5px;border-radius:10px;font-weight:600}
-@media (max-width:560px){
+@media (max-width:720px){
   #status-bar .sb-extra{display:none!important}
-  #status-bar .sb-label{display:none}
   #status-bar > .btn{margin-left:auto}
+}
+@media (max-width:560px){
+  #status-bar{gap:8px}
+  #status-bar .sb-label{display:none}
+  #status-bar > .btn{min-width:44px;min-height:44px;padding:6px 10px}
 }
 
 /* Section strip */
-#nav{background:var(--bg-primary);border-bottom:1px solid var(--border);box-shadow:none}
+#nav{background:var(--bg-primary);border-bottom:1px solid var(--border);box-shadow:none;top:calc(56px + env(safe-area-inset-top,0px))}
 .dark-mode #nav{background:var(--bg-primary);border-top-color:var(--border)}
 #nav .nav-icon{display:none}
 #nav .nav-btn{font-size:12.5px;font-weight:500;letter-spacing:0;color:var(--text-muted);padding:14px 14px;border-radius:0;background:transparent}
@@ -205,10 +219,19 @@ a{color:var(--accent-dark);text-underline-offset:3px}
 .alert-info h3{font-weight:500;letter-spacing:-.02em}
 .quick-action{border-radius:var(--radius-lg);border:1px solid var(--border);background:var(--bg-card);box-shadow:none}
 .quick-action .qa-label{font-weight:500;font-size:12.5px;color:var(--text-primary)}
-.quick-action.urgent{background:var(--red-bg);border-color:rgba(178,65,72,.3)}
+.quick-action.urgent{background:var(--red-bg);border-color:var(--red)}
+.quick-action:hover{transform:none;box-shadow:none;outline:none;background:var(--bg-card);border-color:var(--border-strong)}
+.quick-action.urgent:hover{background:var(--red-bg);border-color:var(--red)}
+.quick-action:focus-visible{transform:none;box-shadow:none;background:var(--bg-card)}
+.quick-action .qa-icon{line-height:1;color:var(--accent)}
+.quick-action .qa-icon .hi{width:26px;height:26px}
+.quick-action.urgent .qa-icon{color:var(--red)}
+.alert-banner{border-width:1px}
+.alert-banner h3{color:inherit}
+.alert-info p{opacity:1}
 
 /* ---------- 9. Bottom bar: Home · Plan · Guides · Messages · Hub ---------- */
-#bottom-tab-bar{background:#211f1b;border-radius:24px;padding:7px;gap:2px;box-shadow:0 14px 34px rgba(41,45,43,.28),inset 0 1px rgba(255,255,255,.07);width:min(420px,calc(100vw - 24px));justify-content:space-between;min-width:0}
+#bottom-tab-bar{background:#211f1b;border-radius:24px;padding:7px;gap:2px;box-shadow:0 14px 34px rgba(41,45,43,.28),inset 0 1px rgba(255,255,255,.07);width:calc(100vw - 24px);max-width:420px;justify-content:space-between;min-width:0}
 .btb-btn{flex:1;min-width:0;padding:9px 4px 7px;border-radius:18px;color:rgba(255,253,245,.58);font-size:10px;font-weight:500;letter-spacing:.02em;gap:4px}
 .btb-btn .btb-icon{font-size:0;line-height:0}
 .btb-btn .btb-icon .hi{width:21px;height:21px;stroke-width:1.5}
@@ -228,7 +251,10 @@ a{color:var(--accent-dark);text-underline-offset:3px}
 .onboard-step h2{font-size:1.15rem;font-weight:600;letter-spacing:-.03em}
 .ob-dot{height:2px;border-radius:1px;background:var(--border)}
 .ob-dot.done{background:var(--accent)}.ob-dot.active{background:var(--accent);opacity:1}
-#toast{border-radius:9px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg)}
+/* Toast: above every overlay (9000 / 8000), wraps, and fades out fully so it never peeks over the bottom edge */
+#toast{z-index:10000;border-radius:12px;font-size:14px;font-weight:500;line-height:1.45;box-shadow:var(--shadow-lg);white-space:normal;text-align:center;width:max-content;max-width:calc(100vw - 24px);max-width:min(520px,calc(100vw - 24px));bottom:calc(92px + env(safe-area-inset-bottom,0px));opacity:0;transform:translateX(-50%) translateY(16px);transition:transform .25s var(--ease-out),opacity .2s ease}
+#toast.show{opacity:1}
+#toast.toast-success,#toast.toast-error,#toast.toast-info,#toast.toast-warning{color:var(--on-color)}
 
 /* ---------- 11. Details that carried heavy weights ---------- */
 .hub-deploy-title{font-size:1.15rem;font-weight:650;letter-spacing:-.03em}
@@ -239,3 +265,169 @@ a{color:var(--accent-dark);text-underline-offset:3px}
 .share-method h4{font-weight:500}
 
 @media print{.halo-landscape,.ready-banner,.home-tiles,.halo-guide{display:none!important}}
+
+/* ---------- 12. Utilities the markup uses ---------- */
+.mt-4{margin-top:4px}
+.mb-4{margin-bottom:4px}
+.mb-6{margin-bottom:6px}
+.gap-6{gap:6px}
+.text-center{text-align:center}
+.font-xs{font-size:12px}
+.field-error{color:var(--red);font-size:13px;margin-top:4px}
+label.form-label{font-family:var(--font);font-size:11.5px;font-weight:500;letter-spacing:.1em;color:var(--text-secondary)}
+@media print{.no-print{display:none!important}}
+
+/* Older phones do not know the "inset" shorthand; without these the overlays and switches lose their size */
+#onboard-overlay,#ark-modal,#share-modal,.toggle-slider,.signal-dot::after{top:0;right:0;bottom:0;left:0}
+
+/* ---------- 13. Tap targets (44px) and focus ---------- */
+@media (pointer:coarse){.btn-sm,.btn-xs,#status-bar > .btn{min-height:44px}}
+.conn-pill{position:relative}
+.conn-pill::after{content:"";position:absolute;top:-12px;bottom:-12px;left:-6px;right:-6px}
+.halo-guide{min-height:48px}
+.ch-tab,.guide-cat-btn{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:6px 14px;font-family:var(--font)}
+.ch-tab.active,.guide-cat-btn.active{box-shadow:none}
+.ch-tab:focus-visible,.guide-cat-btn:focus-visible,.map-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.channel-tabs{display:flex;flex-wrap:wrap;gap:8px}
+
+.toggle{flex-shrink:0}
+.toggle::before{content:"";position:absolute;top:-10px;bottom:-10px;left:0;right:0}
+.toggle input:focus-visible + .toggle-slider{outline:2px solid var(--accent);outline-offset:2px}
+.toggle input:checked + .toggle-slider{background:var(--accent);border-color:var(--accent)}
+.toggle input:checked + .toggle-slider::before{background:var(--bg-card)}
+.setting-row{gap:12px}
+.setting-row > div:first-child{flex:1;min-width:0}
+.setting-desc{font-size:12.5px;line-height:1.45}
+
+/* ---------- 14. Home, header and wizard details ---------- */
+#app{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+@media (max-width:400px){.card{padding:16px}}
+.offline-banner{color:var(--text-primary);line-height:1.5}
+.offline-banner .hi{flex-shrink:0;width:20px;height:20px;color:var(--yellow)}
+.hub-deploy-card::before{display:none}
+.hub-deploy-card.hub-is-active{background:var(--bg-card);border-color:var(--accent);box-shadow:var(--shadow-card)}
+.hub-ip-display{font-weight:600}
+.onboard-step-icon{font-size:1.9rem;line-height:1;color:var(--accent)}
+.onboard-step-icon .hi{width:36px;height:36px}
+.ob-warn .hi{color:var(--red);margin-right:4px}
+.share-method{cursor:default;background:var(--bg-secondary);border-radius:var(--radius-md)}
+.share-method-icon{color:var(--accent);line-height:1}
+.share-method-icon .hi{width:24px;height:24px}
+.share-code{border-radius:var(--radius-md)}
+.share-steps li::before,.guide-steps li::before{background:var(--action);color:var(--on-action);font-weight:600}
+#ark-modal-box label.form-label{margin-top:2px}
+#ark-modal-box #modal-title{font-weight:650;letter-spacing:-.03em}
+#ark-join-banner{box-shadow:var(--shadow-card)}
+#storage-warning-banner button,#storage-unavailable-banner button{min-height:0;min-width:0}
+
+/* ---------- 15. Messages ---------- */
+.msg-actions{flex-wrap:wrap}
+.msg-actions .btn{min-height:44px}
+.msg-actions .btn .hi,.msg-header .hi{width:14px;height:14px}
+.offline-queue-badge{white-space:nowrap}
+.ack-count{background:var(--action);color:var(--on-action);font-weight:600}
+#qr-hub-display svg,#qr-hub-display img,#qr-hub-display canvas{max-width:100%;height:auto}
+
+/* ---------- 16. Guides and Ask Halo ---------- */
+.guide-actions{flex-wrap:wrap;gap:8px}
+.guide-actions button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 14px;font-size:13px;font-weight:500;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);transition:background .16s ease,border-color .16s ease,color .16s ease}
+.guide-actions button:hover{background:var(--bg-secondary);border-color:var(--border-strong);color:var(--text-primary)}
+.guide-actions button.bookmarked,.guide-actions button.bookmarked:hover{background:rgba(var(--accent-rgb),.12);border-color:var(--accent);color:var(--accent)}
+.guide-steps li{padding-left:28px}
+.guide-steps li::before{width:18px;height:18px;top:6px}
+.ai-msg{font-size:14.5px;line-height:1.55}
+.ai-msg-user{background:var(--action);color:var(--on-action)}
+.ai-msg-ts-user{color:var(--on-action);opacity:.75}
+.ai-msg-ai strong{font-weight:600}
+.ai-msg-ai .ai-copy-btn{position:static;opacity:1;display:inline-flex;align-items:center;gap:4px;margin-top:6px;padding:6px 10px;font-size:12px;min-height:36px;border-radius:8px}
+.ai-ctx-badges{align-items:center}
+.ai-ctx-badge{font-size:11px}
+#ai-ctx-btn-medical[aria-pressed="true"],#ai-ctx-btn-inventory[aria-pressed="true"],#ai-ctx-btn-household[aria-pressed="true"],#ai-ctx-btn-situation[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+
+/* ---------- 17. Plan: checklists, people, supplies ---------- */
+.checklist-item{min-height:44px;padding:12px 4px}
+.check-box{width:24px;height:24px;min-width:24px;border:1px solid var(--border-strong);border-radius:7px;margin-top:0}
+.check-box.checked{border-color:var(--green);color:var(--on-color)}
+.check-label{line-height:1.4}
+.check-desc{font-size:12.5px;color:var(--text-secondary);line-height:1.45}
+.checklist-date{font-size:12px}
+.checklist-allclear{background:var(--green-bg);border:1px solid var(--green);border-radius:var(--radius-md);color:var(--text-primary)}
+.member-item{border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg-secondary)}
+.member-avatar{border:1px solid var(--border);font-size:15px;font-weight:600;color:var(--accent)}
+.member-avatar .hi{width:18px;height:18px}
+.member-role{color:var(--text-muted);font-weight:500}
+.resource-label{display:inline-flex;align-items:center;gap:6px;min-width:96px}
+.resource-label .hi{color:var(--accent)}
+.resource-val{min-width:72px}
+@media (max-width:380px){
+  .resource-row{flex-wrap:wrap}
+  .resource-bar-wrap{order:3;flex:1 1 100%}
+}
+
+/* ---------- 18. Medical, map and radio ---------- */
+.cpr-pulse{color:var(--on-color)}
+.cpr-pulse .hi{width:44px;height:44px;stroke-width:1.75}
+.map-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:8px 12px;font-family:inherit;font-size:12.5px;font-weight:500;line-height:1.2;border-radius:12px;background:var(--bg-card);transition:background .16s ease,border-color .16s ease,color .16s ease}
+.map-btn.active{background:var(--action);border-color:var(--action);color:var(--on-action);font-weight:500}
+.map-btn:disabled{opacity:.6;cursor:progress}
+.freq-copyable .copy-hint{opacity:.45}
+.freq-copyable .copy-hint .hi{width:12px;height:12px;vertical-align:-1px}
+.freq-copyable:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.morse-char{font-weight:600}
+.phonetic-letter{font-weight:600}
+#morse-flash{min-height:56px}
+/* Wide radio tables scroll inside their card on every phone, not only at 360px */
+@media (max-width:480px){.freq-table,.vital-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}}
+
+/* ---------- 19. Round 2: guides, dark-mode contrast, small details ---------- */
+/* The row that opens a guide: full 44px tap target, visible keyboard focus, line-icon chevron */
+.guide-toggle{min-height:44px}
+.guide-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:var(--radius-md)}
+.guide-toggle-chevron{display:inline-flex;align-items:center;justify-content:center}
+.guide-toggle-chevron .hi{width:18px;height:18px}
+/* Labels and timestamps that were dimmed with opacity and fell below readable contrast */
+.hero-eyebrow,.hub-deploy-label{opacity:1}
+.ai-msg-ts{font-size:11px;color:var(--text-muted);opacity:1}
+.ai-msg-ts-user{color:var(--on-action);opacity:.8}
+.resource-days{opacity:1;color:var(--text-muted)}
+.guide-sources,.guide-updated{font-size:12px}
+/* The wizard's sticky Back / Continue row must follow the box's rounder corner */
+@media (max-width:480px){.onboard-nav{border-radius:0 0 21px 21px}}
+
+/* ---------- 20. Round 3: focus, small gold text, old-phone fallbacks ---------- */
+/* Sections and dialog boxes get focus from the script (so screen readers follow); they must not draw a ring round the whole screen */
+.tab-panel:focus,#ark-modal-box:focus,.share-box:focus,.onboard-box:focus{outline:none}
+/* Small gold text uses the darker gold so it stays readable on paper (dark mode keeps the pale gold) */
+.text-accent,.guide-section h4,.guide-seealso a,.guide-toggle:hover .guide-title,.halo-guide span,.morse-code,#morse-status,.badge-orange,.hero-badge.hub-active,.ai-ctx-badge.active,.guide-actions button.bookmarked,.guide-actions button.bookmarked:hover{color:var(--accent-text)}
+#ai-ctx-btn-medical[aria-pressed="true"],#ai-ctx-btn-inventory[aria-pressed="true"],#ai-ctx-btn-household[aria-pressed="true"],#ai-ctx-btn-situation[aria-pressed="true"]{color:var(--accent-text)}
+/* Hover left a gold border and gold text behind on touch screens after a tap */
+.btn-secondary:hover{color:var(--text-primary)}
+.btn-ghost:hover{border-color:transparent}
+.ch-tab:hover,.guide-cat-btn:hover{border-color:var(--border-strong);color:var(--text-primary)}
+.ch-tab.active:hover,.guide-cat-btn.active:hover{border-color:var(--action);color:var(--on-action)}
+/* Phones that cannot blur the page behind a dialog get a darker veil instead, so the screen behind does not distract */
+#onboard-overlay,#ark-modal,#share-modal{background:rgba(31,29,25,.62)}
+@supports ((-webkit-backdrop-filter:blur(8px)) or (backdrop-filter:blur(8px))){
+  #onboard-overlay,#ark-modal,#share-modal{background:rgba(41,42,37,.42)}
+}
+.dark-mode #onboard-overlay,.dark-mode #ark-modal,.dark-mode #share-modal{background:rgba(0,0,0,.62)}
+/* The dark bottom bar needs an edge on a dark page */
+.dark-mode #bottom-tab-bar{border:1px solid var(--border)}
+/* CPR box while counting: a calm red ring that follows the theme, no glow */
+.cpr-active{box-shadow:0 0 0 4px var(--red-line)}
+.onboard-step ul li::before{font-weight:600}
+
+/* ---------- 21. Round 4: readable hints, native controls, stronger contrast ---------- */
+/* Hint text inside empty fields often carries the instruction; at 75% it fell to about 3.4:1 */
+.form-input::placeholder,.form-textarea::placeholder{opacity:1}
+/* Native tick boxes follow the ARK gold instead of the browser's blue, and the one bare tick box is big enough to hit */
+input[type="checkbox"],input[type="radio"]{accent-color:var(--accent)}
+#msg-urgent{width:22px;height:22px;flex:none}
+/* "See also" links under a guide: bigger words and room for a thumb */
+.guide-seealso{font-size:13px;line-height:1.4}
+.guide-seealso a{display:inline-block;padding:11px 2px}
+@media (pointer:coarse){.ai-msg-ai .ai-copy-btn{min-height:44px;padding:8px 12px}}
+/* Settings > Stronger contrast: the script darkens ink and borders; gold text, status colours and the bottom bar follow here */
+.high-contrast{--accent:#7a5a20;--accent-text:#5a4212;--accent-dark:#5a4212;--accent-serif:#7a5a20;--green:#145239;--red:#8c2630;--yellow:#604a10;--blue:#263f63}
+.dark-mode.high-contrast{--accent:#e6cf9f;--accent-text:#f0dfb8;--accent-dark:#f0dfb8;--accent-serif:#e6cf9f;--green:#a8ecd2;--red:#ffc4c7;--yellow:#f0dba6;--blue:#c8daf5}
+.high-contrast .btb-btn:not(.active){color:rgba(255,253,245,.86)}

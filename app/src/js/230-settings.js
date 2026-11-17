@@ -2,13 +2,17 @@
 const Settings = {
   load() {
     const hubEl = document.getElementById('set-hub-url'); if (hubEl) hubEl.value = Store.get('hub_url', '');
-    const syncEl = document.getElementById('set-sync-interval'); if (syncEl) syncEl.value = Store.get('sync_interval', 60);
+    // If a stored value is not one of the choices, show the normal one instead of an empty box.
+    const syncEl = document.getElementById('set-sync-interval'); if (syncEl) { syncEl.value = Store.get('sync_interval', 60); if (syncEl.selectedIndex < 0) syncEl.value = '60'; }
     const aliasEl = document.getElementById('set-alias'); if (aliasEl) aliasEl.value = Store.get('last_alias', '');
-    const hhidEl = document.getElementById('set-hh-id'); if (hhidEl) hhidEl.value = Store.get('hh_id', generateID());
+    // The household code is made once and kept, so this screen always shows the same one.
+    let hhId = Store.get('hh_id', '');
+    if (!hhId) { hhId = generateID(); Store.set('hh_id', hhId); }
+    const hhidEl = document.getElementById('set-hh-id'); if (hhidEl) hhidEl.value = hhId;
     const offlineEl = document.getElementById('set-offline-mode'); if (offlineEl) offlineEl.checked = Store.get('offline_mode', false);
     const hcEl = document.getElementById('set-high-contrast'); if (hcEl) hcEl.checked = Store.get('high_contrast', false);
     const devEl = document.getElementById('set-dev-mode'); if (devEl) devEl.checked = Store.get('dev_mode', false);
-    const fontEl = document.getElementById('set-font-size'); if (fontEl) fontEl.value = Store.get('font_size', 16);
+    const fontEl = document.getElementById('set-font-size'); if (fontEl) { fontEl.value = Store.get('font_size', 16); if (fontEl.selectedIndex < 0) fontEl.value = '16'; }
     const lpEl = document.getElementById('set-low-power');
     if (lpEl) lpEl.checked = Store.get('low_power', false);
     const dmEl = document.getElementById('set-dark-mode');
@@ -29,15 +33,15 @@ const Settings = {
     if (!banner) return;
     if (!lastExport) {
       banner.style.display = '';
-      if (daysEl) daysEl.textContent = 'never';
-      if (lxEl) lxEl.textContent = 'Last exported: never';
+      if (daysEl) daysEl.textContent = 'You have not saved a backup yet. Tap Save a backup below.';
+      if (lxEl) lxEl.textContent = 'Last backup: never';
       return;
     }
-    const days = Math.floor((Date.now() - lastExport) / 86400000);
-    if (lxEl) lxEl.textContent = `Last exported: ${days === 0 ? 'today' : days + ' day' + (days!==1?'s':'') + ' ago'}`;
+    const days = Math.max(0, Math.floor((Date.now() - lastExport) / 86400000));
+    if (lxEl) lxEl.textContent = 'Last backup: ' + (days === 0 ? 'today' : days === 1 ? 'yesterday' : days + ' days ago');
     if (days >= 7) {
       banner.style.display = '';
-      if (daysEl) daysEl.textContent = `${days} days`;
+      if (daysEl) daysEl.textContent = `Your last backup was ${days} days ago. Tap Save a backup below.`;
     } else {
       banner.style.display = 'none';
     }
@@ -52,7 +56,7 @@ const Settings = {
       if (!/^https?:\/\//i.test(hubUrl)) hubUrl = 'http://' + hubUrl;
       if (hubInputEl) hubInputEl.value = hubUrl;
     }
-    Store.set('hub_url', hubUrl);
+    let ok = Store.set('hub_url', hubUrl);
     if (hubUrl) SoftHub.yield_to_external(); // external hub configured — stop soft-hub
     // Sync hub URL to network panel (always, including when cleared)
     const netHubEl = document.getElementById('hub-url-input');
@@ -61,11 +65,11 @@ const Settings = {
     if (syncEl) Store.set('sync_interval', syncEl.value);
     const aliasEl = document.getElementById('set-alias');
     const aliasVal = aliasEl ? aliasEl.value.trim() : '';
-    Store.set('last_alias', aliasVal);
+    ok = Store.set('last_alias', aliasVal) && ok;
     // Sync alias to message panel inputs
     document.querySelectorAll('#msg-alias').forEach(el => { if (aliasVal) el.value = aliasVal; });
     const hhidEl = document.getElementById('set-hh-id');
-    if (hhidEl) Store.set('hh_id', hhidEl.value);
+    if (hhidEl && hhidEl.value) Store.set('hh_id', hhidEl.value);
     const offlineEl = document.getElementById('set-offline-mode');
     if (offlineEl) Store.set('offline_mode', offlineEl.checked);
     const hcEl = document.getElementById('set-high-contrast');
@@ -82,7 +86,8 @@ const Settings = {
     this.applyFontSize();
     this.applyContrast();
     this.applyDarkMode();
-    Toast.show('✅ Settings saved', 'success');
+    // If saving failed, Store has already said why and what to do.
+    if (ok) Toast.show('Settings saved', 'success');
     Hub.updateSyncDisplay && Hub.updateSyncDisplay();
   },
 
@@ -96,6 +101,7 @@ const Settings = {
     const offEl = document.getElementById('set-offline-mode');
     if (offEl) Store.set('offline_mode', offEl.checked);
     UI.checkOnline();
+    if (offEl) Toast.show(offEl.checked ? 'Offline mode is on. ARK has stopped looking for a hub.' : 'Offline mode is off. ARK will look for your hub again.', 'info', 4000);
   },
 
   toggleContrast() {
@@ -107,26 +113,28 @@ const Settings = {
   applyContrast() {
     const hcEl = document.getElementById('set-high-contrast');
     const on = Store.get('high_contrast', false) || (hcEl ? hcEl.checked : false);
-    document.documentElement.classList.toggle('high-contrast', on);
+    const root = document.documentElement;
+    root.classList.toggle('high-contrast', on);
+    const names = ['--text-primary', '--text-secondary', '--text-muted', '--border', '--border-strong'];
     if (on) {
-      document.documentElement.style.setProperty('--text-primary', '#0a0806');
-      document.documentElement.style.setProperty('--text-secondary', '#2a221a');
-      document.documentElement.style.setProperty('--text-muted', '#5a4a38');
-      document.documentElement.style.setProperty('--border', '#a89880');
-      document.documentElement.style.setProperty('--border-strong', '#7a6855');
+      // Dark mode needs light words on the dark background; the dark-on-light set would be unreadable there.
+      const dark = root.classList.contains('dark-mode');
+      const vals = dark
+        ? ['#ffffff', '#ece8df', '#cfcbc2', '#7d848c', '#a3a9b0']
+        : ['#0a0806', '#2a221a', '#5a4a38', '#a89880', '#7a6855'];
+      names.forEach((n, i) => root.style.setProperty(n, vals[i]));
     } else {
-      document.documentElement.style.removeProperty('--text-primary');
-      document.documentElement.style.removeProperty('--text-secondary');
-      document.documentElement.style.removeProperty('--text-muted');
-      document.documentElement.style.removeProperty('--border');
-      document.documentElement.style.removeProperty('--border-strong');
+      names.forEach(n => root.style.removeProperty(n));
     }
   },
 
   regenHHID() {
-    const id = generateID();
-    document.getElementById('set-hh-id').value = id;
-    Store.set('hh_id', id);
+    Modal.confirm('Make a new household code? The old code will stop being used. Only do this if you were asked to.', function() {
+      const id = generateID();
+      const el = document.getElementById('set-hh-id');
+      if (el) el.value = id;
+      if (Store.set('hh_id', id)) Toast.show('New household code made', 'success');
+    }, 'Make a new code', 'Keep this code');
   },
 
   exportAll() {
@@ -135,26 +143,44 @@ const Settings = {
       exportedAt: new Date().toISOString(),
       settings: Store.exportAll(),
     };
-    DB.getAll('messages').then(msgs => {
+    let finished = false;
+    const finish = (msgs, msgsOk) => {
+      if (finished) return;
+      finished = true;
       data.messages = msgs;
-      download('ark-backup-' + new Date().toISOString().slice(0,10) + '.json', JSON.stringify(data, null, 2), 'application/json');
+      try {
+        download('ark-backup-' + today() + '.json', JSON.stringify(data, null, 2), 'application/json');
+      } catch (e) {
+        console.error('Export failed', e);
+        Toast.show('The backup could not be saved on this device. Free up some space, then try again.', 'error', 7000);
+        return;
+      }
       Store.set('last_export_ts', Date.now());
       this.checkBackupReminder();
-      Toast.show('📂 All ARK data saved to your downloads', 'success');
-    }).catch(e => {
-      console.error('Export failed', e);
-      Toast.show('Export failed — please try again', 'error');
-    });
+      if (msgsOk) Toast.show('Backup saved to your downloads. Copy the file to a USB stick or another device.', 'success', 7000);
+      else Toast.show('Backup saved, but your messages could not be included. Everything else is in the file.', 'warning', 8000);
+    };
+    // A problem reading messages must not stop the household, plan and settings from being backed up.
+    // Opening the message store first means a store that cannot be opened is reported honestly,
+    // not written into the file as "no messages".
+    DB.open().then(() => DB.getAll('messages')).then(
+      msgs => finish(Array.isArray(msgs) ? msgs : [], true),
+      e => { console.error('Export: messages unreadable', e); finish([], false); }
+    );
+    // Never leave the person waiting for a backup: if the messages do not arrive, save the rest.
+    setTimeout(() => finish([], false), 10000);
   },
 
   // Returns an error string if `data` is not an ARK backup, otherwise null.
   _validateBackup(data) {
-    if (!data || typeof data !== 'object' || Array.isArray(data)) return 'File is not an ARK backup (not a JSON object)';
+    const NOT_ARK = 'That file is not an ARK backup. Choose the file whose name starts with ark-backup.';
+    const DAMAGED = 'That backup file is damaged and cannot be restored. Try an older backup file.';
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return NOT_ARK;
     const hasSettings = data.settings && typeof data.settings === 'object' && !Array.isArray(data.settings);
     const hasMessages = Array.isArray(data.messages);
-    if (!hasSettings && !hasMessages) return 'File is not an ARK backup (no settings or messages found)';
-    if (data.settings !== undefined && !hasSettings) return 'Backup is damaged (settings section is invalid)';
-    if (data.messages !== undefined && !hasMessages) return 'Backup is damaged (messages section is invalid)';
+    if (!hasSettings && !hasMessages) return NOT_ARK;
+    if (data.settings !== undefined && !hasSettings) return DAMAGED;
+    if (data.messages !== undefined && !hasMessages) return DAMAGED;
     // Must contain at least one recognisable ARK key, so random JSON files are rejected.
     const KNOWN = ['household','hh_id','hh_members','hub_url','sync_interval','last_alias','alert_level',
       'map_markers','medications','msg_queue','resources','font_size','high_contrast','dark_mode','offline_mode','low_power','dev_mode',
@@ -162,41 +188,51 @@ const Settings = {
     const sKeys = hasSettings ? Object.keys(data.settings) : [];
     const looksLikeArk = sKeys.some(k => KNOWN.includes(k) || k.startsWith('checklist_')) ||
       (typeof data.version === 'string' && typeof data.exportedAt === 'string');
-    if (!looksLikeArk) return 'File doesn\'t look like an ARK backup (no ARK data keys found)';
-    if (sKeys.some(k => typeof k !== 'string' || k.length > 200)) return 'Backup is damaged (invalid key names)';
+    if (!looksLikeArk) return NOT_ARK;
+    if (sKeys.some(k => typeof k !== 'string' || k.length > 200)) return DAMAGED;
     if (hasMessages && data.messages.some(m => !m || typeof m !== 'object' || m.id === undefined || m.id === null))
-      return 'Backup is damaged (a message is missing its id)';
+      return DAMAGED;
     return null;
   },
 
   importAll() {
-    document.getElementById('import-file').click();
+    const input = document.getElementById('import-file');
+    if (!input) { Toast.show('Restore is not available right now. Close ARK, open it again, then try once more.', 'error', 6000); return; }
+    input.click();
   },
 
   handleImport(input) {
     const file = input.files[0];
     if (!file) return;
     input.value = ''; // allow re-selecting the same file later
-    file.text().then(txt => {
+    // file.text() is missing on older phones; FileReader works everywhere.
+    const read = (typeof file.text === 'function') ? file.text() : new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(String(r.result || ''));
+      r.onerror = () => rej(r.error);
+      r.readAsText(file);
+    });
+    read.then(txt => {
       let data;
       try { data = JSON.parse(txt); }
-      catch(e) { Toast.show('That file isn\'t valid JSON — please choose an ARK backup file', 'error'); return; }
+      catch(e) { Toast.show('That file is not an ARK backup. Choose the file whose name starts with ark-backup.', 'error', 7000); return; }
       const err = this._validateBackup(data);
-      if (err) { Toast.show(err, 'error', 5000); return; }
+      if (err) { Toast.show(err, 'error', 7000); return; }
       // Count what's in the backup so the confirmation is meaningful
       const msgCount = Array.isArray(data.messages) ? data.messages.length : 0;
       const settingsCount = data.settings ? Object.keys(data.settings).length : 0;
-      const exportDate = data.exportedAt ? new Date(data.exportedAt).toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'}) : 'unknown date';
+      const when = data.exportedAt ? new Date(data.exportedAt) : null;
+      const exportDate = (when && !isNaN(when.getTime())) ? when.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'}) : 'an unknown date';
       Modal.confirm(
         `<strong>Restore this backup?</strong><br><br>` +
-        `This backup is from <strong>${exportDate}</strong> and contains <strong>${settingsCount} settings</strong> and <strong>${msgCount} message${msgCount !== 1 ? 's' : ''}</strong>.<br><br>` +
-        `Your current settings will be overwritten. This cannot be undone.`,
+        `It was saved on <strong>${esc(exportDate)}</strong>. It holds <strong>${settingsCount} saved record${settingsCount !== 1 ? 's' : ''}</strong> (your household, plan and settings) and <strong>${msgCount} message${msgCount !== 1 ? 's' : ''}</strong>.<br><br>` +
+        `What is in the backup will replace what is on this device now. Messages already on this device are kept. You cannot undo this.`,
         () => Settings._doImport(data),
-        'Restore Backup', 'Cancel'
+        'Restore backup', 'Cancel'
       );
     }).catch(e => {
       console.error('Import read failed', e);
-      Toast.show('Could not read that file', 'error');
+      Toast.show('That file could not be opened. Choose it again, or try another copy of the backup.', 'error', 7000);
     });
   },
 
@@ -226,56 +262,84 @@ const Settings = {
         } catch(e) { failed++; }
       }
     }
-    if (failed) Toast.show('⚠️ Backup partly restored — ' + failed + ' item(s) could not be saved', 'error', 5000);
-    else Toast.show('✅ Your backup was restored — reloading…', 'success');
+    // A private window keeps nothing: reloading would throw the restored data straight away.
+    if (!Store.persistent) {
+      Toast.show('Your backup is showing for now, but this browser will not keep it. Open ARK in a normal window, not a private one, and restore it there.', 'warning', 12000);
+      try { this.load(); } catch (e) {}
+      return;
+    }
+    if (failed) Toast.show('Only part of the backup was restored. ' + failed + ' item' + (failed !== 1 ? 's' : '') + ' could not be saved. Free up space on this device, then restore again.', 'error', 6000);
+    else Toast.show('Your backup was restored. ARK is reloading…', 'success');
     // Reload so every screen shows the restored data and nothing in memory can overwrite it.
-    setTimeout(() => { try { location.reload(); } catch (e) { this.load(); } }, failed ? 4000 : 1500);
+    setTimeout(() => { try { location.reload(); } catch (e) { this.load(); } }, failed ? 5000 : 1500);
   },
 
   clearCache() {
-    Modal.confirm('Clear cached resource data? Your settings and messages will be kept — only downloaded resources are removed.', function() {
-      DB.clear('resources');
-      DB.clear('map_tiles');
-      Toast.show('Temporary files cleared — your messages and settings are still safe', 'success');
-    }, 'Clear Cache', 'Cancel');
+    Modal.confirm('<strong>Delete the saved map?</strong><br><br>This removes the map that was saved on this device for use without internet. You will need internet to get it back.<br><br>Your markers, messages, household details and settings are kept.', function() {
+      Promise.all([DB.clear('resources'), DB.clear('map_tiles')]).then(() => {
+        Toast.show('The saved map was deleted. Everything else is still here.', 'success', 5000);
+        Settings.updateStorageInfo();
+      }).catch(() => {
+        Toast.show('The saved map could not be deleted. Close ARK, open it again, then try once more.', 'error', 6000);
+      });
+    }, 'Delete saved map', 'Keep the map');
   },
 
   clearAll() {
     Modal.open(`
-      <p style="margin:0 0 8px;font-size:15px">⚠️ <strong>This will permanently delete everything</strong> — your household profile, all messages, map markers, settings, and cached data.</p>
-      <p style="margin:0 0 16px;color:var(--text-secondary,#888)">This cannot be undone. Only do this if you want to start completely fresh.</p>
-      <div class="flex gap-8" style="justify-content:flex-end">
-        <button class="btn btn-ghost" onclick="Modal.close()">Cancel</button>
-        <button class="btn btn-primary" style="background:var(--danger,#dc3545);border-color:var(--danger,#dc3545)" onclick="Modal.close();Settings._confirmWipeFinal()">Delete Everything</button>
+      <p style="margin:0 0 8px;line-height:1.6"><strong>This erases everything ARK holds on this device:</strong> your household details, your plan, all messages, map markers, the saved map and your settings.</p>
+      <p class="text-secondary" style="margin:0 0 16px;line-height:1.6">You cannot undo this. If you might need any of it later, save a backup first.</p>
+      <div class="flex gap-8 wrap" style="justify-content:flex-end">
+        <button type="button" class="btn btn-secondary" onclick="Settings.exportAll()">Save a backup first</button>
+        <button type="button" class="btn btn-ghost" onclick="Modal.close()">Cancel</button>
+        <button type="button" class="btn btn-red" onclick="Modal.close();Settings._confirmWipeFinal()">Erase everything</button>
       </div>
-    `, '🗑️ Wipe All Data');
+    `, 'Erase everything?');
   },
 
   // Second confirmation step before the irreversible wipe — requires typing DELETE.
   _confirmWipeFinal() {
     Modal.open(`
-      <p style="margin:0 0 8px;font-size:15px"><strong>Last chance.</strong> All ARK data on this device will be erased and cannot be recovered.</p>
-      <p style="margin:0 0 12px;color:var(--text-secondary,#888)">Export a backup first if you might need it.</p>
-      <p style="margin:0 0 8px;font-size:13px;font-weight:600">Type <span style="font-family:monospace;background:var(--bg-elevated,#eee);padding:1px 5px;border-radius:3px">DELETE</span> to confirm:</p>
-      <input id="wipe-confirm-input" class="form-input" style="width:100%;margin-bottom:12px" placeholder="DELETE" autocomplete="off" spellcheck="false" oninput="document.getElementById('wipe-confirm-btn').disabled=this.value!=='DELETE'">
-      <div class="flex gap-8" style="justify-content:flex-end">
-        <button class="btn btn-ghost" onclick="Modal.close()">Keep my data</button>
-        <button id="wipe-confirm-btn" class="btn btn-primary" disabled style="background:var(--danger,#dc3545);border-color:var(--danger,#dc3545)" onclick="Modal.close();Settings._doWipeAll()">Erase Everything</button>
+      <p style="margin:0 0 12px;line-height:1.6"><strong>Last check.</strong> Everything ARK holds on this device will be erased. It cannot be brought back.</p>
+      <label class="form-label" for="wipe-confirm-input">Type the word DELETE to go ahead</label>
+      <input id="wipe-confirm-input" class="form-input" style="width:100%;margin:6px 0 12px" placeholder="DELETE" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" oninput="document.getElementById('wipe-confirm-btn').disabled=this.value.trim().toUpperCase()!=='DELETE'">
+      <div class="flex gap-8 wrap" style="justify-content:flex-end">
+        <button type="button" class="btn btn-ghost" onclick="Modal.close()">Keep my data</button>
+        <button type="button" id="wipe-confirm-btn" class="btn btn-red" disabled onclick="Modal.close();Settings._doWipeAll()">Erase everything</button>
       </div>
-    `, '⚠️ Final Confirmation');
+    `, 'Are you sure?');
     setTimeout(() => document.getElementById('wipe-confirm-input')?.focus(), 100);
   },
 
   async _doWipeAll() {
     Store.clearAll(); // only ark_ keys; works in memory-fallback mode too
-    await Promise.all([DB.clear('messages'), DB.clear('resources'), DB.clear('map_tiles')]); // finish before reload
-    Toast.show('All ARK data has been erased', 'info');
-    location.reload();
+    // Nothing still running (location, timers) may write erased data back before the reload.
+    Store._frozen = true;
+    // Finish before the reload. A failure or a stuck database must not stop the reload, or the screen would still show erased data.
+    try {
+      await Promise.race([
+        Promise.all([DB.clear('messages'), DB.clear('resources'), DB.clear('map_tiles')]),
+        new Promise(res => setTimeout(res, 5000))
+      ]);
+    } catch (e) { console.error('Wipe: could not clear stored messages or map', e); }
+    Toast.show('Everything has been erased', 'info');
+    try { location.reload(); } catch (e) { Store._frozen = false; }
+  },
+
+  _fmtBytes(b) {
+    b = Number(b) || 0;
+    if (b >= 1073741824) return (b / 1073741824).toFixed(1) + ' GB';
+    if (b >= 1048576) return (b / 1048576).toFixed(1) + ' MB';
+    return Math.max(1, Math.round(b / 1024)) + ' KB';
   },
 
   updateStorageInfo() {
     const el = document.getElementById('set-storage-info');
     if (!el) return;
+    if (!Store.persistent) {
+      el.textContent = 'This browser is not keeping your information. It will be lost when you close ARK. Open ARK in a normal window, not a private one.';
+      return;
+    }
     // localStorage usage
     let lsBytes = 0;
     try {
@@ -287,22 +351,24 @@ const Settings = {
         }
       }
     } catch(e) {}
+    const basic = 'Space used on this device: about ' + this._fmtBytes(lsBytes) + '.';
 
-    // Use Storage Quota API if available (shows real IndexedDB + all origins)
+    // Use Storage Quota API if available (counts the saved map and messages too)
     if (navigator.storage && navigator.storage.estimate) {
       navigator.storage.estimate().then(est => {
-        const usedMB = (est.usage / 1048576).toFixed(1);
-        const quotaMB = (est.quota / 1048576).toFixed(0);
-        const pct = est.quota ? Math.round(est.usage / est.quota * 100) : 0;
-        if (el) el.innerHTML = `Storage: <strong>${usedMB} MB</strong> of ~${quotaMB} MB (${pct}%) — localStorage: ~${Math.round(lsBytes / 1024)} KB`;
+        const usage = Number(est && est.usage) || 0;
+        const quota = Number(est && est.quota) || 0;
+        if (!quota) { el.textContent = basic; return; }
+        const pct = Math.round(usage / quota * 100);
+        el.textContent = `Space used on this device: ${this._fmtBytes(Math.max(usage, lsBytes))} of about ${this._fmtBytes(quota)} (${pct}%).`;
         // Show warning banner if > 80%
         const banner = document.getElementById('storage-warning-banner');
         if (banner) banner.classList.toggle('hidden', pct < 80);
       }).catch(() => {
-        if (el) el.textContent = `localStorage: ~${Math.round(lsBytes / 1024)} KB used`;
+        el.textContent = basic;
       });
     } else {
-      el.textContent = `localStorage: ~${Math.round(lsBytes / 1024)} KB used`;
+      el.textContent = basic;
     }
   },
 
@@ -312,7 +378,7 @@ const Settings = {
     document.documentElement.classList.toggle('low-power', on);
     // Apply reduced polling
     Hub.startAutoSync();
-    Toast.show(on ? '🔋 Low-power mode on — sync slowed to 5 min' : 'Low-power mode off', 'info');
+    Toast.show(on ? 'Save battery is on. ARK now checks for messages every 5 minutes.' : 'Save battery is off', 'info', 4000);
   },
 
   rerunWizard() {
@@ -324,7 +390,9 @@ const Settings = {
     const on = document.getElementById('set-dark-mode').checked;
     Store.set('dark_mode', on);
     document.documentElement.classList.toggle('dark-mode', on);
-    Toast.show(on ? '🌙 Dark mode on' : '☀️ Dark mode off', 'info');
+    this.applyContrast(); // stronger contrast uses different colours in dark mode
+    try { MapTool.draw(); } catch (e) {} // the empty-map colours follow light and dark mode
+    Toast.show(on ? 'Dark mode on' : 'Dark mode off', 'info');
   },
 
   applyDarkMode() {
@@ -332,38 +400,50 @@ const Settings = {
     document.documentElement.classList.toggle('dark-mode', on);
     const el = document.getElementById('set-dark-mode');
     if (el) el.checked = on;
+    if (Store.get('high_contrast', false)) this.applyContrast();
   },
 
   requestNotifications() {
     if (!('Notification' in window)) {
-      Toast.show('Notifications are not supported in this browser', 'error');
+      Toast.show('This browser cannot show pop-up alerts', 'error');
       return;
     }
     if (Notification.permission === 'granted') {
-      Toast.show('Notifications are already enabled', 'success');
+      Toast.show('Pop-up alerts are already allowed', 'success');
       this._updateNotifBtn();
       return;
     }
     if (Notification.permission === 'denied') {
-      Toast.show('Notifications are blocked — allow them in your browser settings', 'error');
+      Toast.show('Pop-up alerts are blocked. Allow notifications for this page in your browser settings.', 'error', 6000);
       return;
     }
-    Notification.requestPermission().then(perm => {
-      if (perm === 'granted') Toast.show('✅ Notifications enabled', 'success');
-      else Toast.show('Notifications were not enabled', 'info');
+    // Older Safari takes a callback and returns nothing; newer browsers return a promise.
+    let handled = false;
+    const done = perm => {
+      if (handled) return;
+      handled = true;
+      if (perm === 'granted') Toast.show('Pop-up alerts allowed', 'success');
+      else Toast.show('Pop-up alerts were not allowed', 'info');
       this._updateNotifBtn();
-    });
+    };
+    try {
+      const p = Notification.requestPermission(done);
+      if (p && typeof p.then === 'function') p.then(done).catch(() => {});
+    } catch (e) {
+      Toast.show('This browser cannot show pop-up alerts', 'error');
+    }
   },
 
   _updateNotifBtn() {
     const btn = document.getElementById('set-notif-btn');
     if (!btn || !('Notification' in window)) return;
     if (Notification.permission === 'granted') {
-      btn.textContent = '✅ Enabled';
+      btn.textContent = 'Allowed';
       btn.disabled = true;
     } else if (Notification.permission === 'denied') {
-      btn.textContent = '🚫 Blocked';
-      btn.disabled = true;
+      // Left enabled: tapping it explains how to unblock.
+      btn.textContent = 'Blocked';
+      btn.disabled = false;
     } else {
       btn.textContent = 'Enable';
       btn.disabled = false;
@@ -376,4 +456,3 @@ const Settings = {
     if (row) row.style.display = (typeof _deferredInstall !== 'undefined' && _deferredInstall) ? '' : 'none';
   }
 };
-

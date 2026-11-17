@@ -1,148 +1,146 @@
 <!-- === TAB: NETWORK === -->
 <div class="tab-panel" id="tab-network" role="tabpanel" aria-labelledby="navtab-network" tabindex="-1">
 
-  <h2 class="section-title"><span class="title-icon">📡</span>Network</h2>
+  <h2 class="section-title">Network</h2>
 
-  <!-- First-time tip — hidden once hub is configured or soft-hub claimed -->
-  <div id="network-first-use-tip" class="warn-box" style="background:rgba(139,111,62,.08);border-color:rgba(139,111,62,.3);color:var(--text-secondary);font-size:13px;line-height:1.6;margin-bottom:12px">
-    <strong style="color:var(--accent)">📡 How networking works:</strong>
-    ARK makes its own internet from the devices around you. One laptop or Raspberry Pi runs the free <em>ARK Hub</em> program, and every phone nearby joins it over Wi-Fi — no outside internet needed.
-    If someone is already running a hub, enter its address under <strong>Join a Hub</strong>.
-    Everything else in ARK works without a hub — your plan, guides and notes are saved on this device.
-  </div>
-
-  <!-- ONE-TAP HUB DEPLOY CARD -->
-  <div class="hub-deploy-card" id="hub-deploy-card">
-    <div class="hub-deploy-label">This Device</div>
-    <div class="hub-deploy-title" id="hub-deploy-title">Make your own internet</div>
-    <div class="hub-deploy-sub" id="hub-deploy-sub">One laptop or Raspberry Pi becomes the hub. Every phone nearby joins it over Wi-Fi to share messages, guides and ARK itself — with the outside internet down. Hubs pass messages on to each other. Set it up before you need it.</div>
-
-    <!-- PEER STATE (default) -->
-    <div id="hub-deploy-peer-state">
-      <button class="btn btn-primary w-full" id="hub-start-btn" onclick="Network.showHubHelp()" style="font-size:1rem;padding:14px 20px;border-radius:var(--radius-md)">
-        📖 How to set up a hub
-      </button>
-      <div class="font-xs text-muted mt-8" style="text-align:center">A phone cannot be a hub on its own — these steps take about 10 minutes on a laptop</div>
-    </div>
-
-    <!-- HUB ACTIVE STATE (shown when isHub) -->
-    <div id="hub-deploy-active-state" style="display:none">
-      <div class="hub-active-row">
-        <div class="hub-active-dot"></div>
-        <span style="font-weight:700;color:var(--accent)">Hub Active</span>
-        <span class="badge badge-orange" id="hub-deploy-peer-count">0 peers</span>
-      </div>
-      <div id="hub-ip-wrap" style="margin:12px 0">
-        <div class="font-xs text-muted mb-4">Share this address with your neighbors:</div>
-        <div class="hub-ip-display" id="hub-ip-value">Detecting…</div>
-        <div class="font-xs text-muted mt-4">They open ARK → Network → paste this address → Connect</div>
-      </div>
-      <!-- QR code for hub address auto-generated here -->
-      <div id="hub-deploy-qr" style="margin:12px 0 8px"></div>
-      <div class="flex gap-8 mt-4">
-        <button class="btn btn-secondary btn-sm" onclick="Network.copyHubIP()">📋 Copy Address</button>
-        <button class="btn btn-ghost btn-sm" id="hub-stop-btn" onclick="Network.stopSoftHub()" style="color:var(--red)">■ Stop Hub</button>
-      </div>
-    </div>
+  <!-- First-time tip — hidden once a hub is joined -->
+  <div id="network-first-use-tip" class="info-box">
+    <strong>In a crisis, ARK makes its own internet from the devices around you.</strong>
+    One laptop becomes the hub, nearby phones join it over Wi-Fi, and hubs pass messages on to each other.
+    Your plan, guides and notes work without a hub. They are saved on this device.
   </div>
 
   <!-- JOIN A HUB CARD -->
   <div class="card">
-    <div class="card-title mb-12"><span class="card-icon">🌐</span>Join a Hub</div>
-    <div class="font-sm text-secondary mb-12" style="line-height:1.6">Connect to someone else's hub on your Wi-Fi. Ask your coordinator for the address, or scan their QR code.</div>
+    <div class="card-title mb-12"><svg class="hi" aria-hidden="true"><use href="#i-wifi"/></svg>Join a hub</div>
+    <div class="font-sm text-secondary mb-12" style="line-height:1.6">Is someone nearby running an ARK Hub? Join the same Wi-Fi as the hub, then type the address shown on the hub's screen.</div>
     <div class="form-group mb-8">
-      <label class="form-label">Hub Address</label>
+      <label class="form-label" for="hub-url-input">Hub address</label>
       <div class="flex gap-8">
-        <input class="form-input" id="hub-url-input" maxlength="500" placeholder="192.168.1.100:3000" onkeydown="if(event.key==='Enter'){event.preventDefault();Network.connectHub();}">
-        <button class="btn btn-primary" onclick="Network.connectHub()">Connect</button>
+        <input class="form-input" id="hub-url-input" maxlength="500" placeholder="192.168.1.20:8080" inputmode="url" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter'){event.preventDefault();Network.connectHub();}">
+        <button class="btn btn-primary" style="flex-shrink:0" onclick="Network.connectHub()">Join</button>
       </div>
     </div>
-    <div id="hub-status-detail" class="font-sm text-secondary mb-8">Not connected to any hub.</div>
-    <div id="softhub-role-badge" class="font-xs" style="color:var(--text-muted);display:none">📡 Peer mode</div>
-    <div id="hub-heartbeat-row" class="font-xs" style="color:var(--text-muted);display:none;margin-top:4px">
+    <div id="hub-status-detail" class="font-sm text-secondary mb-8" role="status" style="line-height:1.5">Not joined to a hub. Your messages stay on this device.</div>
+    <div id="softhub-role-badge" class="font-xs text-muted" style="display:none"></div>
+    <div id="hub-heartbeat-row" class="font-xs text-muted" style="display:none;margin-top:4px">
       <span id="hub-heartbeat-dot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:5px;vertical-align:middle"></span>
-      <span id="hub-heartbeat-label">Hub alive</span>
+      <span id="hub-heartbeat-label">Hub is answering</span>
     </div>
     <div class="flex gap-8 wrap mt-8">
-      <button class="btn btn-secondary btn-sm" onclick="Network.scanHub()">🔍 Auto-Scan</button>
-      <button class="btn btn-secondary btn-sm" onclick="Network.startQRScan()">📷 Scan QR</button>
-      <button class="btn btn-secondary btn-sm" onclick="Hub.sync(true)">🔄 Sync Now</button>
-      <button class="btn btn-ghost btn-sm" id="hub-disconnect-btn" onclick="Hub.disconnect()" style="display:none;color:var(--red)">✕ Disconnect</button>
+      <button class="btn btn-secondary btn-sm" onclick="Network.scanHub()" title="Look for an ARK Hub on this Wi-Fi">Find a hub</button>
+      <button class="btn btn-secondary btn-sm" onclick="Network.startQRScan()"><svg class="hi" aria-hidden="true"><use href="#i-qr"/></svg>Scan QR code</button>
+      <button class="btn btn-secondary btn-sm" onclick="Hub.sync(true)" title="Send waiting messages and fetch new ones now">Sync now</button>
+      <button class="btn btn-ghost btn-sm" id="hub-disconnect-btn" onclick="Hub.disconnect()" style="display:none"><svg class="hi" aria-hidden="true"><use href="#i-x"/></svg>Leave hub</button>
     </div>
-    <div class="flex gap-8 wrap mt-4" style="font-size:12px;color:var(--text-muted)">
-      <span id="net-last-sync">Never synced</span>
-      <span>·</span>
-      <span id="net-sync-interval">Auto-sync every 1 min</span>
+    <div class="flex gap-8 wrap mt-8 font-xs text-muted">
+      <span id="net-last-sync">No hub reached yet</span>
+      <span aria-hidden="true">·</span>
+      <span id="net-sync-interval">Join a hub to share messages</span>
     </div>
-    <div id="scan-results" class="mt-8"></div>
-    <!-- QR Scanner (moved here) -->
+    <div id="scan-results" class="mt-8" aria-live="polite"></div>
+    <!-- QR Scanner -->
     <div id="qr-video-container" class="hidden mt-8">
-      <video class="w-full" id="qr-video" style="border-radius:var(--radius-md)" autoplay playsinline></video>
-      <button class="btn btn-ghost btn-sm mt-8" onclick="Network.stopQRScan()">Stop</button>
+      <video class="w-full" id="qr-video" style="border-radius:var(--radius-md)" autoplay playsinline muted></video>
+      <button class="btn btn-secondary btn-sm mt-8" onclick="Network.stopQRScan()">Stop camera</button>
+    </div>
+  </div>
+
+  <!-- SET UP A HUB CARD -->
+  <div class="hub-deploy-card" id="hub-deploy-card">
+    <div class="hub-deploy-label">No hub nearby?</div>
+    <div class="hub-deploy-title" id="hub-deploy-title">Make your own internet</div>
+    <div class="hub-deploy-sub" id="hub-deploy-sub">One laptop or Raspberry Pi becomes the hub. Nearby phones join it over Wi-Fi to share messages, guides and ARK itself, with the outside internet down. Set it up before you need it.</div>
+
+    <!-- PEER STATE (default) -->
+    <div id="hub-deploy-peer-state">
+      <button class="btn btn-primary w-full" id="hub-start-btn" onclick="Network.showHubHelp()">
+        <svg class="hi" aria-hidden="true"><use href="#i-hub"/></svg>How to set up a hub
+      </button>
+      <div class="font-xs text-muted mt-8" style="text-align:center;line-height:1.5">A phone cannot be the hub on its own. The steps take about 10 minutes on a laptop.</div>
+    </div>
+
+    <!-- HUB ACTIVE STATE (kept for compatibility; a browser tab is never shown as a hub) -->
+    <div id="hub-deploy-active-state" style="display:none">
+      <div class="hub-active-row">
+        <div class="hub-active-dot"></div>
+        <span style="font-weight:600;color:var(--accent)">Hub active</span>
+        <span class="badge badge-orange" id="hub-deploy-peer-count">0 peers</span>
+      </div>
+      <div id="hub-ip-wrap" style="margin:12px 0">
+        <div class="font-xs text-muted mb-8">Share this address with your neighbours:</div>
+        <div class="hub-ip-display" id="hub-ip-value">Looking…</div>
+      </div>
+      <div id="hub-deploy-qr" style="margin:12px 0 8px"></div>
+      <div class="flex gap-8 mt-8">
+        <button class="btn btn-secondary btn-sm" onclick="Network.copyHubIP()"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg>Copy address</button>
+        <button class="btn btn-ghost btn-sm" id="hub-stop-btn" onclick="Network.stopSoftHub()">Stop hub</button>
+      </div>
     </div>
   </div>
 
   <!-- SHARE HUB QR -->
   <div class="card" id="hub-qr-share-card" style="display:none">
-    <div class="card-title mb-12"><span class="card-icon">🔲</span>Share Hub QR Code</div>
-    <div class="font-sm text-secondary mb-12">Show this to neighbors so they can connect in one scan.</div>
-    <div id="qr-hub-display">
-      <div class="text-muted font-sm">Start the hub or connect to one above to generate a QR code.</div>
+    <div class="card-title mb-12"><svg class="hi" aria-hidden="true"><use href="#i-qr"/></svg>Help others join this hub</div>
+    <div class="font-sm text-secondary mb-12" style="line-height:1.6">People on the same Wi-Fi can scan this with their phone camera, or type the address under it into their browser.</div>
+    <div id="qr-hub-display" style="max-width:100%;overflow-x:auto">
+      <div class="text-muted font-sm">Join a hub above to show its QR code here.</div>
     </div>
-    <button class="btn btn-secondary btn-sm mt-8" onclick="Network.generateHubQR()">🔄 Regenerate</button>
+    <div><button class="btn btn-secondary btn-sm mt-8" onclick="Network.generateHubQR()">Draw again</button></div>
   </div>
 
-  <!-- Connected Peers -->
+  <!-- Linked hubs (the other hubs this hub passes messages to) -->
   <div class="card">
     <div class="card-header">
-      <div class="card-title"><span class="card-icon">👥</span>Connected Peers</div>
-      <span class="badge badge-blue" id="peer-count-badge">0 peers</span>
+      <div class="card-title"><svg class="hi" aria-hidden="true"><use href="#i-nodes"/></svg>Linked hubs</div>
+      <span class="badge badge-blue" id="peer-count-badge">0 hubs</span>
     </div>
     <div id="peers-list">
-      <div class="text-secondary font-sm">No peers yet. Start or join a hub to see participants.</div>
+      <div class="text-secondary font-sm">Join a hub first. Then you will see here whether it is linked to other hubs.</div>
     </div>
   </div>
 
-  <!-- Relay Status -->
+  <!-- How messages travel -->
   <div class="card">
-    <div class="card-title mb-12"><span class="card-icon">🕸️</span>Relay Status</div>
+    <div class="card-title mb-12"><svg class="hi" aria-hidden="true"><use href="#i-share"/></svg>How messages travel</div>
     <div class="grid-2 font-sm">
-      <div class="peer-item">
-        <span class="text-muted">📶 Wi-Fi Hub</span>
-        <span class="badge badge-blue" id="wifi-status">Offline</span>
+      <div class="peer-item" style="justify-content:space-between">
+        <span class="text-secondary"><svg class="hi" aria-hidden="true"><use href="#i-wifi"/></svg> Wi-Fi hub</span>
+        <span class="badge badge-muted" id="wifi-status">Not joined</span>
       </div>
-      <div class="peer-item">
-        <span class="text-muted">📡 Meshtastic</span>
-        <span class="badge badge-yellow">Future</span>
+      <div class="peer-item" style="justify-content:space-between">
+        <span class="text-secondary"><svg class="hi" aria-hidden="true"><use href="#i-download"/></svg> USB stick</span>
+        <span class="badge badge-green" title="Messages tab: Carry messages by USB stick">Ready</span>
       </div>
-      <div class="peer-item">
-        <span class="text-muted">🔵 Bluetooth</span>
-        <span class="badge badge-yellow">Future</span>
+      <div class="peer-item" style="justify-content:space-between">
+        <span class="text-secondary"><svg class="hi" aria-hidden="true"><use href="#i-radio"/></svg> Radio (LoRa, Meshtastic)</span>
+        <span class="badge badge-yellow">Not in this app yet</span>
       </div>
-      <div class="peer-item">
-        <span class="text-muted">📻 LoRa Bridge</span>
-        <span class="badge badge-yellow">Future</span>
+      <div class="peer-item" style="justify-content:space-between">
+        <span class="text-secondary"><svg class="hi" aria-hidden="true"><use href="#i-phone"/></svg> Bluetooth</span>
+        <span class="badge badge-yellow">Not in this app yet</span>
       </div>
     </div>
+    <div class="font-xs text-muted mt-8" style="line-height:1.5">Messages reach the people joined to your hub and the hubs linked to it. They do not reach the wider internet, and nobody monitors them. In immediate danger, call 911 or your local emergency number if you can.</div>
   </div>
 
   <!-- Bug Report -->
   <div class="card">
     <div class="card-header">
-      <div class="card-title"><span class="card-icon">🐛</span>Report a Bug</div>
-      <span class="badge badge-blue">Auto-patch</span>
+      <div class="card-title"><svg class="hi" aria-hidden="true"><use href="#i-alert"/></svg>Report a problem with ARK</div>
+      <span class="badge badge-blue">Needs internet</span>
     </div>
-    <div class="font-sm text-secondary mb-12" style="line-height:1.5">Found something broken? Report it here. Fixes are delivered as patches — no need to re-download the app.</div>
+    <div class="font-sm text-secondary mb-12" style="line-height:1.6">Found something broken in the app? Tell us here. This goes to the people who make ARK, not to emergency services. Fixes arrive by themselves when ARK has internet.</div>
     <div class="form-group">
-      <label class="form-label">What went wrong?</label>
-      <textarea class="form-input" id="bug-report-text" placeholder="Describe what happened and what you expected…" style="min-height:70px"></textarea>
+      <label class="form-label" for="bug-report-text">What went wrong?</label>
+      <textarea class="form-input" id="bug-report-text" maxlength="2000" placeholder="What did you do, and what happened?" style="min-height:70px"></textarea>
     </div>
-    <div class="flex gap-8">
-      <button class="btn btn-primary btn-sm" onclick="Network.submitBugReport()">📤 Submit Report</button>
-      <button class="btn btn-secondary btn-sm" onclick="Network.checkForUpdates()">🔄 Check for Updates</button>
+    <div class="flex gap-8 wrap">
+      <button class="btn btn-primary btn-sm" onclick="Network.submitBugReport()">Send report</button>
+      <button class="btn btn-secondary btn-sm" onclick="Network.checkForUpdates()">Check for fixes</button>
     </div>
-    <div id="bug-report-status" class="font-xs text-muted mt-8"></div>
-    <div id="patch-status" class="font-xs text-muted mt-4"></div>
+    <div id="bug-report-status" class="font-xs text-muted mt-8" role="status"></div>
+    <div id="patch-status" class="font-xs text-muted mt-8" role="status"></div>
   </div>
 
   <!-- CONNECT TO ARK — for emergency services and agencies -->
@@ -151,7 +149,7 @@
     <div class="card-title mb-8">Connect to ARK</div>
     <div class="font-sm text-secondary mb-12" style="line-height:1.6">Emergency management, responders, shelters, utilities and community organisations can ask to link with ARK — to share verified local information, or to connect a hub their team runs. Every request is checked by a person.</div>
     <a class="btn btn-secondary" href="https://arks.solutions/connect" target="_blank" rel="noopener">Request to connect</a>
-    <div class="font-xs text-muted mt-8">Needs internet. Not monitored for emergencies — in immediate danger, call 911.</div>
+    <div class="font-xs text-muted mt-8">Needs internet. Not monitored for emergencies — in immediate danger, call 911 or your local emergency number.</div>
   </div>
 
 </div><!-- /tab-network -->

@@ -1,32 +1,33 @@
 <!-- === TAB: RADIO === -->
 <div class="tab-panel" id="tab-radio" role="tabpanel" aria-labelledby="navtab-radio" tabindex="-1">
 
-  <h2 class="section-title"><span class="title-icon">📻</span>Radio Reference</h2>
+  <h2 class="section-title">Radio Reference</h2>
+  <div class="font-sm text-secondary mb-12">Channels to listen on when phones and internet are down. Tap a frequency to copy it. Tune your radio by hand: ARK cannot tune it for you.</div>
 
   <!-- Band / Region filter bar -->
-  <div class="map-toolbar" id="radio-filter-bar" role="toolbar" aria-label="Filter radio reference cards">
-    <button class="map-btn active" data-radio-filter="all" onclick="Radio.setFilter('all',this)">All</button>
-    <button class="map-btn" data-radio-filter="weather" onclick="Radio.setFilter('weather',this)">🌪️ Weather</button>
-    <button class="map-btn" data-radio-filter="emergency" onclick="Radio.setFilter('emergency',this)">🚨 Emergency</button>
-    <button class="map-btn" data-radio-filter="frs" onclick="Radio.setFilter('frs',this)">📱 FRS/CB</button>
-    <button class="map-btn" data-radio-filter="ham" onclick="Radio.setFilter('ham',this)">🏠 Ham</button>
-    <button class="map-btn" data-radio-filter="mesh" onclick="Radio.setFilter('mesh',this)">🕸️ Mesh</button>
-    <button class="map-btn" data-radio-filter="reference" onclick="Radio.setFilter('reference',this)">📖 Reference</button>
+  <div class="map-toolbar" id="radio-filter-bar" role="toolbar" aria-label="Show only one kind of radio" style="flex-wrap:wrap">
+    <button class="map-btn active" data-radio-filter="all" aria-pressed="true" style="min-height:44px;padding:6px 14px" onclick="Radio.setFilter('all',this)">All</button>
+    <button class="map-btn" data-radio-filter="weather" aria-pressed="false" style="min-height:44px;padding:6px 14px" onclick="Radio.setFilter('weather',this)">Weather</button>
+    <button class="map-btn" data-radio-filter="emergency" aria-pressed="false" style="min-height:44px;padding:6px 14px" onclick="Radio.setFilter('emergency',this)">Emergency</button>
+    <button class="map-btn" data-radio-filter="frs" aria-pressed="false" style="min-height:44px;padding:6px 14px" onclick="Radio.setFilter('frs',this)">FRS/CB</button>
+    <button class="map-btn" data-radio-filter="ham" aria-pressed="false" style="min-height:44px;padding:6px 14px" onclick="Radio.setFilter('ham',this)">Ham</button>
+    <button class="map-btn" data-radio-filter="mesh" aria-pressed="false" style="min-height:44px;padding:6px 14px" onclick="Radio.setFilter('mesh',this)">Mesh</button>
+    <button class="map-btn" data-radio-filter="reference" aria-pressed="false" style="min-height:44px;padding:6px 14px" onclick="Radio.setFilter('reference',this)">Reference</button>
   </div>
 
   <!-- NOAA Weather -->
   <div class="card" data-radio-band="weather">
-    <div class="card-title mb-12"><span class="card-icon">🌪️</span>NOAA Weather Radio (US)</div>
+    <div class="card-title mb-12"><span class="card-icon"><svg class="hi" aria-hidden="true"><use href="#i-radio"/></svg></span>NOAA Weather Radio (US)</div>
     <table class="freq-table">
       <thead><tr><th>Frequency (MHz) <span style="font-weight:400;opacity:.6">(tap to copy)</span></th><th>Coverage Area</th><th>Notes</th></tr></thead>
       <tbody>
-        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.400 MHz',this)" title="Tap to copy">162.400<span class="copy-hint">📋</span></td><td>Primary nationwide</td><td>Most common</td></tr>
-        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.425 MHz',this)" title="Tap to copy">162.425<span class="copy-hint">📋</span></td><td>Alternative</td><td></td></tr>
-        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.450 MHz',this)" title="Tap to copy">162.450<span class="copy-hint">📋</span></td><td>Alternative</td><td></td></tr>
-        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.475 MHz',this)" title="Tap to copy">162.475<span class="copy-hint">📋</span></td><td>Alternative</td><td></td></tr>
-        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.500 MHz',this)" title="Tap to copy">162.500<span class="copy-hint">📋</span></td><td>Alternative</td><td></td></tr>
-        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.525 MHz',this)" title="Tap to copy">162.525<span class="copy-hint">📋</span></td><td>Alternative</td><td></td></tr>
-        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.550 MHz',this)" title="Tap to copy">162.550<span class="copy-hint">📋</span></td><td>Alternative</td><td>Second most common</td></tr>
+        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.400 MHz',this)" title="Tap to copy">162.400<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Primary nationwide</td><td>Most common</td></tr>
+        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.425 MHz',this)" title="Tap to copy">162.425<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Alternative</td><td></td></tr>
+        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.450 MHz',this)" title="Tap to copy">162.450<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Alternative</td><td></td></tr>
+        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.475 MHz',this)" title="Tap to copy">162.475<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Alternative</td><td></td></tr>
+        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.500 MHz',this)" title="Tap to copy">162.500<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Alternative</td><td></td></tr>
+        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.525 MHz',this)" title="Tap to copy">162.525<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Alternative</td><td></td></tr>
+        <tr><td class="monospace bold text-accent freq-copyable" onclick="Radio.copyFreq('162.550 MHz',this)" title="Tap to copy">162.550<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Alternative</td><td>Second most common</td></tr>
       </tbody>
     </table>
     <div class="info-box mt-8">Most NOAA-capable weather radios and many handheld radios receive these frequencies. Always scan all 7 channels for the strongest signal.</div>
@@ -34,34 +35,36 @@
 
   <!-- Emergency Frequencies -->
   <div class="card" data-radio-band="emergency">
-    <div class="card-title mb-12"><span class="card-icon">🚨</span>Emergency Broadcast Frequencies</div>
+    <div class="card-title mb-12"><span class="card-icon"><svg class="hi" aria-hidden="true"><use href="#i-sos"/></svg></span>Emergency Broadcast Frequencies</div>
+    <div class="font-xs text-muted mb-8">Anyone may listen. Only transmit on distress channels if life is in danger.</div>
     <table class="freq-table">
       <thead><tr><th>Service</th><th>Frequency <span style="font-weight:400;opacity:.6">(tap to copy)</span></th><th>Use</th></tr></thead>
       <tbody>
-        <tr><td>AM Emergency Broadcast</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('640 / 1240 kHz',this)" title="Tap to copy">640 / 1240 kHz<span class="copy-hint">📋</span></td><td>EAS primary stations</td></tr>
-        <tr><td>International Distress (HF)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('2182 kHz',this)" title="Tap to copy">2182 kHz<span class="copy-hint">📋</span></td><td>Marine/aviation distress</td></tr>
-        <tr><td>Marine Channel 16 — Distress &amp; Calling <span class="badge badge-red" style="font-size:10px;padding:1px 5px;vertical-align:middle">PRIORITY</span></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('156.800 MHz',this)" title="Tap to copy">156.800 MHz<span class="copy-hint">📋</span></td><td>International distress / calling</td></tr>
-        <tr><td>Aviation Distress</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('121.5 MHz',this)" title="Tap to copy">121.5 MHz<span class="copy-hint">📋</span></td><td>Guard frequency</td></tr>
-        <tr><td>Hospital / EMS (HEAR)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('155.340 MHz',this)" title="Tap to copy">155.340 MHz<span class="copy-hint">📋</span></td><td>Ambulance-to-hospital — listen only</td></tr>
-        <tr><td>National Calling (Ham 2m)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('146.520 MHz',this)" title="Tap to copy">146.520 MHz<span class="copy-hint">📋</span></td><td>Ham radio simplex calling</td></tr>
-        <tr><td>National Calling (Ham 70cm)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('446.000 MHz',this)" title="Tap to copy">446.000 MHz<span class="copy-hint">📋</span></td><td>Ham radio simplex calling</td></tr>
+        <tr><td>Local AM / FM news radio</td><td class="monospace">AM 530–1700 kHz<br>FM 88–108 MHz</td><td>Emergency Alert System messages. Scan for the strongest local news station.</td></tr>
+        <tr><td>International Distress (HF)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('2182 kHz',this)" title="Tap to copy">2182 kHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Marine distress (HF). The US Coast Guard no longer listens here.</td></tr>
+        <tr><td>Marine Channel 16 — Distress &amp; Calling <span class="badge badge-red" style="font-size:10px;padding:1px 5px;vertical-align:middle">PRIORITY</span></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('156.800 MHz',this)" title="Tap to copy">156.800 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Boats and coast guard. Needs a marine radio.</td></tr>
+        <tr><td>Aviation Distress</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('121.5 MHz',this)" title="Tap to copy">121.5 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Aircraft emergency channel. Listen only unless life is in danger.</td></tr>
+        <tr><td>Hospital / EMS (HEAR)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('155.340 MHz',this)" title="Tap to copy">155.340 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Ambulance-to-hospital — listen only</td></tr>
+        <tr><td>National Calling (Ham 2m)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('146.520 MHz',this)" title="Tap to copy">146.520 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Ham radio simplex calling</td></tr>
+        <tr><td>National Calling (Ham 70cm)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('446.000 MHz',this)" title="Tap to copy">446.000 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Ham radio simplex calling</td></tr>
       </tbody>
     </table>
   </div>
 
   <!-- FRS/GMRS/CB -->
   <div class="card" data-radio-band="frs">
-    <div class="card-title mb-12"><span class="card-icon">📱</span>FRS / GMRS / CB (License-Free Emergency Use)</div>
+    <div class="card-title mb-12"><span class="card-icon"><svg class="hi" aria-hidden="true"><use href="#i-phone"/></svg></span>FRS / GMRS / CB (Walkie-Talkies)</div>
+    <div class="font-xs text-muted mb-8">In the US, FRS and CB need no license. GMRS needs an FCC license.</div>
     <div class="grid-2 gap-8">
       <div>
-        <div class="font-sm bold mb-8">FRS Channels (462-467 MHz)</div>
+        <div class="font-sm bold mb-8">FRS / GMRS Channels (462–467 MHz)</div>
         <table class="freq-table">
           <thead><tr><th>Ch</th><th>Frequency</th><th>Notes</th></tr></thead>
           <tbody>
-            <tr><td><b>1</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('462.5625 MHz',this)" title="Tap to copy">462.5625<span class="copy-hint">📋</span></td><td>Common calling</td></tr>
-            <tr><td><b>7</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('462.7125 MHz',this)" title="Tap to copy">462.7125<span class="copy-hint">📋</span></td><td>Common secondary</td></tr>
-            <tr><td><b>16</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('462.5500 MHz',this)" title="Tap to copy">462.5500<span class="copy-hint">📋</span></td><td>Interop/emergency</td></tr>
-            <tr><td><b>22</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('462.7250 MHz',this)" title="Tap to copy">462.7250<span class="copy-hint">📋</span></td><td>GMRS calling</td></tr>
+            <tr><td><b>1</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('462.5625 MHz',this)" title="Tap to copy">462.5625<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Common calling</td></tr>
+            <tr><td><b>7</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('462.7125 MHz',this)" title="Tap to copy">462.7125<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Common secondary</td></tr>
+            <tr><td><b>20</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('462.6750 MHz',this)" title="Tap to copy">462.6750<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Often used for emergency / travel help</td></tr>
+            <tr><td><b>22</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('462.7250 MHz',this)" title="Tap to copy">462.7250<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>GMRS calling</td></tr>
           </tbody>
         </table>
       </div>
@@ -69,52 +72,52 @@
         <div class="font-sm bold mb-8">CB Radio</div>
         <table class="freq-table">
           <tbody>
-            <tr><td><b>Ch 9</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('27.065 MHz',this)" title="Tap to copy">27.065 MHz<span class="copy-hint">📋</span></td><td class="text-red bold">Emergency/Distress</td></tr>
-            <tr><td><b>Ch 19</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('27.185 MHz',this)" title="Tap to copy">27.185 MHz<span class="copy-hint">📋</span></td><td>Highway/Trucker</td></tr>
-            <tr><td><b>Ch 1</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('26.965 MHz',this)" title="Tap to copy">26.965 MHz<span class="copy-hint">📋</span></td><td>Calling channel</td></tr>
+            <tr><td><b>Ch 9</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('27.065 MHz',this)" title="Tap to copy">27.065 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td class="text-red bold">Emergency/Distress</td></tr>
+            <tr><td><b>Ch 19</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('27.185 MHz',this)" title="Tap to copy">27.185 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Highway/Trucker</td></tr>
+            <tr><td><b>Ch 1</b></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('26.965 MHz',this)" title="Tap to copy">26.965 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>Calling channel</td></tr>
           </tbody>
         </table>
-        <div class="font-xs text-muted mt-8">CB channel 9 is monitored for emergencies in many areas.</div>
+        <div class="font-xs text-muted mt-8">CB channel 9 is set aside for emergencies. Do not count on anyone listening.</div>
       </div>
     </div>
   </div>
 
   <!-- Ham Emergency -->
   <div class="card" data-radio-band="ham">
-    <div class="card-title mb-12"><span class="card-icon">🏠</span>ARES/RACES Emergency Coordination</div>
+    <div class="card-title mb-12"><span class="card-icon"><svg class="hi" aria-hidden="true"><use href="#i-radio"/></svg></span>ARES/RACES Emergency Coordination</div>
     <table class="freq-table">
       <thead><tr><th>Band</th><th>Simplex <span style="font-weight:400;opacity:.6">(tap to copy)</span></th><th>Repeater Output</th><th>Use</th></tr></thead>
       <tbody>
-        <tr><td>2m (146 MHz)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('146.520 MHz',this)" title="Tap to copy">146.520<span class="copy-hint">📋</span></td><td>146.000–148.000</td><td>Primary emergency net</td></tr>
-        <tr><td>70cm (446 MHz)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('446.000 MHz',this)" title="Tap to copy">446.000<span class="copy-hint">📋</span></td><td>440.000–450.000</td><td>Secondary/urban</td></tr>
-        <tr><td>HF 40m</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('7.285 MHz',this)" title="Tap to copy">7.285 MHz<span class="copy-hint">📋</span></td><td>—</td><td>Regional emergency net</td></tr>
-        <tr><td>HF 80m</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('3.985 MHz',this)" title="Tap to copy">3.985 MHz<span class="copy-hint">📋</span></td><td>—</td><td>Local/regional</td></tr>
-        <tr><td>HF 20m</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('14.300 MHz',this)" title="Tap to copy">14.300 MHz<span class="copy-hint">📋</span></td><td>—</td><td>International distress</td></tr>
+        <tr><td>2m (146 MHz)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('146.520 MHz',this)" title="Tap to copy">146.520<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>146.000–148.000</td><td>Primary emergency net</td></tr>
+        <tr><td>70cm (446 MHz)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('446.000 MHz',this)" title="Tap to copy">446.000<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>440.000–450.000</td><td>Secondary/urban</td></tr>
+        <tr><td>HF 40m</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('7.285 MHz',this)" title="Tap to copy">7.285 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>—</td><td>Regional emergency net</td></tr>
+        <tr><td>HF 80m</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('3.985 MHz',this)" title="Tap to copy">3.985 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>—</td><td>Local/regional</td></tr>
+        <tr><td>HF 20m</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('14.300 MHz',this)" title="Tap to copy">14.300 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>—</td><td>International distress</td></tr>
       </tbody>
     </table>
-    <div class="info-box mt-8">ARES (Amateur Radio Emergency Service) and RACES coordinate with emergency management. A licensed ham operator can relay traffic through these nets.</div>
+    <div class="info-box mt-8">ARES (Amateur Radio Emergency Service) and RACES coordinate with emergency management. A licensed ham operator can pass messages on through these nets. Anyone may listen. You need a ham license to transmit.</div>
   </div>
 
   <!-- Meshtastic -->
   <div class="card" data-radio-band="mesh">
     <div class="card-header mb-12">
-      <div class="card-title"><span class="card-icon">🕸️</span>Meshtastic Default Channels</div>
-      <span class="badge badge-yellow" id="meshtastic-status-radio">Not connected</span>
+      <div class="card-title"><span class="card-icon"><svg class="hi" aria-hidden="true"><use href="#i-nodes"/></svg></span>Meshtastic Default Channels</div>
+      <span class="badge badge-yellow" id="meshtastic-status-radio">Reference only</span>
     </div>
     <table class="freq-table">
       <thead><tr><th>Region</th><th>Frequency <span style="font-weight:400;opacity:.6">(tap to copy)</span></th><th>Bandwidth</th><th>Spread Factor</th></tr></thead>
       <tbody>
-        <tr><td>US (915 MHz)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('906.875 MHz',this)" title="Tap to copy">906.875 MHz<span class="copy-hint">📋</span></td><td>250 kHz</td><td>SF11</td></tr>
-        <tr><td>EU (868 MHz)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('869.525 MHz',this)" title="Tap to copy">869.525 MHz<span class="copy-hint">📋</span></td><td>250 kHz</td><td>SF11</td></tr>
-        <tr><td>AU (915 MHz)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('917.000 MHz',this)" title="Tap to copy">917.000 MHz<span class="copy-hint">📋</span></td><td>125 kHz</td><td>SF12</td></tr>
+        <tr><td>US (915 MHz)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('906.875 MHz',this)" title="Tap to copy">906.875 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>250 kHz</td><td>SF11</td></tr>
+        <tr><td>EU (868 MHz)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('869.525 MHz',this)" title="Tap to copy">869.525 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>250 kHz</td><td>SF11</td></tr>
+        <tr><td>AU (915 MHz)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('917.000 MHz',this)" title="Tap to copy">917.000 MHz<span class="copy-hint"><svg class="hi" aria-hidden="true"><use href="#i-copy"/></svg></span></td><td>125 kHz</td><td>SF12</td></tr>
       </tbody>
     </table>
-    <div class="info-box mt-8">Meshtastic is an open-source LoRa mesh radio system. Devices can carry text messages several miles without cell towers or internet. Connect a Meshtastic device to the ARK hub server to relay mesh traffic.</div>
+    <div class="info-box mt-8">Meshtastic is a small radio that passes text messages from one radio to the next, with no cell towers or internet. Range depends on hills and buildings. ARK does not connect to these radios by itself: use the Meshtastic app on your phone to send and read messages.</div>
   </div>
 
   <!-- Phonetic Alphabet -->
   <div class="card" data-radio-band="reference">
-    <div class="card-title mb-12"><span class="card-icon">🔤</span>NATO Phonetic Alphabet</div>
+    <div class="card-title mb-12"><span class="card-icon"><svg class="hi" aria-hidden="true"><use href="#i-list-check"/></svg></span>NATO Phonetic Alphabet</div>
     <div class="phonetic-grid" id="phonetic-grid">
       <!-- filled by JS -->
     </div>
@@ -122,45 +125,45 @@
 
   <!-- Morse Code -->
   <div class="card" data-radio-band="reference">
-    <div class="card-header">
+    <div class="card-header" style="flex-wrap:wrap;gap:8px">
       <div class="card-title"><span class="card-icon">· — ·</span>Morse Code</div>
       <div class="flex gap-8" style="align-items:center;flex-wrap:wrap">
-        <input class="form-input" id="morse-input" style="width:150px" placeholder="SOS" maxlength="30" aria-label="Text to convert to Morse code" oninput="Radio.updateEncodeOutput()">
-        <button class="btn btn-primary btn-sm" id="morse-play-btn" onclick="Radio.playMorse()">▶ Play</button>
-        <button class="btn btn-secondary btn-sm" onclick="Radio.stopMorse()" aria-label="Stop Morse playback">⏹ Stop</button>
+        <input class="form-input" id="morse-input" style="width:150px;flex:1 1 120px" placeholder="SOS" maxlength="30" autocomplete="off" autocapitalize="characters" aria-label="Text to turn into Morse code" oninput="Radio.updateEncodeOutput()" onkeydown="if(event.key==='Enter')Radio.playMorse()">
+        <button class="btn btn-primary btn-sm" id="morse-play-btn" style="min-height:44px" onclick="Radio.playMorse()">Play</button>
+        <button class="btn btn-secondary btn-sm" style="min-height:44px" onclick="Radio.stopMorse()" aria-label="Stop Morse playback">Stop</button>
         <label class="font-xs text-muted" style="display:flex;align-items:center;gap:4px">
           Speed:
-          <select id="morse-speed" class="form-input" style="padding:3px 6px;font-size:12px;width:auto" aria-label="Morse playback speed">
+          <select id="morse-speed" class="form-input" style="padding:3px 6px;font-size:12px;width:auto;min-height:44px" aria-label="Morse playback speed">
             <option value="0.18">Slow</option>
             <option value="0.1" selected>Medium</option>
             <option value="0.06">Fast</option>
           </select>
         </label>
-        <span id="morse-status">● Playing…</span>
+        <span id="morse-status" role="status">● Playing…</span>
       </div>
     </div>
     <!-- Encoder output -->
-    <div id="morse-encode-output" style="display:none;margin-top:10px;padding:8px 12px;background:var(--bg-secondary);border-radius:6px;font-family:monospace;font-size:1.05em;letter-spacing:0.08em;color:var(--accent);word-break:break-all"></div>
+    <div id="morse-encode-output" style="display:none;margin-top:10px;padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius-md);font-family:monospace;font-size:1.05em;letter-spacing:0.08em;color:var(--accent);word-break:break-all"></div>
     <div class="morse-chart" id="morse-chart">
       <!-- filled by JS -->
     </div>
-    <div id="morse-flash" style="display:none; height:40px; background:var(--accent); opacity:0.7; border-radius:6px; margin-top:8px; transition:opacity 0.05s;"></div>
-    <div class="info-box mt-12">SOS = · · · — — — · · ·   |   Always repeat SOS three times with a gap between each set.</div>
+    <div id="morse-flash" style="display:none; height:40px; background:var(--accent); opacity:0.7; border-radius:var(--radius-md); margin-top:8px; transition:opacity 0.05s;"></div>
+    <div class="info-box mt-12">SOS = · · · — — — · · · (3 short, 3 long, 3 short). Send it three times with a pause between each. Play makes a beep, flashes this screen and buzzes the phone. With no sound you can use a flashlight or a whistle.</div>
     <!-- Decode section -->
     <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
-      <div class="font-sm bold mb-8">Decode Incoming Morse</div>
-      <div class="font-xs text-muted mb-6">Separate letters with spaces, words with <code style="background:var(--bg-elevated);padding:1px 4px;border-radius:3px"> / </code> — e.g. <code style="background:var(--bg-elevated);padding:1px 4px;border-radius:3px">... --- ...</code> or <code style="background:var(--bg-elevated);padding:1px 4px;border-radius:3px">.... . .-.. .-.. --- / .-- --- .-. .-.. -..</code></div>
+      <div class="font-sm bold mb-8">Read Morse You Hear or See</div>
+      <div class="font-xs text-muted mb-8">Type <strong>.</strong> for short and <strong>-</strong> for long. Put a space between letters, and <code style="background:var(--bg-elevated);padding:1px 4px;border-radius:3px"> / </code> between words. For example <code style="background:var(--bg-elevated);padding:1px 4px;border-radius:3px">... --- ...</code> or <code style="background:var(--bg-elevated);padding:1px 4px;border-radius:3px">.... . .-.. .-.. --- / .-- --- .-. .-.. -..</code></div>
       <div class="flex gap-8 wrap">
-        <textarea id="morse-decode-input" class="form-input" rows="2" placeholder="... --- ..." style="flex:1;min-width:160px;resize:vertical;font-family:monospace" aria-label="Morse code to decode"></textarea>
-        <button class="btn btn-secondary btn-sm" onclick="Radio.decodeMorse()" style="align-self:flex-end">🔍 Decode</button>
+        <textarea id="morse-decode-input" class="form-input" rows="2" placeholder="... --- ..." style="flex:1;min-width:160px;resize:vertical;font-family:monospace" aria-label="Morse code to read" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+        <button class="btn btn-secondary btn-sm" onclick="Radio.decodeMorse()" style="align-self:flex-end;min-height:44px"><svg class="hi" aria-hidden="true"><use href="#i-search"/></svg>Decode</button>
       </div>
-      <div id="morse-decode-output" style="display:none;margin-top:8px;padding:8px 12px;background:var(--bg-secondary);border-radius:6px;font-family:monospace;font-size:1.1em;letter-spacing:0.05em"></div>
+      <div id="morse-decode-output" aria-live="polite" style="display:none;margin-top:8px;padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius-md);overflow-wrap:anywhere;font-family:monospace;font-size:1.1em;letter-spacing:0.05em"></div>
     </div>
   </div>
 
   <!-- Q-Codes -->
   <div class="card" data-radio-band="reference">
-    <div class="card-title mb-12"><span class="card-icon">📖</span>Common Q-Codes</div>
+    <div class="card-title mb-12"><span class="card-icon"><svg class="hi" aria-hidden="true"><use href="#i-guides"/></svg></span>Common Q-Codes</div>
     <table class="freq-table">
       <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
       <tbody>
@@ -182,7 +185,7 @@
 
   <!-- RST Signal Report -->
   <div class="card" data-radio-band="reference">
-    <div class="card-title mb-12"><span class="card-icon">📶</span>RST Signal Report System</div>
+    <div class="card-title mb-12"><span class="card-icon"><svg class="hi" aria-hidden="true"><use href="#i-wifi"/></svg></span>RST Signal Report System</div>
     <div class="grid-2 font-sm gap-8">
       <div>
         <div class="bold mb-8">Readability (1–5)</div>
@@ -201,38 +204,40 @@
         <div>9 — Extremely strong</div>
       </div>
     </div>
-    <div class="info-box mt-8">Common reports: "59" = perfectly readable, extremely strong. "33" = barely readable, weak. In an emergency, give a quick RST before asking for help.</div>
+    <div class="info-box mt-8">Common reports: "59" = perfectly readable, extremely strong. "33" = barely readable, weak. In an emergency, ask for help first. A signal report can wait.</div>
   </div>
 
   <!-- Personal Frequency Logbook -->
   <div class="card">
     <div class="card-header mb-12">
-      <div class="card-title"><span class="card-icon">📒</span>My Channels</div>
-      <button class="btn btn-primary btn-sm" onclick="FreqLog.openAdd()">+ Add</button>
+      <div class="card-title"><span class="card-icon"><svg class="hi" aria-hidden="true"><use href="#i-list-check"/></svg></span>My Channels</div>
+      <button class="btn btn-primary btn-sm" style="min-height:44px" onclick="FreqLog.openAdd()"><svg class="hi" aria-hidden="true"><use href="#i-plus"/></svg>Add</button>
     </div>
-    <div id="freq-log-empty" class="font-sm text-muted" style="text-align:center;padding:16px 0">No frequencies logged yet. Add your group's local frequencies here.</div>
+    <div id="freq-log-empty" class="font-sm text-muted" style="text-align:center;padding:16px 0">No channels saved yet. Tap Add to save the channels your family or group agrees to use. They are kept on this device only.</div>
     <table class="freq-table" id="freq-log-table" style="display:none">
-      <thead><tr><th>Name</th><th>Frequency</th><th>Notes</th><th>Added</th><th style="width:60px"></th></tr></thead>
+      <thead><tr><th>Name</th><th>Channel / frequency</th><th>Notes</th><th>Added</th><th style="width:60px"></th></tr></thead>
       <tbody id="freq-log-body"></tbody>
     </table>
     <!-- Add/Edit form (inline, hidden by default) -->
-    <div id="freq-log-form" style="display:none;margin-top:12px;background:var(--bg-secondary);border-radius:8px;padding:12px">
+    <div id="freq-log-form" style="display:none;margin-top:12px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px">
       <div class="font-sm bold mb-8" id="freq-log-form-title">Add Channel</div>
       <input type="hidden" id="freq-log-edit-idx" value="-1">
       <div class="flex gap-8 wrap">
-        <input class="form-input" id="freq-log-name" placeholder="Name / Callsign" maxlength="40" style="flex:1;min-width:120px" aria-label="Channel name">
-        <input class="form-input" id="freq-log-freq" placeholder="Frequency (e.g. 146.520)" maxlength="20" style="flex:1;min-width:120px" aria-label="Frequency">
-        <input class="form-input" id="freq-log-notes" placeholder="Notes (optional)" maxlength="80" style="flex:2;min-width:160px" aria-label="Notes">
+        <input class="form-input" id="freq-log-name" placeholder="Name (e.g. Family channel)" maxlength="40" autocomplete="off" style="flex:1;min-width:120px" aria-label="Channel name" onkeydown="if(event.key==='Enter')FreqLog.save()">
+        <input class="form-input" id="freq-log-freq" placeholder="Channel or frequency" maxlength="20" autocomplete="off" inputmode="decimal" style="flex:1;min-width:120px" aria-label="Channel number or frequency, for example 7 or 146.520" onkeydown="if(event.key==='Enter')FreqLog.save()">
+        <input class="form-input" id="freq-log-notes" placeholder="Notes (optional)" maxlength="80" autocomplete="off" style="flex:2;min-width:160px" aria-label="Notes" onkeydown="if(event.key==='Enter')FreqLog.save()">
       </div>
-      <div class="flex gap-8 mt-8" style="align-items:center">
-        <button class="btn btn-primary btn-sm" onclick="FreqLog.save()">💾 Save</button>
-        <button class="btn btn-secondary btn-sm" onclick="FreqLog.cancelForm()">Cancel</button>
-        <span class="font-xs text-muted" id="freq-log-ts-note" style="display:none">Timestamp auto-set on save</span>
+      <div class="flex gap-8 mt-8 wrap" style="align-items:center">
+        <button class="btn btn-primary btn-sm" style="min-height:44px" onclick="FreqLog.save()">Save</button>
+        <button class="btn btn-secondary btn-sm" style="min-height:44px" onclick="FreqLog.cancelForm()">Cancel</button>
+        <span class="font-xs text-muted" id="freq-log-ts-note" style="display:none">The date and time are added when you save.</span>
       </div>
     </div>
-    <div class="flex gap-8 mt-12" style="justify-content:flex-end">
-      <button onclick="FreqLog.exportCSV()" class="btn btn-sm btn-secondary">📊 Export CSV</button>
-      <button onclick="FreqLog.exportJSON()" class="btn btn-sm btn-secondary">📋 Export JSON</button>
+    <div class="flex gap-8 mt-12 wrap" style="justify-content:flex-end">
+      <button onclick="FreqLog.exportCSV()" class="btn btn-sm btn-secondary" style="min-height:44px" title="Save your channels as a spreadsheet file (CSV)"><svg class="hi" aria-hidden="true"><use href="#i-download"/></svg>Save as spreadsheet</button>
+      <button onclick="FreqLog.exportJSON()" class="btn btn-sm btn-secondary" style="min-height:44px" title="Save your channels as a backup file (JSON)"><svg class="hi" aria-hidden="true"><use href="#i-download"/></svg>Save as backup file</button>
+      <button onclick="FreqLog.importPick()" class="btn btn-sm btn-ghost" style="min-height:44px" title="Add channels from a backup file saved earlier"><svg class="hi" aria-hidden="true"><use href="#i-upload"/></svg>Load a backup file</button>
+      <input type="file" id="freq-log-import" accept=".json,application/json" style="display:none" aria-hidden="true" tabindex="-1" onchange="FreqLog.importFile(this)">
     </div>
   </div>
 </div><!-- /tab-radio -->

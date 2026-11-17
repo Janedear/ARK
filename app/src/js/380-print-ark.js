@@ -24,27 +24,37 @@ th{background:#eee;font-weight:700}
 .footer{margin-top:24px;padding-top:8px;border-top:1px solid #ccc;font-size:11px;color:#666;text-align:center}
 @media print{body{padding:0}button{display:none}.no-print{display:none}}
 </style></head><body>${html}
-<div class="footer">ARK Crisis Suite · Printed ${new Date().toLocaleString()} · arks.solutions</div>`;
+<div class="footer">ARK by HaloSuite · Printed ${new Date().toLocaleString()} · arks.solutions</div>`;
     const w = window.open('', '_blank', 'width=760,height=900');
     if (!w) {
       // Pop-ups are blocked (common in installed apps): print from this page instead.
       printInPage(pageHead + '</body></html>');
       return;
     }
-    w.document.write(pageHead + `
+    try {
+      w.document.write(pageHead + `
 <div class="no-print" style="text-align:center;margin:20px 0">
-  <button onclick="window.print()" style="padding:8px 20px;font-size:14px;cursor:pointer;background:#333;color:#fff;border:none;border-radius:4px">🖨️ Print</button>
+  <button onclick="window.print()" style="padding:8px 20px;font-size:14px;cursor:pointer;background:#1c1a17;color:#fff;border:none;border-radius:12px">Print this page</button>
 </div>
 </body></html>`);
-    w.document.close();
+      w.document.close();
+    } catch (e) {
+      // The new window could not be written to (some installed apps): print from this page instead.
+      try { w.close(); } catch (_) {}
+      printInPage(pageHead + '</body></html>');
+      return;
+    }
     // Auto-trigger print dialog after render
     printOnce(w);
   }
 
   // ── Household emergency card (wallet-size, 2 per page) ─────────────────────
   function emergencyCard() {
-    const hh = Store.get('hh_members', []);
-    const contacts = (function(){ const hh = Store.get('household', {}); return hh.ooaName ? [{name:hh.ooaName, phone:hh.ooaPhone||'', role:'Out-of-area contact'}] : []; })();
+    // Guard against damaged saved data: this card must always print.
+    const hhRaw = Store.get('hh_members', []);
+    const hh = (Array.isArray(hhRaw) ? hhRaw : []).filter(m => m && typeof m === 'object');
+    const plan = Store.get('household', {}) || {};
+    const contacts = (function(){ const hh = plan; return hh.ooaName ? [{name:hh.ooaName, phone:hh.ooaPhone||'', role:'Out-of-area contact'}] : []; })();
     const alias = Store.get('last_alias', 'ARK User');
     const hhId = Store.get('hh_id', '');
     const alertLevel = Store.get('alert_level', 1);
@@ -61,52 +71,55 @@ th{background:#eee;font-weight:700}
         return `<tr><td>${esc(m.name||'')}</td><td>${esc(m.role||'')}</td><td>${medical}</td></tr>`;
       }).join('');
     } else {
-      memberRows = '<tr><td colspan="3" style="color:#999;font-style:italic">No members added yet — fill in Household tab</td></tr>';
+      memberRows = '<tr><td colspan="3" style="color:#999;font-style:italic">No members added yet. Add them on the Household screen.</td></tr>';
     }
 
     let contactRows = '';
     if (contacts && contacts.length) {
       contactRows = contacts.slice(0,5).map(c => `<tr><td>${esc(c.name||'')}</td><td>${esc(c.phone||'')}</td><td>${esc(c.role||'')}</td></tr>`).join('');
     } else {
-      contactRows = '<tr><td colspan="3" style="color:#999;font-style:italic">No contacts saved — fill in Checklist tab</td></tr>';
+      contactRows = '<tr><td colspan="3" style="color:#999;font-style:italic">No contact saved yet. Add an out-of-area contact on the Household screen.</td></tr>';
     }
 
     const gps = Store.get('last_gps');
-    const gpsLine = gps ? `${gps.lat.toFixed(4)}, ${gps.lon.toFixed(4)}` : 'unknown';
+    const gpsOk = gps && typeof gps.lat === 'number' && typeof gps.lon === 'number';
+    const gpsWhen = (gpsOk && gps.ts && !isNaN(Date.parse(gps.ts))) ? ' (found ' + new Date(gps.ts).toLocaleString() + ')' : '';
+    const gpsLine = gpsOk ? `${gps.lat.toFixed(4)}, ${gps.lon.toFixed(4)}${gpsWhen}` : 'not known';
 
-    const card = `<h1>🆘 ARK Emergency Card</h1>
-<div class="warn">⚠️ EMERGENCY USE — Keep this with you. Alert level at print time: <strong>${alertLabels[alertLevel] || alertLevel}</strong></div>
+    const card = `<h1>ARK Emergency Card</h1>
+<div class="warn">EMERGENCY USE. Keep this with you. Alert level at print time: <strong>${esc(alertLabels[alertLevel] || alertLevel)}</strong></div>
 <div class="card">
-  <div class="card-title">👤 Household ID: ${esc(hhId)} &nbsp;·&nbsp; Lead: ${esc(alias)}</div>
+  <div class="card-title">Household ID: ${esc(hhId)} &nbsp;·&nbsp; Lead: ${esc(alias)}</div>
   <table>
     <tr><th>Name</th><th>Role</th><th>Medical Info</th></tr>
     ${memberRows}
   </table>
 </div>
 <div class="card">
-  <div class="card-title">📞 Emergency Contacts</div>
+  <div class="card-title">Emergency Contacts</div>
   <table>
     <tr><th>Name</th><th>Phone</th><th>Role</th></tr>
     ${contactRows}
   </table>
 </div>
 <div class="card">
-  <div class="card-title">📍 Location at Print Time</div>
-  <p>GPS: ${gpsLine} &nbsp;·&nbsp; Printed: ${new Date().toLocaleString()}</p>
-  <p><strong>Meeting point (near home):</strong> ${esc(Store.get('household', {}).meet1 || '') || '_______________________________________'}</p>
-  <p><strong>Meeting point (further away):</strong> ${esc(Store.get('household', {}).meet2 || '') || '_______________________________________'}</p>
-  <p><strong>Evacuation route / destination:</strong> ${esc(Store.get('household', {}).evac || '') || '_______________________________________'}</p>
-  <p><strong>Out-of-area contact:</strong> ${esc([Store.get('household', {}).ooaName, Store.get('household', {}).ooaPhone].filter(Boolean).join(' — ')) || '__________________________________'}</p>
+  <div class="card-title">Where to find us</div>
+  <p>Last known location of this device: ${gpsLine}</p>
+  <p>Printed: ${new Date().toLocaleString()}</p>
+  <p><strong>Meeting point (near home):</strong> ${esc(plan.meet1 || '') || '_______________________________________'}</p>
+  <p><strong>Meeting point (further away):</strong> ${esc(plan.meet2 || '') || '_______________________________________'}</p>
+  <p><strong>Evacuation route / destination:</strong> ${esc(plan.evac || '') || '_______________________________________'}</p>
+  <p><strong>Out-of-area contact:</strong> ${esc([plan.ooaName, plan.ooaPhone].filter(Boolean).join(' — ')) || '__________________________________'}</p>
 </div>`;
     _openPrintWindow(card, 'ARK Emergency Card');
   }
 
   // ── Medical quick reference ────────────────────────────────────────────────
   function medicalRef() {
-    const html = `<h1>🏥 ARK Medical Quick Reference</h1>
-<div class="warn">⚠️ Life-threatening emergency: call 911. This is for reference only — not a substitute for professional care.</div>
+    const html = `<h1>ARK Medical Quick Reference</h1>
+<div class="warn">Life-threatening emergency: call 911 or your local emergency number. This is for reference only. It does not replace professional care.</div>
 <div class="card">
-  <div class="card-title">❤️ CPR — Adult (8+ years)</div>
+  <div class="card-title">CPR — Adult (8+ years)</div>
   <ol>
     <li>Check scene safety. Tap shoulder: "Are you OK?" — no response?</li>
     <li>Call 911 (or tell someone else to call).</li>
@@ -117,7 +130,7 @@ th{background:#eee;font-weight:700}
   </ol>
 </div>
 <div class="card">
-  <div class="card-title">❤️ CPR — Child (1–8 years) and Infant</div>
+  <div class="card-title">CPR — Child (1–8 years) and Infant</div>
   <ol>
     <li>Same check/call as above.</li>
     <li><strong>Child:</strong> one or two hands. 30 compressions, about 2 inches deep.</li>
@@ -126,7 +139,7 @@ th{background:#eee;font-weight:700}
   </ol>
 </div>
 <div class="card">
-  <div class="card-title">🤿 Choking — Adult / Child</div>
+  <div class="card-title">Choking — Adult / Child</div>
   <ul>
     <li>5 firm back blows between shoulder blades with heel of hand.</li>
     <li>5 abdominal thrusts (Heimlich): stand behind, fist above navel, pull sharply inward and upward.</li>
@@ -135,7 +148,7 @@ th{background:#eee;font-weight:700}
   </ul>
 </div>
 <div class="card">
-  <div class="card-title">🤿 Choking — Infant (&lt;1 year)</div>
+  <div class="card-title">Choking — Infant (under 1 year)</div>
   <ul>
     <li>5 back blows (face-down on forearm, heel of hand).</li>
     <li>5 chest thrusts (heel of one hand, centre of chest). Do NOT do abdominal thrusts.</li>
@@ -143,7 +156,7 @@ th{background:#eee;font-weight:700}
   </ul>
 </div>
 <div class="card">
-  <div class="card-title">🩸 Bleeding Control</div>
+  <div class="card-title">Bleeding Control</div>
   <ul>
     <li>Apply firm direct pressure with clean cloth — do not remove.</li>
     <li>Elevate the limb if possible.</li>
@@ -151,7 +164,7 @@ th{background:#eee;font-weight:700}
   </ul>
 </div>
 <div class="card">
-  <div class="card-title">🌡️ Shock Signs &amp; Response</div>
+  <div class="card-title">Shock Signs &amp; Response</div>
   <ul>
     <li>Signs: pale/cool/clammy skin, rapid weak pulse, confusion, rapid breathing.</li>
     <li>Lay person flat, elevate legs 12 inches (unless head/neck/spine injury).</li>
@@ -159,7 +172,7 @@ th{background:#eee;font-weight:700}
   </ul>
 </div>
 <div class="card">
-  <div class="card-title">🔥 Burns</div>
+  <div class="card-title">Burns</div>
   <ul>
     <li>Cool with cool running water 10–20 minutes. No ice.</li>
     <li>Cover loosely with sterile gauze. No butter or toothpaste.</li>
@@ -172,17 +185,18 @@ th{background:#eee;font-weight:700}
   // ── Survival checklist ────────────────────────────────────────────────────
   function checklist() {
     const cl = (typeof Checklist !== 'undefined') ? Checklist._getActiveChecklist() : null;
-    const items = cl ? cl.items : [];
+    const items = (cl && Array.isArray(cl.items)) ? cl.items.filter(i => i && typeof i === 'object') : [];
     const storeKey = (typeof Checklist !== 'undefined') ? Checklist._storeKey() : ('checklist_daily_' + today());
-    const checked = Store.get(storeKey, {});
+    const checked = Store.get(storeKey, {}) || {};
     const done = items.filter(i => checked[i.id]).length;
     const total = items.length;
-    const listName = cl ? cl.label : '📋 Preparedness Checklist';
+    // Strip any picture characters from the name: many printers turn them into empty boxes.
+    const listName = String(cl ? cl.label : 'Preparedness Checklist').replace(/[\u2190-\u2BFF\uFE0F\u200D]|[\uD83C-\uDBFF][\uDC00-\uDFFF]/g, '').trim() || 'Checklist';
 
     let rows = '';
     if (items.length) {
       rows = items.map(i => `<tr>
-        <td style="text-align:center;font-size:16px">${checked[i.id] ? '✅' : '☐'}</td>
+        <td style="text-align:center"><span style="display:inline-block;width:15px;height:15px;border:1.5px solid #000;font-size:12px;line-height:13px;font-weight:700">${checked[i.id] ? '&#10003;' : '&nbsp;'}</span></td>
         <td>${esc(i.label||i.text||'')}</td>
         ${i.desc ? `<td style="font-size:11px;color:#666">${esc(i.desc)}</td>` : '<td></td>'}
       </tr>`).join('');
@@ -190,15 +204,15 @@ th{background:#eee;font-weight:700}
       rows = '<tr><td colspan="3" style="color:#999;font-style:italic">No checklist items available</td></tr>';
     }
 
-    const contacts = (function(){ const hh = Store.get('household', {}); return hh.ooaName ? [{name:hh.ooaName, phone:hh.ooaPhone||'', role:'Out-of-area contact'}] : []; })();
+    const contacts = (function(){ const hh = Store.get('household', {}) || {}; return hh.ooaName ? [{name:hh.ooaName, phone:hh.ooaPhone||'', role:'Out-of-area contact'}] : []; })();
     let contactRows = '';
     if (contacts && contacts.length) {
       contactRows = contacts.map(c => `<tr><td>${esc(c.name||'')}</td><td>${esc(c.phone||'')}</td><td>${esc(c.role||'')}</td></tr>`).join('');
     } else {
-      contactRows = '<tr><td colspan="3" style="color:#999;font-style:italic">No contacts added</td></tr>';
+      contactRows = '<tr><td colspan="3" style="color:#999;font-style:italic">No contact saved yet. Add an out-of-area contact on the Household screen.</td></tr>';
     }
 
-    const html = `<h1>📋 ${esc(listName)}</h1>
+    const html = `<h1>${esc(listName)}</h1>
 <p>Completed: <strong>${done} / ${total}</strong> items &nbsp;·&nbsp; Printed: ${new Date().toLocaleDateString()}</p>
 <div class="card">
   <div class="card-title">Items</div>
@@ -208,7 +222,7 @@ th{background:#eee;font-weight:700}
   </table>
 </div>
 <div class="card">
-  <div class="card-title">📞 Emergency Contacts</div>
+  <div class="card-title">Emergency Contacts</div>
   <table>
     <tr><th>Name</th><th>Phone</th><th>Role</th></tr>
     ${contactRows}
@@ -220,7 +234,7 @@ th{background:#eee;font-weight:700}
   // ── Inventory / resources list ────────────────────────────────────────────
   function inventory() {
     const r = Store.get('resources', null);
-    if (!r) { Toast.show('No resources data saved yet — update inventory first', 'warning', 3000); return; }
+    if (!r) { Toast.show('There are no supplies to print yet. Add them on the Resources screen first.', 'warning', 5000); return; }
     const rows = [
       {name:'Water', qty: r.water||0, unit:'gal'},
       {name:'Food', qty: r.food||0, unit:'days'},
@@ -229,13 +243,13 @@ th{background:#eee;font-weight:700}
       {name:'Shelter Capacity', qty: r.shelter||0, unit:'ppl'},
       {name:'Power', qty: r.power||0, unit:'hrs'},
     ].filter(x => x.qty > 0);
-    if (!rows.length) { Toast.show('All resource quantities are zero — update inventory first', 'warning', 3000); return; }
+    if (!rows.length) { Toast.show('All your supplies are at zero, so there is nothing to print. Update them first.', 'warning', 5000); return; }
     const tableRows = rows.map(i => `<tr>
       <td>${esc(i.name)}</td>
       <td style="text-align:center">${Number(i.qty)||0} ${esc(i.unit)}</td>
     </tr>`).join('');
     const notesRow = r.notes ? `<div class="card"><div class="card-title">Notes</div><p>${esc(r.notes)}</p></div>` : '';
-    const html = `<h1>📦 ARK Inventory Report</h1>
+    const html = `<h1>ARK Supplies List</h1>
 <p>Printed: ${new Date().toLocaleString()}</p>
 <div class="card">
   <table>
@@ -246,14 +260,21 @@ th{background:#eee;font-weight:700}
     _openPrintWindow(html, 'ARK Inventory');
   }
 
+  // A saved time as words, or a dash when it is missing or damaged (never "Invalid Date").
+  function _when(ts) {
+    const d = new Date(ts);
+    return (ts && !isNaN(d.getTime())) ? d.toLocaleString() : '—';
+  }
+
   // ── Missing persons flyer ─────────────────────────────────────────────────
   function missingPerson(id) {
-    const people = Store.get('missing_persons', []);
+    const peopleRaw = Store.get('missing_persons', []);
+    const people = (Array.isArray(peopleRaw) ? peopleRaw : []).filter(x => x && typeof x === 'object');
     const p = id != null ? people.find(x => x.id === id) : people[0];
-    if (!p) { Toast.show('No missing person record to print', 'warning', 3000); return; }
+    if (!p) { Toast.show('There is no missing person report to print yet. Add one first.', 'warning', 5000); return; }
     // G2: validate photoUrl — only allow data:image/ or https:// to block javascript: injection
     const safePhotoUrl = (p.photoUrl && (/^data:image\//i.test(p.photoUrl) || /^https:\/\//i.test(p.photoUrl))) ? p.photoUrl : null;
-    const html = `<h1 style="text-align:center;font-size:28px;color:#cc0000">⚠️ MISSING PERSON</h1>
+    const html = `<h1 style="text-align:center;font-size:28px;color:#cc0000">MISSING PERSON</h1>
 <div style="text-align:center;margin-bottom:16px">
   ${safePhotoUrl ? `<img src="${esc(safePhotoUrl)}" style="max-width:200px;max-height:200px;border:2px solid #000;border-radius:4px">` : '<div style="width:200px;height:200px;border:2px dashed #aaa;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;color:#aaa;font-size:14px;margin:0 auto">No photo</div>'}
 </div>
@@ -265,14 +286,14 @@ th{background:#eee;font-weight:700}
     <tr><th>Description</th><td>${esc(p.description||'—')}</td></tr>
     <tr><th>Last seen location</th><td>${esc(p.lastSeen||'—')}</td></tr>
     ${p.lastSeenTime ? `<tr><th>Last seen time</th><td>${esc(p.lastSeenTime)}</td></tr>` : ''}
-    <tr><th>Reported</th><td>${p.ts ? new Date(p.ts).toLocaleString() : '—'}</td></tr>
-    ${p.updatedTs ? `<tr><th>Status updated</th><td>${new Date(p.updatedTs).toLocaleString()}${p.updateNote ? ' — ' + esc(p.updateNote) : ''}</td></tr>` : ''}
+    <tr><th>Reported</th><td>${_when(p.ts)}</td></tr>
+    ${p.updatedTs ? `<tr><th>Status updated</th><td>${_when(p.updatedTs)}${p.updateNote ? ' — ' + esc(p.updateNote) : ''}</td></tr>` : ''}
   </table>
 </div>
 <div style="border:2px solid #000;border-radius:4px;padding:12px;text-align:center">
   <strong>If you have information, contact:</strong><br>
   ${p.contactInfo ? `<div style="margin:8px 0;font-size:16px;font-weight:600">${esc(p.contactInfo)}</div>` : ''}
-  <div style="margin:8px 0;font-size:16px">Call 911 or local emergency services</div>
+  <div style="margin:8px 0;font-size:16px">Call 911 or your local emergency services</div>
   <div style="color:#555;font-size:12px">ARK Household ID: ${esc(Store.get('hh_id',''))}</div>
 </div>`;
     _openPrintWindow(html, 'Missing Person — ' + (p.name || 'Unknown'));

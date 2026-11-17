@@ -1,8 +1,18 @@
 # ARK Local Hub — setup and power guide
 
+**In a crisis, ARK makes its own internet from the devices around you.** One laptop becomes the
+hub. Nearby phones join it over Wi-Fi. Hubs pass messages on to each other by network, radio, or a
+USB stick.
+
 The hub turns one laptop or Raspberry Pi into a community board and library that phones reach over
 local Wi-Fi. It needs **no internet, no accounts and no ARK servers**. It does need power, and it
 needs this kit copied onto the machine **before** the internet goes down.
+
+Keep three things in mind:
+
+- The network is **local**. Messages reach only people on this hub, and on hubs it swaps messages with.
+- The hub must run on a **laptop or Raspberry Pi**. A phone alone cannot be the hub.
+- **Nobody monitors it.** ARK is not an emergency service. If any phone works, call 911 or your local emergency number.
 
 ## What people get when they join the hub's Wi-Fi
 
@@ -57,7 +67,7 @@ automatically. A Raspberry Pi without a clock battery can boot with the wrong ti
 - **USB stick:** the hub writes its whole board to `hub/outbox/ark-hub-bundle.json` every 30 seconds.
   Copy that file to a stick, carry it to another hub, and drop it into that hub's `hub/inbox/` folder. It is imported within 30 seconds and moved to `inbox/done`.
 - **Hub to hub:** if two hubs can reach each other on any network, set `ARK_HUB_PEERS` and they swap boards every minute.
-- **Phones:** the hub page shows the newest 40 messages to copy into the offline message app, and accepts bundles pasted back from it.
+- **From the hub page:** open the **USB carry** section on any phone or laptop. "Download all messages" saves the board as one file. On the other hub, open the same section and choose that file under "Bring messages in". The page can also show the newest 40 messages as text to copy into the offline message app, and accepts text pasted back from it.
 - **Radio and SMS:** set `ARK_HUB_URL=http://127.0.0.1:8080` in the bridge toolkit's `.env`. The radio bridge also needs a local Mosquitto MQTT broker, because the public one is on the internet.
   Install the toolkit's packages with `npm install` while you still have internet.
 
@@ -81,9 +91,27 @@ There is no software fix for power. These figures are rough and depend on hardwa
 - **What to power first:** the hub and its Wi-Fi, then one phone per household, then the radio node, then lights.
 - **Save power:** dim or turn off the hub's screen, run the hub only at set hours (for example 8–10 am and 6–8 pm), and write those hours on the printed sign.
 
+## If something does not work
+
+| What you see | What to do |
+| --- | --- |
+| The hub window closes at once, or says Node is missing | Mac, Linux, Pi: install Node.js 20 or newer while you still have internet. Windows: unzip the whole kit first, then run `hub\start-hub.cmd` from the unzipped folder. |
+| A phone cannot open the address | Check the phone is on the **same Wi-Fi** as the hub. Type the whole address, starting with `http://` (not `https://`) and ending with `:8080`. Turn off mobile data on the phone and try again. |
+| Phones still cannot open it | On Windows, allow the hub through the firewall on **private** networks. On the router, turn off "AP isolation" or "guest mode". |
+| The hub page says it cannot reach the hub | The phone has left the Wi-Fi, or the hub computer went to sleep. Rejoin the Wi-Fi and stop the hub computer from sleeping. Messages written meanwhile stay saved on the phone and post when the hub is back, as long as the page stays open. |
+| "Too many posts from this phone" | Each phone can do 20 things (posts, "I saw this", edits) every 10 minutes. Wait 10 minutes. |
+| "The hub is full and cannot take new messages" | The hub holds 5,000 items (messages and "I saw this" marks). The message was **not** posted. Room comes back by itself as older messages run out of time (3 days at most), so post it again later. The hub already removes expired messages by itself, so **Remove expired messages** in Hub settings rarely frees more. Until there is room, pass urgent news on in person or on a paper note, and ask people to pick a shorter time under "Keep this message up for". |
+| A message saved on the phone is still waiting after the hub is back | Open **Messages** and tap **Try now**. After the hub refuses a saved message, the page waits 2 minutes before it tries again by itself (10 minutes after "Too many posts"). Keep the page open. |
+| The "I need help" button opens the Post form instead of asking a question | That browser blocks pop-up questions. Type where you are and what you need, then tap **Post to board**. |
+| A second hub added on the hub page never swaps messages | Restart the hub program, or start it with `ARK_HUB_PEERS` set to the other hub's address. |
+| Message times look wrong | Fix the clock on the hub computer (see "The clock matters"). |
+
 ## What the hub cannot do
 
 - It is not monitored, not dispatch and not a 911 replacement.
+- It does not reach the wider internet, and it cannot call or text anyone. Only people on this hub, or on hubs it swaps messages with, can see a message.
+- The hub page has no password. Anyone on the Wi-Fi can post, edit the shared lists, set the alert banner and use the Hub settings section.
+- The "Clinic" section of the hub page keeps its notes only on the device that typed them. Other phones cannot see them.
 - Everything on the board is public and unencrypted. Posts made on the hub page are signed by the **hub**, which shows which hub accepted them, not who typed them.
 - iPhones cannot install apps from the hub. They can use the board and read the guidance in Safari, and open `.zim` files only if Kiwix was installed from the App Store beforehand.
 - The offline message app opens from a phone's downloads on many Android browsers. Some phones refuse to run saved HTML files; test yours.

@@ -2,34 +2,34 @@
 <div class="tab-panel" id="tab-survival" role="tabpanel" aria-labelledby="navtab-survival" tabindex="-1">
 
   <div class="flex-between mb-12 wrap gap-8">
-    <h2 class="section-title"><span class="title-icon">📚</span>Survival Library<span class="guide-count-badge" id="guide-count-badge"></span></h2>
+    <h2 class="section-title">Survival guides<span class="guide-count-badge" id="guide-count-badge"></span></h2>
     <div class="flex gap-8">
-      <input class="form-input" id="guide-search" maxlength="500" style="width:200px" placeholder="Search guides..." oninput="Guides.search()" aria-label="Search guides">
-      <button class="btn btn-ghost btn-sm" onclick="PrintARK.checklist()" title="Print your preparedness checklist">🖨️ Checklist</button>
+      <input class="form-input" id="guide-search" maxlength="500" style="width:200px" placeholder="Search — try burn, water, CPR" oninput="Guides.search()" onkeydown="if(event.key==='Enter'&&!event.isComposing){this.blur()}" aria-label="Search the guides" autocomplete="off" enterkeyhint="search">
+      <button class="btn btn-ghost btn-sm" onclick="PrintARK.checklist()" title="Print your preparedness checklist" aria-label="Print your preparedness checklist"><svg class="hi" aria-hidden="true"><use href="#i-printer"/></svg> Checklist</button>
     </div>
   </div>
+  <p class="font-xs text-muted mb-8">All guides are stored in ARK. They work with no internet. Tap a guide to open it.</p>
 
-  <div class="guide-nav" id="guide-nav">
-    <span class="guide-cat-btn active" data-cat="all">All Guides</span>
-    <span class="guide-cat-btn" data-cat="water">💧 Water</span>
-    <span class="guide-cat-btn" data-cat="food">🍽️ Food</span>
-    <span class="guide-cat-btn" data-cat="shelter">🏕️ Shelter</span>
-    <span class="guide-cat-btn" data-cat="fire">🔥 Fire</span>
-    <span class="guide-cat-btn" data-cat="medical">🏥 Medical</span>
-    <span class="guide-cat-btn" data-cat="navigation">🧭 Navigation</span>
-    <span class="guide-cat-btn" data-cat="signaling">📡 Signaling</span>
-    <span class="guide-cat-btn" data-cat="comms">📻 Radio/Comms</span>
-    <span class="guide-cat-btn" data-cat="power">⚡ Power</span>
-    <span class="guide-cat-btn" data-cat="weather">🌡️ Weather</span>
-    <span class="guide-cat-btn" data-cat="evacuation">🚶 Evacuation</span>
-    <span class="guide-cat-btn" data-cat="communication">📶 Messaging</span>
-    <span class="guide-cat-btn" data-cat="reunification">👨‍👩‍👧 Family</span>
-    <span class="guide-cat-btn" data-cat="community">🤝 Community</span>
-    <span class="guide-cat-btn" data-cat="__bookmarks__">⭐ Bookmarked</span>
+  <div class="guide-nav" id="guide-nav" role="group" aria-label="Show guides about">
+    <span class="guide-cat-btn active" data-cat="all" role="button" tabindex="0" aria-pressed="true">All guides</span>
+    <span class="guide-cat-btn" data-cat="medical" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-heart-pulse"/></svg> Medical</span>
+    <span class="guide-cat-btn" data-cat="water" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-droplet"/></svg> Water</span>
+    <span class="guide-cat-btn" data-cat="food" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-box"/></svg> Food</span>
+    <span class="guide-cat-btn" data-cat="shelter" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-house"/></svg> Shelter</span>
+    <span class="guide-cat-btn" data-cat="fire" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-flame"/></svg> Fire</span>
+    <span class="guide-cat-btn" data-cat="power" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-bolt"/></svg> Power</span>
+    <span class="guide-cat-btn" data-cat="weather" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-sun"/></svg> Heat and cold</span>
+    <span class="guide-cat-btn" data-cat="evacuation" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-arrow-right"/></svg> Evacuation</span>
+    <span class="guide-cat-btn" data-cat="communication" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-messages"/></svg> Staying in touch</span>
+    <span class="guide-cat-btn" data-cat="reunification" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-users"/></svg> Family</span>
+    <span class="guide-cat-btn" data-cat="community" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-home"/></svg> Community</span>
+    <span class="guide-cat-btn" data-cat="signaling" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-sos"/></svg> Signaling</span>
+    <span class="guide-cat-btn" data-cat="comms" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-radio"/></svg> Radio</span>
+    <span class="guide-cat-btn" data-cat="navigation" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-compass"/></svg> Navigation</span>
+    <span class="guide-cat-btn" data-cat="__bookmarks__" role="button" tabindex="0" aria-pressed="false"><svg class="hi" aria-hidden="true"><use href="#i-check"/></svg> Saved</span>
   </div>
 
   <div id="guides-container">
     <!-- filled by JS from embedded data -->
   </div>
 </div><!-- /tab-survival -->
-

@@ -1,31 +1,32 @@
 <!-- === TAB: HOUSEHOLD === -->
 <div class="tab-panel" id="tab-household" role="tabpanel" aria-labelledby="navtab-household" tabindex="-1">
 
-  <h2 class="section-title"><span class="title-icon">🏘️</span>Household Profile</h2>
+  <h2 class="section-title">Your household plan</h2>
+  <p class="font-sm text-secondary mb-12">Fill this in before you need it. It is saved on this device as you go. Nobody else sees it unless you print it or share it.</p>
 
   <!-- Basic Info -->
   <div class="card">
-    <div class="card-title mb-12"><span class="card-icon">🏠</span>Household Info</div>
+    <div class="card-title mb-12"><svg class="hi" aria-hidden="true"><use href="#i-house"/></svg>Your household</div>
     <div class="grid-2">
       <div class="form-group">
-        <label class="form-label">Household Name</label>
-        <input class="form-input" id="hh-name" maxlength="60" placeholder="e.g. Smith Family">
+        <label class="form-label" for="hh-name">Household name</label>
+        <input class="form-input" id="hh-name" maxlength="60" placeholder="e.g. Smith Family" autocomplete="off">
       </div>
       <div class="form-group">
-        <label class="form-label">Total Members</label>
-        <input class="form-input" id="hh-count" type="number" min="1" placeholder="4">
+        <label class="form-label" for="hh-count">How many people</label>
+        <input class="form-input" id="hh-count" type="number" inputmode="numeric" min="1" max="999" placeholder="4">
       </div>
       <div class="form-group">
-        <label class="form-label">General Location (no street address)</label>
-        <input class="form-input" id="hh-location" maxlength="500" placeholder="e.g. Riverside area, near school">
+        <label class="form-label" for="hh-location">General area (no street address)</label>
+        <input class="form-input" id="hh-location" maxlength="500" placeholder="e.g. Riverside area, near school" autocomplete="off">
       </div>
       <div class="form-group">
-        <label class="form-label">Household ID</label>
-        <input class="form-input" id="hh-id" placeholder="Auto-generated" readonly>
+        <label class="form-label" for="hh-id">Household ID (made for you)</label>
+        <input class="form-input" id="hh-id" placeholder="Made automatically" readonly>
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Special Needs / Vulnerabilities</label>
+      <label class="form-label" for="hh-needs">Special needs</label>
       <textarea class="form-input" id="hh-needs" maxlength="500" placeholder="Medication, mobility needs, medical equipment, etc." style="min-height:60px"></textarea>
     </div>
   </div>
@@ -33,8 +34,8 @@
   <!-- Members -->
   <div class="card">
     <div class="card-header">
-      <div class="card-title"><span class="card-icon">👥</span>Members <span id="hh-member-count" style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--accent);color:#fff;margin-left:6px;display:none"></span></div>
-      <button class="btn btn-secondary btn-sm" onclick="Household.addMember()">+ Add</button>
+      <div class="card-title"><svg class="hi" aria-hidden="true"><use href="#i-users"/></svg>People <span id="hh-member-count" class="badge badge-orange" style="display:none"></span></div>
+      <button class="btn btn-secondary btn-sm" onclick="Household.addMember()"><svg class="hi" aria-hidden="true"><use href="#i-plus"/></svg> Add person</button>
     </div>
     <div id="members-list">
       <!-- filled by JS -->
@@ -43,55 +44,55 @@
 
   <!-- Meeting Points -->
   <div class="card">
-    <div class="card-title mb-12"><span class="card-icon">📍</span>Meeting Points</div>
+    <div class="card-title mb-12"><svg class="hi" aria-hidden="true"><use href="#i-pin"/></svg>Where to meet</div>
     <div class="form-group">
-      <label class="form-label">Primary (just outside home)</label>
-      <input class="form-input" id="hh-meet1" maxlength="500" placeholder="e.g. Front mailbox / driveway end">
+      <label class="form-label" for="hh-meet1">First place (just outside home)</label>
+      <input class="form-input" id="hh-meet1" maxlength="500" placeholder="e.g. Front mailbox / end of the driveway">
     </div>
     <div class="form-group">
-      <label class="form-label">Secondary (outside neighborhood)</label>
+      <label class="form-label" for="hh-meet2">Second place (outside your neighborhood)</label>
       <input class="form-input" id="hh-meet2" maxlength="500" placeholder="e.g. Community center parking lot">
     </div>
     <div class="form-group">
-      <label class="form-label">Evacuation destination</label>
-      <input class="form-input" id="hh-evac" maxlength="500" placeholder="e.g. Relative's home in [city], approx 100 miles north">
+      <label class="form-label" for="hh-evac">If you must leave the area, go to</label>
+      <input class="form-input" id="hh-evac" maxlength="500" placeholder="e.g. Aunt's home, about 100 miles north">
     </div>
   </div>
 
   <!-- Out-of-Area Contact -->
   <div class="card">
-    <div class="card-title mb-12"><span class="card-icon">📞</span>Out-of-Area Contact</div>
+    <div class="card-title mb-12"><svg class="hi" aria-hidden="true"><use href="#i-phone"/></svg>Contact outside your area</div>
     <div class="grid-2">
       <div class="form-group">
-        <label class="form-label">Name</label>
-        <input class="form-input" id="hh-ooa-name" maxlength="60" placeholder="Contact name">
+        <label class="form-label" for="hh-ooa-name">Name</label>
+        <input class="form-input" id="hh-ooa-name" maxlength="60" placeholder="Contact name" autocomplete="off">
       </div>
       <div class="form-group">
-        <label class="form-label">Relationship</label>
-        <input class="form-input" id="hh-ooa-rel" maxlength="60" placeholder="e.g. Uncle, Family friend">
+        <label class="form-label" for="hh-ooa-rel">Relationship</label>
+        <input class="form-input" id="hh-ooa-rel" maxlength="60" placeholder="e.g. Uncle, family friend" autocomplete="off">
       </div>
       <div class="form-group">
-        <label class="form-label">Phone</label>
-        <input class="form-input" id="hh-ooa-phone" maxlength="40" placeholder="+1 555 000 0000" type="tel">
+        <label class="form-label" for="hh-ooa-phone">Phone</label>
+        <input class="form-input" id="hh-ooa-phone" maxlength="40" placeholder="+1 555 000 0000" type="tel" inputmode="tel" autocomplete="off">
       </div>
       <div class="form-group">
-        <label class="form-label">Alternate Contact Method</label>
-        <input class="form-input" id="hh-ooa-alt" maxlength="80" placeholder="e.g. Email or radio callsign">
+        <label class="form-label" for="hh-ooa-alt">Another way to reach them</label>
+        <input class="form-input" id="hh-ooa-alt" maxlength="80" placeholder="e.g. Email or radio callsign" autocomplete="off">
       </div>
     </div>
-    <div class="info-box">Local phone lines fill up during emergencies. An out-of-area contact can relay messages between separated family members.</div>
+    <div class="info-box">Local phone lines fill up in an emergency. Someone who lives far away can pass messages between family members who get separated. Make sure everyone knows this number by heart or carries it on paper.</div>
   </div>
 
   <!-- Vehicles -->
   <div class="card">
-    <div class="card-title mb-12"><span class="card-icon">🚗</span>Vehicles &amp; Evacuation</div>
+    <div class="card-title mb-12"><svg class="hi" aria-hidden="true"><use href="#i-map"/></svg>Vehicles, pets and go-bag</div>
     <div class="grid-2">
       <div class="form-group">
-        <label class="form-label">Vehicle 1 — Make / Model</label>
+        <label class="form-label" for="hh-veh1">Vehicle 1 — make, model, color</label>
         <input class="form-input" id="hh-veh1" maxlength="200" placeholder="e.g. 2018 Toyota Camry, silver">
       </div>
       <div class="form-group">
-        <label class="form-label">Fuel Level (Vehicle 1)</label>
+        <label class="form-label" for="hh-fuel">Fuel level (vehicle 1)</label>
         <select class="form-input" id="hh-fuel">
           <option>Full</option>
           <option>3/4</option>
@@ -101,11 +102,11 @@
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Vehicle 2 — Make / Model</label>
-        <input class="form-input" id="hh-veh2" maxlength="200" placeholder="e.g. 2015 Honda CRV, blue (optional)">
+        <label class="form-label" for="hh-veh2">Vehicle 2 (optional)</label>
+        <input class="form-input" id="hh-veh2" maxlength="200" placeholder="e.g. 2015 Honda CRV, blue">
       </div>
       <div class="form-group">
-        <label class="form-label">Fuel Level (Vehicle 2)</label>
+        <label class="form-label" for="hh-fuel2">Fuel level (vehicle 2)</label>
         <select class="form-input" id="hh-fuel2">
           <option>Full</option>
           <option>3/4</option>
@@ -117,32 +118,33 @@
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Pets &amp; Animals</label>
+      <label class="form-label" for="hh-pets">Pets and animals</label>
       <input class="form-input" id="hh-pets" maxlength="500" placeholder="e.g. 1 dog (needs carrier), 2 cats (crates in garage)">
     </div>
     <div class="form-group">
-      <label class="form-label">Bug-out Bag / Go-bag Location</label>
+      <label class="form-label" for="hh-gobag">Where your go-bag is kept</label>
       <input class="form-input" id="hh-gobag" maxlength="300" placeholder="e.g. Hall closet, top shelf">
+      <div class="text-muted font-xs" style="margin-top:3px">A go-bag is a packed bag you can grab if you have to leave fast.</div>
     </div>
   </div>
 
   <!-- Quick Reference Card -->
   <div class="card" id="hh-qrc-card" style="display:none">
     <div class="card-header">
-      <div class="card-title"><span class="card-icon">🪪</span>Quick Reference Card</div>
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('hh-qrc-card').style.display='none'">✕</button>
+      <div class="card-title"><svg class="hi" aria-hidden="true"><use href="#i-file"/></svg>Your plan at a glance</div>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('hh-qrc-card').style.display='none'" aria-label="Close" title="Close"><svg class="hi" aria-hidden="true"><use href="#i-x"/></svg></button>
     </div>
     <div id="hh-qrc-content" style="font-size:13px;line-height:1.6"></div>
     <div class="flex gap-8 mt-12">
-      <button class="btn btn-secondary btn-sm" onclick="Household.printCard()">🖨️ Print Full Card</button>
+      <button class="btn btn-secondary btn-sm" onclick="Household.printCard()"><svg class="hi" aria-hidden="true"><use href="#i-printer"/></svg> Print this card</button>
     </div>
   </div>
 
   <div class="flex gap-8 wrap">
-    <button class="btn btn-primary" onclick="Household.save()">💾 Save Profile</button>
-    <button class="btn btn-secondary" onclick="Household.showQuickRef()">🪪 Quick Reference</button>
-    <button class="btn btn-secondary" onclick="Household.printCard()">🖨️ Print Card</button>
-    <button class="btn btn-secondary" onclick="Household.shareWithHub()">📡 Share with Hub</button>
+    <button class="btn btn-primary" onclick="Household.save()"><svg class="hi" aria-hidden="true"><use href="#i-check"/></svg> Save plan</button>
+    <button class="btn btn-secondary" onclick="Household.showQuickRef()"><svg class="hi" aria-hidden="true"><use href="#i-eye"/></svg> View plan</button>
+    <button class="btn btn-secondary" onclick="Household.printCard()"><svg class="hi" aria-hidden="true"><use href="#i-printer"/></svg> Print card</button>
+    <button class="btn btn-secondary" onclick="Household.shareWithHub()"><svg class="hi" aria-hidden="true"><use href="#i-hub"/></svg> Share with hub</button>
   </div>
+  <div id="hh-save-status" class="font-xs text-muted mt-8" role="status" aria-live="polite"></div>
 </div><!-- /tab-household -->
-

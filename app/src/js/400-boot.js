@@ -37,15 +37,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Bottom tab bar (thumb navigation on phones)
   safe('bottom-bar', () => {
-    const syncBTB = tab => document.querySelectorAll('.btb-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    const syncBTB = tab => document.querySelectorAll('.btb-btn').forEach(b => {
+      const on = b.dataset.tab === tab;
+      b.classList.toggle('active', on);
+      // Tell screen readers which section is open
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
     document.querySelectorAll('.btb-btn').forEach(btn => {
       btn.addEventListener('click', () => { if (btn.dataset.tab) UI.switchTab(btn.dataset.tab); });
     });
     const origSwitch = UI.switchTab;
     UI.switchTab = function(tab, ...args) {
       const result = origSwitch.call(this, tab, ...args);
-      // "More" stands for every tab that has no button of its own
-      syncBTB(document.querySelector('.btb-btn[data-tab="' + tab + '"]') ? tab : 'settings');
+      // Light the button for the section that is really open (switchTab ignores unknown names).
+      // Sections with no button of their own leave the bar with nothing lit.
+      syncBTB(this.currentTab || tab);
       return result;
     };
     syncBTB(UI.currentTab || 'home');
@@ -122,11 +128,21 @@ window.addEventListener('appinstalled', () => {
   _deferredInstall = null;
   const banner = document.getElementById('install-banner');
   if (banner) banner.style.display = 'none';
+  try { Toast.show('ARK is installed. Look for it on your home screen.', 'success', 5000); } catch (_) {}
 });
 function installPWA() {
-  if (!_deferredInstall) return;
-  _deferredInstall.prompt();
-  _deferredInstall.userChoice.then(() => { _deferredInstall = null; });
+  if (!_deferredInstall) {
+    // Never a dead button: say what to do instead.
+    try { Toast.show('This browser cannot install ARK from here. Open the browser menu and choose "Add to Home Screen".', 'info', 7000); } catch (_) {}
+    return;
+  }
+  try {
+    _deferredInstall.prompt();
+    _deferredInstall.userChoice.then(() => { _deferredInstall = null; }, () => { _deferredInstall = null; });
+  } catch (e) {
+    _deferredInstall = null;
+    try { Toast.show('Could not start the install. Open the browser menu and choose "Add to Home Screen".', 'error', 7000); } catch (_) {}
+  }
   const banner = document.getElementById('install-banner');
   if (banner) banner.style.display = 'none';
 }

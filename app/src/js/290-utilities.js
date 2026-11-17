@@ -46,10 +46,10 @@ function printInPage(docHtml) {
     doc.open(); doc.write(docHtml); doc.close();
     setTimeout(() => {
       try { frame.contentWindow.focus(); frame.contentWindow.print(); }
-      catch (e) { Toast.show('Printing is not available here — use your browser\'s Share or Print menu', 'warning', 6000); }
+      catch (e) { Toast.show('ARK could not start printing. Open your browser menu and choose Print or Share.', 'warning', 7000); }
     }, 400);
   } catch (e) {
-    Toast.show('Printing is not available here — use your browser\'s Share or Print menu', 'warning', 6000);
+    Toast.show('ARK could not start printing. Open your browser menu and choose Print or Share.', 'warning', 7000);
   }
 }
 

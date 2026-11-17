@@ -35,12 +35,10 @@ const SoftHub = (() => {
 
   function _updateUI() {
     // Update Network tab hub status indicator if present
+    // Other ARK tabs in this same browser are not other people. Showing a "role" or a peer
+    // count for them would suggest a network that is not there, so the badge stays hidden.
     const badge = document.getElementById('softhub-role-badge');
-    if (badge) {
-      badge.textContent = '📡 ARK tabs open in this browser share messages with each other';
-      badge.style.color = isHub() ? 'var(--gold, #8b6f3e)' : 'var(--text-secondary, #666)';
-      badge.style.display = '';
-    }
+    if (badge) badge.style.display = 'none';
     // Show notification once when auto-promoted
     const notified = Store.get('softhub_notified');
     if (isHub() && !notified) {
@@ -48,9 +46,7 @@ const SoftHub = (() => {
       // so would give false reassurance. Other devices are reached through an ARK Hub (Network tab).
       Store.set('softhub_notified', true);
     }
-    // Update hero peer badge
-    const heroPeers = document.getElementById('hero-sync-badge');
-    if (heroPeers) heroPeers.textContent = _peers.length + ' Peer' + (_peers.length !== 1 ? 's' : '');
+    // The Home tile count is set by Hub (real hubs only) — never from tabs in this browser.
     // Delegate to Network's deploy UI updater
     if (typeof Network !== 'undefined' && Network._updateHubDeployUI) {
       Network._updateHubDeployUI();
@@ -197,37 +193,19 @@ const SoftHub = (() => {
       if (type === 'ark_here' && hubIP) {
         _showJoinBanner(fromAlias, hubIP, hubPort);
       }
-      // A new tab just opened — if we're the hub, announce our address
-      if (type === 'ark_new_tab' && isHub()) {
-        const ip = Store.get('softhub_detected_ip');
-        if (ip) {
-          _discoverBc.postMessage({
-            type: 'ark_here',
-            fromAlias: Store.get('last_alias', 'ARK Hub'),
-            hubIP: ip,
-            hubPort: 8765
-          });
-        }
-      }
+      // A browser tab is never a real hub (nothing listens for other devices), so this tab
+      // never announces itself as one. Real hubs are joined from the Network tab.
     };
 
     // Announce ourselves as a new tab — existing hubs will respond
-    _discoverBc.postMessage({ type: 'ark_new_tab', from: SELF_ID });
+    try { _discoverBc.postMessage({ type: 'ark_new_tab', from: SELF_ID }); } catch(e) {}
+  }
 
-    // If we become hub and detect IP, announce to any other tabs
-    setTimeout(() => {
-      if (isHub()) {
-        const ip = Store.get('softhub_detected_ip');
-        if (ip) {
-          _discoverBc.postMessage({
-            type: 'ark_here',
-            fromAlias: Store.get('last_alias', 'This device'),
-            hubIP: ip,
-            hubPort: 8765
-          });
-        }
-      }
-    }, 4000);
+  // Runs shortly after ARK opens. If this page was opened straight from an ARK Hub, join that
+  // hub so nobody has to type its address a second time.
+  function _startDiscoveryAndJoin() {
+    _startDiscovery();
+    try { if (typeof Network !== 'undefined' && Network.joinOwnHub) Network.joinOwnHub(); } catch(e) {}
   }
 
   // Validate that an IP is a private-range address (safe for LAN hub use)
@@ -247,7 +225,7 @@ const SoftHub = (() => {
     const bannerId = 'ark-join-banner';
     if (document.getElementById(bannerId)) return; // already showing
 
-    const hubUrl = 'http://' + ip + ':' + (parseInt(port) || 8765);
+    const hubUrl = 'http://' + ip + ':' + (parseInt(port, 10) || 8080); // 8080 is the hub's standard port
     const displayAlias = alias || 'a nearby device';
 
     const banner = document.createElement('div');
@@ -255,28 +233,23 @@ const SoftHub = (() => {
     banner.style.cssText = [
       'position:fixed', 'bottom:calc(80px + env(safe-area-inset-bottom,0px))', 'left:50%', 'transform:translateX(-50%)',
       'z-index:8500', 'max-width:min(420px,calc(100vw - 32px))', 'width:100%',
-      'background:linear-gradient(135deg,#2a2016 0%,#1a1208 100%)',
-      'border:1.5px solid rgba(139,111,62,.55)', 'border-radius:20px',
-      'padding:16px 20px', 'box-shadow:0 8px 40px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.04) inset',
+      'background:var(--bg-card)', 'color:var(--text-primary)',
+      'border:1px solid var(--border)', 'border-radius:var(--radius-lg)',
+      'padding:14px 16px',
       'display:flex', 'align-items:center', 'gap:14px',
       'animation:slideUpBanner .35s cubic-bezier(.34,1.56,.64,1) both'
     ].join(';');
 
+    banner.setAttribute('role', 'status');
     banner.innerHTML = `
-      <span style="font-size:1.6rem;flex-shrink:0">📡</span>
+      <svg class="hi" aria-hidden="true" style="width:24px;height:24px;color:var(--accent)"><use href="#i-hub"/></svg>
       <div style="flex:1;min-width:0">
-        <div style="font-size:.8rem;font-weight:700;color:#c9a86c;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px">ARK Found Nearby</div>
-        <div style="font-size:.85rem;color:#e8dcc8;line-height:1.3"><strong>${_esc(displayAlias)}</strong> has an ARK hub on this network. Join to sync messages.</div>
+        <div class="kicker" style="margin-bottom:4px">ARK Hub found</div>
+        <div class="font-sm" style="line-height:1.4"><strong>${_esc(displayAlias)}</strong> has an ARK Hub on this Wi-Fi. Join it to share messages.</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-        <button class="ark-join-btn"
-          style="background:var(--accent,#8b6f3e);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap">
-          Join →
-        </button>
-        <button class="ark-dismiss-btn"
-          style="background:transparent;color:rgba(200,180,150,.6);border:none;font-size:.75rem;cursor:pointer;padding:2px 0">
-          Dismiss
-        </button>
+        <button class="btn btn-primary btn-sm ark-join-btn">Join</button>
+        <button class="btn btn-ghost btn-sm ark-dismiss-btn">Not now</button>
       </div>`;
 
     // Wire buttons via data attributes — avoids string interpolation XSS in onclick
@@ -299,6 +272,6 @@ const SoftHub = (() => {
 
   function _esc(s) { return String(s).replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c])); }
 
-  return { init, stop, yield_to_external, isHub, peerCount, claimHubManually, startDiscovery: _startDiscovery };
+  return { init, stop, yield_to_external, isHub, peerCount, claimHubManually, startDiscovery: _startDiscoveryAndJoin };
 })();
 

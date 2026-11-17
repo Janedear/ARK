@@ -7,7 +7,7 @@ if (!_lsAvailable) {
   document.addEventListener('DOMContentLoaded', () => {
     const b = document.getElementById('storage-unavailable-banner');
     if (b) b.classList.remove('hidden');
-    Toast.show('⚠️ Storage unavailable — data won\'t persist between sessions', 'error', 6000);
+    try { Toast.show('This browser will not keep your information after you close ARK. Open ARK in a normal window, not a private one.', 'error', 9000); } catch (e) {}
   });
 }
 

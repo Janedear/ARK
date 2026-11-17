@@ -4,7 +4,7 @@ const Modal = {
     const box = document.getElementById('ark-modal-box');
     const overlay = document.getElementById('ark-modal');
     if (!box || !overlay) return;
-    box.innerHTML = title ? `<div id="modal-title" class="mb-12" style="font-weight:800;font-size:1.1rem">${title}</div>${html}` : html;
+    box.innerHTML = title ? `<div id="modal-title" class="mb-12" style="font-weight:700;font-size:1.1rem;letter-spacing:-.02em">${title}</div>${html}` : html;
     // Untitled dialogs have no #modal-title; fall back to a generic accessible name.
     if (title) { box.setAttribute('aria-labelledby', 'modal-title'); box.removeAttribute('aria-label'); }
     else { box.removeAttribute('aria-labelledby'); box.setAttribute('aria-label', 'Dialog'); }
@@ -58,7 +58,7 @@ const Modal = {
     this._onYes = null;
     this.close();
     if (typeof fn !== 'function') return;
-    try { fn(); } catch(e) { console.warn('Modal.confirm action:', e); Toast.show('That action failed — please try again', 'error'); }
+    try { fn(); } catch(e) { console.warn('Modal.confirm action:', e); Toast.show('That did not work. Please try again.', 'error'); }
   }
 };
 

@@ -3,122 +3,125 @@
 
   <div class="card">
     <div class="card-header">
-      <div class="card-title"><span class="card-icon">📝</span>Post Message</div>
-      <span id="queue-badge" class="offline-queue-badge hidden">0 queued</span>
+      <div class="card-title"><svg class="hi" aria-hidden="true"><use href="#i-edit"/></svg>Post a message</div>
+      <span id="queue-badge" class="offline-queue-badge hidden" role="status">0 waiting to send</span>
     </div>
     <div class="grid-2">
       <div class="form-group">
-        <label class="form-label">Your Alias</label>
-        <input class="form-input" id="msg-alias" placeholder="Anonymous" maxlength="40">
+        <label class="form-label" for="msg-alias">Your name</label>
+        <input class="form-input" id="msg-alias" placeholder="Name or nickname" maxlength="40" autocomplete="nickname">
       </div>
       <div class="form-group">
-        <label class="form-label">Channel</label>
+        <label class="form-label" for="msg-channel">About</label>
         <select class="form-input" id="msg-channel">
-          <option value="help">🆘 Need Help</option>
-          <option value="safe">✅ I'm Safe</option>
-          <option value="offers">🤝 Can Help / Have Supplies</option>
-          <option value="missing">🔍 Looking for Someone</option>
-          <option value="reunification">👨‍👩‍👧 Family Reunification</option>
-          <option value="general" selected>💬 General</option>
-          <option value="resources">📦 Resources</option>
-          <option value="medical">🏥 Medical</option>
-          <option value="shelter">🏠 Shelter</option>
-          <option value="water">💧 Water</option>
-          <option value="power">⚡ Power</option>
+          <option value="help">Need help</option>
+          <option value="safe">I'm safe</option>
+          <option value="offers">Can help / have supplies</option>
+          <option value="missing">Looking for someone</option>
+          <option value="reunification">Finding family</option>
+          <option value="general" selected>General</option>
+          <option value="resources">Resources</option>
+          <option value="medical">Medical</option>
+          <option value="shelter">Shelter</option>
+          <option value="water">Water</option>
+          <option value="power">Power</option>
         </select>
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label" style="display:flex;justify-content:space-between;align-items:baseline">
-        <span>Message <span class="text-muted">(public — no addresses or medical details)</span></span>
+      <label class="form-label" for="msg-text" style="display:flex;justify-content:space-between;align-items:baseline">
+        <span>Message</span>
         <span id="msg-char-counter" class="font-xs text-muted" aria-live="polite">0 / 1000</span>
       </label>
-      <textarea class="form-input" id="msg-text" placeholder="Short and specific. E.g. 'Need insulin for adult, at school gym'" maxlength="1000" oninput="Messages._onTextInput(this)" onkeydown="if(event.ctrlKey&&event.key==='Enter'){event.preventDefault();Messages.post()}" aria-describedby="msg-char-counter"></textarea>
+      <textarea class="form-input" id="msg-text" placeholder="Short and clear. For example: Need drinking water for 4 people, at the school gym" maxlength="1000" oninput="Messages._onTextInput(this)" onkeydown="if(event.ctrlKey&&event.key==='Enter'){event.preventDefault();Messages.post()}" aria-describedby="msg-char-counter msg-public-hint"></textarea>
+      <div class="font-xs text-muted mt-8" id="msg-public-hint">Everyone on the hub can read this. Do not post home addresses or private details.</div>
     </div>
     <div class="form-group">
-      <label class="form-label">Location (optional)</label>
-      <div style="display:flex;gap:6px;align-items:center">
-        <input class="form-input" id="msg-location" maxlength="500" placeholder="Intersection, landmark, or general area" style="flex:1">
-        <button class="btn btn-secondary btn-sm" onclick="GPS.fillLocation('msg-location', this)" title="Auto-fill with GPS coordinates" aria-label="Fill location with GPS" style="white-space:nowrap;flex-shrink:0">📍 GPS</button>
+      <label class="form-label" for="msg-location">Where (optional)</label>
+      <div class="flex gap-8" style="align-items:center">
+        <input class="form-input" id="msg-location" maxlength="500" placeholder="Street corner, landmark or area" style="flex:1;min-width:0">
+        <button class="btn btn-secondary btn-sm" onclick="GPS.fillLocation('msg-location', this)" title="Fill in where you are using GPS" aria-label="Fill in where you are using GPS" style="white-space:nowrap;flex-shrink:0">Use GPS</button>
       </div>
     </div>
     <div class="flex gap-8 wrap">
-      <label class="flex gap-8 font-sm" style="align-items:center;cursor:pointer">
-        <input type="checkbox" id="msg-urgent"> <span>🚨 Mark as urgent</span>
+      <label class="flex gap-8 font-sm" style="align-items:center;cursor:pointer;min-height:44px">
+        <input type="checkbox" id="msg-urgent"> <span>Mark as urgent</span>
       </label>
     </div>
-    <div class="flex gap-8 mt-12">
-      <button class="btn btn-primary" id="msg-post-btn" onclick="Messages.post()" disabled>📤 Post Message</button>
-      <button class="btn btn-green btn-sm" onclick="Messages.postSafe()">✅ I'm Safe (quick)</button>
+    <div class="flex gap-8 wrap mt-12">
+      <button class="btn btn-primary" id="msg-post-btn" onclick="Messages.post()" disabled>Post message</button>
+      <button class="btn btn-green" onclick="Messages.postSafe()" title="Posts a short message saying you are safe">I'm safe</button>
     </div>
   </div>
 
   <!-- Channel Filter + Board -->
   <div class="card">
     <div class="card-header">
-      <div class="card-title"><span class="card-icon">📋</span>Message Board</div>
+      <div class="card-title"><svg class="hi" aria-hidden="true"><use href="#i-messages"/></svg>Message board</div>
       <div class="flex gap-8">
-        <button class="btn btn-ghost btn-sm" onclick="Messages.search()">🔍 Search</button>
-        <button class="btn btn-ghost btn-sm" onclick="Messages.exportTxt()">📄 Export</button>
+        <button class="btn btn-ghost btn-sm" onclick="Messages.search()"><svg class="hi" aria-hidden="true"><use href="#i-search"/></svg>Search</button>
+        <button class="btn btn-ghost btn-sm" onclick="Messages.exportTxt()" title="Save all messages as a text file"><svg class="hi" aria-hidden="true"><use href="#i-download"/></svg>Save</button>
       </div>
     </div>
-    <div class="channel-tabs" id="channel-tabs" role="group" aria-label="Filter messages by channel">
+    <div class="channel-tabs" id="channel-tabs" role="group" aria-label="Show messages about">
       <button class="ch-tab active" data-ch="all" aria-pressed="true">All</button>
-      <button class="ch-tab" data-ch="help" aria-pressed="false"><span aria-hidden="true">🆘</span> Help</button>
-      <button class="ch-tab" data-ch="safe" aria-pressed="false"><span aria-hidden="true">✅</span> Safe</button>
-      <button class="ch-tab" data-ch="offers" aria-pressed="false"><span aria-hidden="true">🤝</span> Offers</button>
-      <button class="ch-tab" data-ch="missing" aria-pressed="false"><span aria-hidden="true">🔍</span> Missing</button>
-      <button class="ch-tab" data-ch="reunification" aria-pressed="false"><span aria-hidden="true">👨‍👩‍👧</span> Reunif.</button>
-      <button class="ch-tab" data-ch="general" aria-pressed="false"><span aria-hidden="true">💬</span> General</button>
-      <button class="ch-tab" data-ch="resources" aria-pressed="false"><span aria-hidden="true">📦</span> Resources</button>
-      <button class="ch-tab" data-ch="medical" aria-pressed="false"><span aria-hidden="true">🏥</span> Medical</button>
-      <button class="ch-tab" data-ch="water" aria-pressed="false"><span aria-hidden="true">💧</span> Water</button>
+      <button class="ch-tab" data-ch="help" aria-pressed="false">Help</button>
+      <button class="ch-tab" data-ch="safe" aria-pressed="false">Safe</button>
+      <button class="ch-tab" data-ch="offers" aria-pressed="false">Offers</button>
+      <button class="ch-tab" data-ch="missing" aria-pressed="false">Missing</button>
+      <button class="ch-tab" data-ch="reunification" aria-pressed="false">Family</button>
+      <button class="ch-tab" data-ch="general" aria-pressed="false">General</button>
+      <button class="ch-tab" data-ch="resources" aria-pressed="false">Resources</button>
+      <button class="ch-tab" data-ch="medical" aria-pressed="false">Medical</button>
+      <button class="ch-tab" data-ch="shelter" aria-pressed="false">Shelter</button>
+      <button class="ch-tab" data-ch="water" aria-pressed="false">Water</button>
+      <button class="ch-tab" data-ch="power" aria-pressed="false">Power</button>
     </div>
     <div id="msg-search-bar" class="hidden mb-12" style="position:relative">
-      <input class="form-input" id="msg-search-input" maxlength="500" placeholder="Search messages..." oninput="Messages.filterSearch()" aria-label="Search messages" style="padding-right:36px">
-      <button onclick="Messages.clearSearch()" title="Clear search" aria-label="Clear search" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;padding:2px 4px">✕</button>
+      <input class="form-input" id="msg-search-input" maxlength="500" placeholder="Search messages" oninput="Messages.filterSearch()" aria-label="Search messages" style="padding-right:48px">
+      <button onclick="Messages.clearSearch()" title="Clear search" aria-label="Clear search" style="position:absolute;right:0;top:50%;transform:translateY(-50%);width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:var(--text-muted)"><svg class="hi" aria-hidden="true"><use href="#i-x"/></svg></button>
     </div>
     <div id="messages-list" aria-live="polite" aria-atomic="false" aria-relevant="additions">
       <div id="msg-empty-state" class="card" style="text-align:center;padding:24px 16px;border:1px dashed var(--border)">
-        <div class="mb-8" style="font-size:2rem">💬</div>
-        <div style="font-weight:700;margin-bottom:6px">No messages yet</div>
-        <div class="text-secondary font-sm mb-16">To post: pick a channel, type a short, specific message in the box above, and press <strong>Post Message</strong>. It is saved on this device right away and shared when you connect to a hub (Network tab). To see your neighbors' messages, connect to a hub and tap <strong>Sync Now</strong>.</div>
-        <button class="btn btn-primary btn-sm" onclick="document.getElementById('msg-text').focus();document.getElementById('msg-text').scrollIntoView({behavior:'smooth'})">Write First Message</button>
+        <div class="mb-8 text-muted"><svg class="hi" aria-hidden="true" style="width:28px;height:28px"><use href="#i-messages"/></svg></div>
+        <div class="mb-8" style="font-weight:600">No messages yet</div>
+        <div class="text-secondary font-sm mb-12" style="line-height:1.6">Write a short message above and press <strong>Post message</strong>. It is saved on this device right away. It reaches other people once you join an ARK Hub on the Network tab.</div>
+        <button class="btn btn-primary btn-sm" onclick="var t=document.getElementById('msg-text');if(t){t.scrollIntoView({block:'center'});t.focus();}">Write a message</button>
       </div>
     </div>
     <div class="mt-12" id="load-more-wrap" style="display:none">
-      <button class="btn btn-secondary btn-sm" onclick="Messages.loadMore()">Load More</button>
+      <button class="btn btn-secondary btn-sm w-full" onclick="Messages.loadMore()">Show older messages</button>
     </div>
   </div>
 
   <!-- Bundle Transfer -->
   <div class="card">
-    <div class="card-title mb-8"><span class="card-icon">🔄</span>Carry Messages (USB/File Transfer)</div>
-    <div class="info-box">Transfer messages without internet by exporting/importing bundles from USB or shared files.</div>
+    <div class="card-title mb-8"><svg class="hi" aria-hidden="true"><use href="#i-share"/></svg>Carry messages by USB stick</div>
+    <div class="info-box">No hub in reach? Save all messages to a file, carry it on a USB stick, and load it on another device that has ARK. No internet needed.</div>
     <div class="flex gap-8 wrap">
-      <button class="btn btn-secondary btn-sm" onclick="Messages.exportBundle()">📦 Export Bundle</button>
-      <button class="btn btn-secondary btn-sm" onclick="Messages.importBundleUI()">📥 Import Bundle</button>
+      <button class="btn btn-secondary btn-sm" onclick="Messages.exportBundle()"><svg class="hi" aria-hidden="true"><use href="#i-download"/></svg>Save messages to a file</button>
+      <button class="btn btn-secondary btn-sm" onclick="var f=document.getElementById('bundle-file');if(f){f.click();}else{Messages.importBundleUI();}"><svg class="hi" aria-hidden="true"><use href="#i-upload"/></svg>Load a messages file</button>
+      <button class="btn btn-ghost btn-sm" onclick="Messages.importBundleUI()">Paste text instead</button>
     </div>
     <div id="bundle-import-area" class="hidden mt-12">
-      <label class="form-label">Paste bundle JSON or load file:</label>
-      <textarea class="form-input" id="bundle-paste" placeholder='{"protocol":"ARK-RELAY-1","packets":[...]}' aria-label="Paste bundle JSON"></textarea>
-      <button class="btn btn-primary btn-sm mt-8" onclick="Messages.importBundle()">Import</button>
+      <label class="form-label" for="bundle-paste">Paste the text of a messages file</label>
+      <textarea class="form-input" id="bundle-paste" placeholder='{"protocol":"ARK-RELAY-1","packets":[...]}'></textarea>
+      <button class="btn btn-primary btn-sm mt-8" onclick="Messages.importBundle()">Load these messages</button>
     </div>
   </div>
 
   <!-- Missing Persons -->
   <div class="card">
     <div class="card-header">
-      <div class="card-title"><span class="card-icon">🔍</span>Missing Persons <span id="missing-count-badge" class="badge badge-muted font-xs" style="display:none"></span></div>
-      <button class="btn btn-primary btn-sm" onclick="MissingPersons.addForm()">+ Report Missing</button>
+      <div class="card-title"><svg class="hi" aria-hidden="true"><use href="#i-person-search"/></svg>Missing people <span id="missing-count-badge" class="badge badge-muted font-xs" style="display:none"></span></div>
+      <button class="btn btn-primary btn-sm" onclick="MissingPersons.addForm()"><svg class="hi" aria-hidden="true"><use href="#i-plus"/></svg>Report missing</button>
     </div>
-    <div class="info-box">Record missing persons locally. Print a flyer to distribute in your community.</div>
+    <div class="info-box">Reports are kept on this device only. Print a flyer to hand out or pin up nearby.</div>
     <div class="flex gap-8 mb-8" id="missing-search-row" style="display:none">
-      <input type="text" id="missing-search" class="form-input" placeholder="Search by name or location…" maxlength="100" oninput="MissingPersons.filterSearch()" aria-label="Search missing persons" style="flex:1">
+      <input type="text" id="missing-search" class="form-input" placeholder="Search by name or place" maxlength="100" oninput="MissingPersons.filterSearch()" aria-label="Search missing people" style="flex:1">
     </div>
     <div id="missing-persons-list">
-      <div class="text-secondary font-sm" style="padding:8px 0">No missing persons reports — tap Add to create a report.</div>
+      <div class="text-secondary font-sm" style="padding:8px 0">No reports yet. Tap <strong>Report missing</strong> to add one.</div>
     </div>
   </div>
 </div><!-- /tab-messages -->
-

@@ -5,70 +5,125 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ARK — Start here</title>
 <style>
-  :root { --bg:#faf9f5; --card:#fffefa; --line:#e2e0d6; --ink:#292a25; --soft:#6b7068; --accent:#8d7041; --red:#b24148; }
+  /* ARK brand: warm paper, near-black ink, gold accents, hairline borders. */
+  :root { --bg:#faf9f5; --card:#fffefa; --tint:#f3f1e9; --line:#e2e0d6; --ink:#292a25; --soft:#555a52; --muted:#6b7068; --accent:#8d7041; --gold:#c9a45c; --red:#a8343c; --red-bg:#f8e9e9; }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.7 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width:720px; margin:0 auto; padding:28px 18px 60px; }
-  h1 { font-size:2.1rem; font-weight:500; letter-spacing:-.05em; line-height:1.1; margin:0 0 8px; }
-  h2 { font-size:1.05rem; font-weight:600; letter-spacing:-.02em; margin:0 0 8px; color:var(--ink); }
+  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; -webkit-text-size-adjust:100%; }
+  main { max-width:720px; margin:0 auto; padding:24px 16px 56px; }
+  /* Margins, not "gap": phones from before 2021 ignore gap in a row. */
+  .brand { display:flex; align-items:center; margin-bottom:28px; }
+  .brand b { display:inline-flex; align-items:center; margin-right:10px; font-size:1.35rem; font-weight:800; letter-spacing:-.04em; line-height:1; }
+  .brand svg { width:28px; height:14px; margin-right:7px; fill:none; stroke:var(--gold); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+  .brand small { font-size:.58rem; font-weight:500; letter-spacing:.17em; text-transform:uppercase; color:var(--muted); }
+  .kicker { display:flex; align-items:center; font-size:.68rem; font-weight:600; letter-spacing:.17em; text-transform:uppercase; color:var(--muted); margin:0 0 12px; }
+  .kicker::before { content:""; width:5px; height:5px; border-radius:50%; background:var(--gold); margin-right:10px; flex-shrink:0; }
+  h1 { font-size:2rem; font-weight:700; letter-spacing:-.035em; line-height:1.12; margin:0 0 14px; }
+  h1 em { display:block; font-family:Georgia, "Times New Roman", serif; font-style:italic; font-weight:400; letter-spacing:0; color:var(--accent); }
+  h2 { font-size:1.1rem; font-weight:700; letter-spacing:-.02em; line-height:1.3; margin:0 0 10px; }
   p { margin:0 0 12px; }
-  .lead { color:var(--soft); margin-bottom:22px; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:16px; }
-  .danger { border-color:var(--red); }
+  .lead { color:var(--soft); margin-bottom:24px; }
+  .art { display:block; width:100%; max-width:320px; height:auto; margin:0 0 18px; }
+  .art .ln { fill:none; stroke:var(--gold); stroke-width:1.6; stroke-dasharray:2 6; stroke-linecap:round; }
+  .art .dv { fill:var(--card); stroke:var(--ink); stroke-width:1.6; stroke-linejoin:round; stroke-linecap:round; }
+  .art .dot { fill:var(--gold); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px 18px 14px; margin-bottom:16px; }
+  .danger { border-color:var(--red); background:var(--red-bg); }
   .danger h2 { color:var(--red); }
-  ol, ul { margin:0 0 6px; padding-left:22px; }
+  .num { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; margin-right:8px; border:1px solid var(--line); border-radius:50%; background:var(--tint); color:var(--accent); font-size:.85rem; font-weight:700; vertical-align:2px; }
+  ol, ul { margin:0 0 8px; padding-left:22px; }
   li { margin-bottom:8px; }
-  code { background:#fff; border:1px solid var(--line); border-radius:6px; padding:1px 6px; font:15px/1.4 ui-monospace, Consolas, monospace; }
-  .foot { color:var(--soft); font-size:.9rem; }
+  code { background:var(--tint); border:1px solid var(--line); border-radius:6px; padding:1px 6px; font:.9em/1.4 ui-monospace, Consolas, monospace; word-break:break-word; overflow-wrap:anywhere; }
+  .note { color:var(--soft); font-size:.93rem; }
+  .foot { color:var(--soft); font-size:.93rem; margin-top:20px; }
+  .via { display:none; border-color:var(--gold); }
+  .via a { display:inline-block; min-height:44px; padding:10px 14px; margin:4px 8px 4px 0; border:1px solid var(--ink); border-radius:12px; color:var(--ink); font-weight:600; text-decoration:none; line-height:1.4; }
+  .via a.main { background:var(--ink); color:var(--card); }
+  @media (max-width:420px) { h1 { font-size:1.7rem; } }
+  @media print {
+    body { background:#fff; font-size:12pt; }
+    main { padding:0; max-width:none; }
+    .card { break-inside:avoid; page-break-inside:avoid; }
+    .danger { background:#fff; }
+    .via { display:none !important; }
+  }
 </style>
 </head>
 <body>
 <main>
-  <h1>ARK — Start here</h1>
-  <p class="lead">This folder is the whole ARK kit. It works with no internet. Read this page once now, while things are normal.</p>
+  <div class="brand" aria-label="ARK, by HaloSuite">
+    <b><svg viewBox="0 0 60 26" aria-hidden="true"><path d="M4 22 30 5l26 17"/><path d="M18 23l12-8 12 8" stroke-width="3.4"/></svg>ARK</b>
+    <small>by HaloSuite</small>
+  </div>
+
+  <p class="kicker">Start here</p>
+  <h1>In a crisis, ARK makes its own internet <em>from the devices around you.</em></h1>
+  <svg class="art" viewBox="0 0 280 72" aria-hidden="true">
+    <path class="ln" d="M46 44H114M66 22 114 34M194 20 166 32M212 52 166 46"/>
+    <rect class="dv" x="118" y="24" width="44" height="28" rx="3"/><path class="dv" d="M108 58h64"/>
+    <rect class="dv" x="28" y="30" width="16" height="28" rx="3"/>
+    <rect class="dv" x="48" y="6" width="16" height="28" rx="3"/>
+    <rect class="dv" x="196" y="4" width="16" height="28" rx="3"/>
+    <path class="dv" d="M216 62V48l14-11 14 11v14z"/>
+    <circle class="dot" cx="140" cy="38" r="3"/>
+  </svg>
+  <p class="lead">One laptop becomes the hub. Nearby phones join it over Wi-Fi. Hubs pass messages on to each other by network, radio, or a USB stick. This folder is the whole ARK kit, and it works with no internet. Read this page once now, while things are normal.</p>
 
   <div class="card danger">
     <h2>In immediate danger</h2>
-    <p><strong>Call 911</strong> (or your local emergency number). ARK is not an emergency service and nobody monitors it.</p>
+    <p><strong>Call 911</strong> (or your local emergency number) if any phone works. ARK is not an emergency service and nobody monitors it.</p>
+  </div>
+
+  <div class="card via" id="viaHub">
+    <h2>You are reading this from an ARK hub</h2>
+    <p>Your phone has no kit folder, so use these instead of step 1.</p>
+    <p><a class="main" href="/app">Open ARK now</a><a href="/kit/relay">Save ARK to this phone</a><a href="/">Back to the hub board</a></p>
   </div>
 
   <div class="card">
-    <h2>1. Use ARK on your own phone or computer</h2>
+    <h2><span class="num">1</span>Use ARK on your own phone or computer</h2>
     <ol>
       <li>Open the file <code>ARK-CRISIS-SUITE.html</code> in this folder. It opens in any web browser.</li>
-      <li>Fill in your household plan and emergency contacts.</li>
-      <li>Print the emergency card (Household tab) and keep a paper copy.</li>
+      <li>Tap <strong>Plan</strong> and fill in your household plan and emergency contacts.</li>
+      <li>On the same screen tap <strong>Print card</strong>, and keep the paper copy where everyone can find it.</li>
     </ol>
-    <p>Everything you type stays on your own device.</p>
+    <p class="note">Everything you type stays on your own device. This part needs no hub and no Wi-Fi.</p>
   </div>
 
   <div class="card">
-    <h2>2. Link the phones around you — with no internet</h2>
-    <p>One laptop or Raspberry Pi becomes the <strong>hub</strong>. Every phone on the same Wi-Fi can then read and post messages.</p>
+    <h2><span class="num">2</span>Link the phones around you, with no internet</h2>
+    <p>One laptop or Raspberry Pi becomes the <strong>hub</strong>. Every phone on the same Wi-Fi can then read and post messages. A phone alone cannot be the hub.</p>
     <ol>
       <li><strong>Windows:</strong> open the <code>hub</code> folder and double-click <code>start-hub.cmd</code>. If Windows Firewall asks, allow <em>private</em> networks.<br>
-          <strong>Mac, Linux, Raspberry Pi:</strong> open Terminal in this folder and run <code>sh hub/start-hub.sh</code> (Node.js must be installed).</li>
-      <li>The hub window shows an address such as <code>http://192.168.1.20:8080</code>. Write it on paper, or open <code>http://localhost:8080/sign</code> and print the sign.</li>
-      <li>Everyone joins the same Wi-Fi and types that address into their browser. A router that is switched on but has no internet is fine.</li>
+          <strong>Mac, Linux, Raspberry Pi:</strong> open Terminal in this folder and run <code>sh hub/start-hub.sh</code> (Node.js must already be installed).</li>
+      <li>The hub window shows an address such as <code>http://192.168.1.20:8080</code>. Write it on paper, or open <code>http://localhost:8080/sign</code> on the hub and print the sign.</li>
+      <li>Everyone joins the same Wi-Fi and types that address into their web browser. A router that is switched on but has no internet is fine.</li>
     </ol>
-    <p>The message board is public to everyone on that Wi-Fi. Do not post anything you would not pin to a noticeboard.</p>
+    <p class="note">The network is local. Messages reach only people on this hub, and on other hubs it swaps messages with. The board is public to everyone on that Wi-Fi, so do not post anything you would not pin to a noticeboard.</p>
   </div>
 
   <div class="card">
-    <h2>3. Fill these in now</h2>
+    <h2><span class="num">3</span>Fill these in now</h2>
     <ul>
-      <li><code>MEETING-POINT.txt</code> — where your household meets if you cannot reach each other.</li>
-      <li><code>Emergency-Contacts.txt</code> — local numbers you will not be able to look up later.</li>
-      <li><code>Household-Plan-Worksheet.txt</code> — print it and fill it in by hand.</li>
+      <li><code>MEETING-POINT.txt</code>: where your household meets if you cannot reach each other.</li>
+      <li><code>Emergency-Contacts.txt</code>: local numbers you will not be able to look up later.</li>
+      <li><code>Household-Plan-Worksheet.txt</code>: print it and fill it in by hand.</li>
     </ul>
   </div>
 
   <div class="card">
-    <h2>4. Pass it on</h2>
-    <p>Copy this whole folder to a USB stick for a neighbour. Anyone on a hub's Wi-Fi can also tap <strong>Save full kit</strong> on the hub page.</p>
+    <h2><span class="num">4</span>Pass it on</h2>
+    <p>Copy this whole folder to a USB stick for a neighbour. Anyone on a hub's Wi-Fi can also tap <strong>Save the full kit</strong> on the hub page.</p>
   </div>
 
-  <p class="foot">Practise once before you need it: start the hub, join with two phones, post a message. More detail is in <code>hub/HUB-GUIDE.md</code>.</p>
+  <p class="foot">Practise once before you need it: start the hub, join with two phones, post a message. If the hub does not start or a phone cannot open the address, the fixes are in <code>hub/HUB-GUIDE.md</code>.</p>
 </main>
+<script>
+// Served by an ARK hub (not opened from the kit folder): show links that work on a phone with no folder.
+try {
+  if (/^https?:$/.test(location.protocol) && location.pathname.indexOf('/kit/') === 0) {
+    document.getElementById('viaHub').style.display = 'block';
+  }
+} catch (e) {}
+</script>
 </body>
 </html>

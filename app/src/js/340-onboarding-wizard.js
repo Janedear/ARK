@@ -21,6 +21,33 @@ const Onboarding = (() => {
     }
     updateDots(n);
     currentStep = n;
+    // Each step opens at its top (on a phone the last step was scrolled down to reach Continue),
+    // and its heading takes focus so screen readers announce where the person now is.
+    try {
+      const overlay = document.getElementById('onboard-overlay');
+      if (overlay) overlay.scrollTop = 0;
+      const box = overlay && overlay.querySelector('.onboard-box');
+      if (box) box.scrollTop = 0;
+      const head = document.querySelector('#ob-step-' + n + ' h2');
+      if (head && overlay && !overlay.classList.contains('hidden')) head.focus({ preventScroll: true });
+    } catch (e) {}
+  }
+
+  function _hubError(msg) {
+    const errEl = document.getElementById('ob-hub-err');
+    if (errEl) { errEl.textContent = msg || ''; errEl.style.display = msg ? '' : 'none'; }
+    const hubInput = document.getElementById('ob-hub');
+    if (hubInput) hubInput.style.borderColor = msg ? 'var(--red)' : '';
+  }
+
+  // The address of the hub this page was loaded from, or '' when it was not loaded from a hub.
+  // Hubs serve ARK over plain http from a local (private) network address.
+  function _hubFromPage() {
+    try {
+      if (location.protocol !== 'http:') return '';
+      const local = /^(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})$/;
+      return local.test(location.hostname) ? location.origin : '';
+    } catch (e) { return ''; }
   }
 
   function start() {
@@ -28,8 +55,10 @@ const Onboarding = (() => {
     try {
       const overlay = document.getElementById('onboard-overlay');
       if (overlay) {
+        overlay.style.display = ''; // undo the emergency hide in finish()'s fallback
         overlay.classList.remove('hidden');
         showStep(1);
+        _hubError('');
         // Clear any stale validation state
         const nameInput = document.getElementById('ob-name');
         if (nameInput) { nameInput.style.borderColor = ''; }
@@ -44,6 +73,25 @@ const Onboarding = (() => {
         const roleEl = document.getElementById('ob-role'); if (roleEl) roleEl.value = savedRole;
         const addrEl = document.getElementById('ob-addr'); if (addrEl) addrEl.value = savedAddr;
         const hubEl  = document.getElementById('ob-hub');  if (hubEl)  hubEl.value  = savedHub;
+        // Opened straight from a hub (for example by scanning its QR code)? Then the hub's address
+        // is already known: fill it in so nobody has to type numbers in an emergency.
+        const guessed = savedHub ? '' : _hubFromPage();
+        if (hubEl && guessed) hubEl.value = guessed;
+        const hintEl = document.getElementById('ob-hub-hint');
+        if (hintEl) hintEl.style.display = guessed ? '' : 'none';
+        // Keep the Tab key inside the wizard while it is open (the app behind it is covered).
+        if (!overlay._trapBound) {
+          overlay._trapBound = true;
+          overlay.addEventListener('keydown', e => {
+            if (e.key !== 'Tab') return;
+            const items = Array.from(overlay.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),a[href]'))
+              .filter(el => el.offsetParent !== null);
+            if (!items.length) return;
+            const first = items[0], last = items[items.length - 1], act = document.activeElement;
+            if (e.shiftKey && (act === first || items.indexOf(act) === -1)) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && act === last) { e.preventDefault(); first.focus(); }
+          });
+        }
       }
     } catch (e) { console.warn('Onboarding.start error:', e); }
   }
@@ -92,19 +140,18 @@ const Onboarding = (() => {
 
   function saveHub() {
     try {
-      let url = (document.getElementById('ob-hub')?.value || '').trim();
-      if (!url) { next(); return; } // Hub is optional — skip if empty
+      let url = (document.getElementById('ob-hub')?.value || '').replace(/\s+/g, '');
+      if (!url) { _hubError(''); next(); return; } // Hub is optional — skip if empty
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'http://' + url;
       // Basic validation — must look like an IP or hostname with optional port
       const urlPattern = /^https?:\/\/([\d.]+|localhost|[\w.-]+)(:\d+)?(\/.*)?$/;
       if (!urlPattern.test(url)) {
-        Toast.show('Hub URL should be like: http://192.168.1.100:3000', 'warning');
+        _hubError('That hub address does not look right. It should look like 192.168.1.20:8080, as shown on the hub\'s screen. Fix it, or clear the box to skip this step.');
         const hubInput = document.getElementById('ob-hub');
-        if (hubInput) { hubInput.style.borderColor = 'var(--red)'; hubInput.focus(); }
+        if (hubInput) hubInput.focus();
         return;
       }
-      const hubInput = document.getElementById('ob-hub');
-      if (hubInput) hubInput.style.borderColor = '';
+      _hubError('');
       Store.set('hub_url', url);
       // Sync to both hub input fields and the display label
       const settingsHubInput = document.getElementById('set-hub-url');
@@ -112,18 +159,22 @@ const Onboarding = (() => {
       const networkHubInput = document.getElementById('hub-url-input');
       if (networkHubInput) networkHubInput.value = url;
       Hub.updateSyncDisplay();
+      // Start reaching the hub now, quietly, instead of waiting up to a minute for the next check.
+      Promise.resolve().then(() => Hub.sync()).catch(() => {});
     } catch (e) { console.warn('Onboarding.saveHub error:', e); }
     next();
   }
 
   async function downloadARK() {
+    // Same path as Save & Share: it ignores double taps and says "Saving…" straight away.
+    if (typeof ShareARK !== 'undefined' && ShareARK.downloadFile) return ShareARK.downloadFile();
     try {
       // A clean copy: the recipient gets the setup wizard and none of this device's data
       const html = await _freshDownloadHTML();
       download('ARK-CRISIS-SUITE.html', html, 'text/html');
-      Toast.show('ARK downloaded — when they open it they\'ll get the setup wizard!', 'success', 3500);
+      Toast.show('A clean copy of ARK is saved. Look in your Downloads or Files, then send it to someone.', 'success', 6000);
     } catch (e) {
-      Toast.show('Download failed — try again', 'error', 3000);
+      Toast.show('Could not save a copy. Try again, or use your browser menu to save this page.', 'error', 6000);
       console.warn('Onboarding.downloadARK error:', e);
     }
   }
@@ -132,17 +183,24 @@ const Onboarding = (() => {
   function finish() {
     if (_finishing) return;
     _finishing = true;
+    // "Skip. I need help now" leaves from step 1: that person must not be interrupted by a share reminder.
+    const completed = currentStep >= TOTAL;
     try {
       Store.set('first_run_done', true);
       const overlay = document.getElementById('onboard-overlay');
       if (overlay) overlay.classList.add('hidden');
-      Toast.show('Welcome to ARK — you\'re the first line of safety.', 'success', 4000);
+      // Put keyboard and screen-reader focus on the section now showing, not on a button that has gone.
+      try {
+        const panel = document.getElementById('tab-' + ((typeof UI !== 'undefined' && UI.currentTab) || 'home'));
+        if (panel) panel.focus({ preventScroll: true });
+      } catch (e) {}
+      Toast.show(completed ? 'ARK is ready. It works with no internet.' : 'ARK is open. You can finish set-up later in Settings.', 'success', 4000);
 
       // Auto-discovery: start finding nearby ARK users on this network
       setTimeout(() => {
         if (typeof SoftHub !== 'undefined') SoftHub.startDiscovery();
         // Show a "share ARK" nudge after welcome toast fully exits (toast is 4s, exit anim ~300ms)
-        setTimeout(_showShareNudge, 5000);
+        if (completed) setTimeout(_showShareNudge, 5000);
       }, 1000);
     } catch (e) {
       console.warn('Onboarding.finish error:', e);
@@ -156,41 +214,27 @@ const Onboarding = (() => {
     // Soft nudge to share ARK with the people around them
     const nudgeId = 'ark-share-nudge';
     if (document.getElementById(nudgeId)) return;
+    // Never on top of an open dialog
+    const sm = document.getElementById('share-modal'), am = document.getElementById('ark-modal');
+    if ((sm && !sm.classList.contains('hidden')) || (am && !am.classList.contains('hidden'))) return;
 
     const nudge = document.createElement('div');
     nudge.id = nudgeId;
+    nudge.className = 'card';
+    nudge.setAttribute('role', 'region');
+    nudge.setAttribute('aria-label', 'Share ARK');
     nudge.style.cssText = [
-      'position:fixed','bottom:calc(80px + env(safe-area-inset-bottom,0px))','left:50%','transform:translateX(-50%)',
-      'z-index:8500','max-width:min(400px,calc(100vw - 32px))','width:100%',
-      'background:linear-gradient(135deg,rgba(139,111,62,.18) 0%,rgba(240,235,224,.97) 100%)',
-      'border:1.5px solid rgba(139,111,62,.35)','border-radius:20px',
-      'padding:16px 20px','box-shadow:0 8px 32px rgba(139,111,62,.18)',
-      'display:flex','align-items:center','gap:14px',
-      'animation:slideUpBanner .35s cubic-bezier(.34,1.56,.64,1) both'
+      'position:fixed','bottom:calc(88px + env(safe-area-inset-bottom,0px))','left:50%','transform:translateX(-50%)',
+      'z-index:8500','max-width:400px','width:calc(100vw - 32px)','margin:0',
+      'animation:slideUpBanner .35s ease both'
     ].join(';');
 
     nudge.innerHTML = `
-      <div style="flex:1;min-width:0">
-        <div style="font-size:.8rem;font-weight:700;color:var(--accent,#8b6f3e);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">🤝 Get Your People In</div>
-        <div style="font-size:.82rem;color:var(--text-secondary,#555);line-height:1.35;margin-bottom:10px">ARK works best when everyone nearby has it. Send them the link now.</div>
-        <div style="display:flex;gap:7px;flex-wrap:wrap">
-          <button onclick="ShareARK.shareViaSMS();document.getElementById('${nudgeId}')?.remove()"
-            style="background:var(--accent,#8b6f3e);color:#fff;border:none;border-radius:10px;padding:7px 13px;font-size:.78rem;font-weight:700;cursor:pointer">
-            💬 SMS
-          </button>
-          <button onclick="ShareARK.shareViaEmail();document.getElementById('${nudgeId}')?.remove()"
-            style="background:var(--accent,#8b6f3e);color:#fff;border:none;border-radius:10px;padding:7px 13px;font-size:.78rem;font-weight:700;cursor:pointer">
-            ✉️ Email
-          </button>
-          <button onclick="ShareARK.openModal();document.getElementById('${nudgeId}')?.remove()"
-            style="background:transparent;color:var(--accent,#8b6f3e);border:1.5px solid rgba(139,111,62,.35);border-radius:10px;padding:7px 13px;font-size:.78rem;font-weight:600;cursor:pointer">
-            More →
-          </button>
-          <button onclick="document.getElementById('${nudgeId}')?.remove()"
-            style="background:transparent;color:var(--text-muted,#aaa);border:none;font-size:.75rem;cursor:pointer;padding:2px 4px;margin-left:auto;align-self:center">
-            ✕
-          </button>
-        </div>
+      <div class="kicker mb-8">Share ARK</div>
+      <div class="font-sm text-secondary mb-12">ARK makes its network from the devices around you. It helps more when your neighbors have it too.</div>
+      <div class="flex gap-8 wrap">
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('${nudgeId}')?.remove();ShareARK.openModal()"><svg class="hi" aria-hidden="true"><use href="#i-share"/></svg> Share ARK</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('${nudgeId}')?.remove()">Not now</button>
       </div>`;
 
     document.body.appendChild(nudge);

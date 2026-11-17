@@ -3,61 +3,73 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ARK Hub — link phones with no internet</title>
-<meta name="description" content="Turn one laptop into an ARK Hub so every phone on the same Wi-Fi can share messages with no internet. Free download and step-by-step setup.">
+<title>ARK Hub — one laptop links the phones around you</title>
+<meta name="description" content="In a crisis, ARK makes its own internet from the devices around you. Turn one laptop into an ARK Hub so every phone on the same Wi-Fi can share messages with no internet. Free download and step-by-step setup.">
 <link rel="canonical" href="https://arks.solutions/hub">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://arks.solutions/hub">
 <meta property="og:site_name" content="ARK">
-<meta property="og:title" content="ARK Hub — link phones with no internet">
-<meta property="og:description" content="One laptop becomes a local message board for every phone on the same Wi-Fi. Free. Set it up before you need it.">
+<meta property="og:title" content="ARK Hub — one laptop links the phones around you">
+<meta property="og:description" content="In a crisis, ARK makes its own internet from the devices around you. One laptop becomes the hub for every phone on the same Wi-Fi. Free. Set it up before you need it.">
 <meta property="og:image" content="https://arks.solutions/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#faf9f5">
+<meta name="theme-color" content="#fbf7ef">
 <meta name="referrer" content="no-referrer">
+<link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="preload" href="/brand/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/site.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to the page</a>
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="ark-roof" viewBox="0 0 60 26"><path d="M4 22 30 5l26 17"/><path d="M18 23l12-8 12 8" stroke-width="3.4"/></symbol>
   <symbol id="download" viewBox="0 0 24 24"><path d="M12 4v13M6 12l6 6 6-6M5 21h14"/></symbol>
+  <symbol id="printer" viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v6H7z"/></symbol>
 </svg>
+
+<div class="fast">In an emergency? <a href="/app">Open ARK now</a> · In danger, call 911 or your local emergency number.</div>
 
 <header class="nav">
   <div class="wrap">
     <a class="wordmark" href="/" aria-label="ARK home"><span class="ark"><svg aria-hidden="true"><use href="#ark-roof"/></svg>ARK</span><small>by HaloSuite</small></a>
     <nav class="nav-links" aria-label="Main">
-      <a href="/">Home</a>
+      <a class="keep" href="/">Home</a>
       <a href="/connect">For official services</a>
       <a class="button button-dark" href="/app">Open ARK</a>
     </nav>
   </div>
 </header>
 
-<main class="wrap">
+<main class="wrap" id="main">
   <div class="split" style="padding-bottom:clamp(56px,8vw,110px)">
     <div class="page-head">
       <div class="kicker">ARK Hub</div>
-      <h1>Link the phones around you.<em>No internet needed.</em></h1>
-      <p class="lead">One laptop becomes a local message board for a street, a building or a shelter.</p>
-      <p>Every phone that joins the same Wi-Fi can post and read messages, open the first-aid guides, and save ARK for themselves. Nothing leaves the room.</p>
+      <h1>One laptop becomes the hub. <em>The phones around you join in.</em></h1>
+      <p class="lead">In a crisis, ARK makes its own internet from the devices around you. The hub is the laptop in the middle.</p>
+      <p>Every phone that joins the same Wi-Fi can post and read messages, open the first-aid guides, and save ARK for themselves. It works with no internet. The hub must run on a laptop or a Raspberry Pi — a phone on its own cannot be the hub.</p>
       <div class="invite" style="margin-top:8px">
         <a class="button button-dark button-lg" href="https://github.com/Janedear/ARK/releases/latest/download/ARK-hub-kit.zip">Download the hub kit <svg aria-hidden="true"><use href="#download"/></svg></a>
-        <span class="note">Free · about 35 MB<br>Includes everything a Windows laptop needs.</span>
+        <span class="note">Free · about 35 MB<br>Download it on the laptop that will be the hub.<br>Includes everything a Windows laptop needs.<br>You need internet for this download, so do it today.</span>
       </div>
+      <div class="invite" style="margin-top:0">
+        <button class="button button-line" type="button" onclick="window.print()">Print these steps <svg aria-hidden="true"><use href="#printer"/></svg></button>
+        <span class="note">Paper still works when the power is out.</span>
+      </div>
+      <p class="note print-only">Printed from arks.solutions/hub. The free hub kit download is on that page.</p>
       <div class="record" style="margin-top:14px">
         <strong>Know the limits</strong>
-        <p>The hub reaches about as far as your Wi-Fi does, and its message board is public to everyone on that Wi-Fi. ARK is not an emergency service and nobody monitors it. <strong>In immediate danger, call 911.</strong></p>
+        <p>The hub reaches about as far as your Wi-Fi does. Its message board is public to everyone on that Wi-Fi, so do not post anything private. Messages go no further unless your hub is linked to another hub.</p>
+        <p>ARK is not an emergency service and nobody monitors it. <strong>In immediate danger, call 911 or your local emergency number.</strong></p>
       </div>
     </div>
 
-    <ol class="steps" style="margin-top:clamp(44px,7vw,96px)">
+    <ol class="steps" style="margin-top:clamp(8px,7vw,96px)" aria-label="How to set up a hub">
       <li><div><h3>Download and unzip — today</h3><p>Do this now, while you have internet. Copy the unzipped folder to a USB stick as a spare.</p></div></li>
-      <li><div><h3>Start the hub</h3><p><strong style="color:var(--ink);font-weight:500">Windows:</strong> open the folder, open <code>hub</code>, and double-click <code>start-hub.cmd</code>. If Windows Firewall asks, tick <em>Private networks</em> and allow.</p><p style="margin-top:8px"><strong style="color:var(--ink);font-weight:500">Mac, Linux, Raspberry Pi:</strong> install <a href="https://nodejs.org/">Node.js</a> once, then run <code>sh hub/start-hub.sh</code> in the folder.</p></div></li>
-      <li><div><h3>Write down the address</h3><p>A window shows the hub's address, for example <code>http://192.168.1.20:8080</code>. Put it on paper where people can see it.</p></div></li>
-      <li><div><h3>Everyone joins</h3><p>Each phone joins the same Wi-Fi as the laptop and types that address into its browser. A router with no internet works. So does a phone hotspot. No app, no account.</p></div></li>
+      <li><div><h3>Start the hub</h3><p><strong>Windows:</strong> open the folder, open <code>hub</code>, and double-click <code>start-hub.cmd</code>. If Windows Firewall asks, tick <strong>Private networks</strong> and allow. Keep the window open: closing it stops the hub.</p><p><strong>Mac, Linux, Raspberry Pi:</strong> install <a href="https://nodejs.org/">Node.js</a> once, while you have internet. Then run <code>sh hub/start-hub.sh</code> in the folder.</p></div></li>
+      <li><div><h3>Write down the address</h3><p>The window shows the hub's address, for example <code>http://192.168.1.20:8080</code>. Put it on paper where people can see it. To print a ready-made sign, open <code>http://localhost:8080/sign</code> on the laptop.</p></div></li>
+      <li><div><h3>Everyone joins</h3><p>Each phone joins the same Wi-Fi as the laptop and types that address into its browser. A router with no internet works. So does a phone hotspot, as long as the laptop joins it too. No app, no account.</p><p><strong>Phone cannot open it?</strong> Check it is on the same Wi-Fi as the laptop. Type the whole address, starting with <code>http://</code> and not <code>https://</code>. Turn off mobile data on the phone and try again.</p><p><strong>Still nothing?</strong> On a Windows laptop, allow the hub through Windows Firewall on <strong>Private networks</strong>. On the router, turn off “guest mode” (also called “AP isolation”), which stops devices from seeing each other.</p></div></li>
       <li><div><h3>Practise once</h3><p>Unplug your router from the internet, start the hub, join with two phones and post a message. Ten minutes now saves confusion later.</p></div></li>
     </ol>
   </div>
@@ -66,8 +78,14 @@
 <footer>
   <div class="wrap">
     <span>ARK — made by <a href="https://halosuite.ai/">HaloSuite</a>. Free and open source.</span>
-    <span class="right"><a href="/">Home</a><a href="/connect">Official services</a><a href="https://github.com/Janedear/ARK">Source code</a></span>
+    <span class="right"><a href="/">Home</a><a href="/app">Open ARK</a><a href="/connect">Official services</a><a href="https://github.com/Janedear/ARK">Source code</a></span>
   </div>
 </footer>
+<script>
+// Save this page and ARK for offline use, even if this is the first page someone opens.
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  navigator.serviceWorker.register('/service-worker.js', {scope: '/'}).catch(function () {});
+}
+</script>
 </body>
 </html>

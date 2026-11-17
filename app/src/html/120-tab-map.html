@@ -2,69 +2,73 @@
 <div class="tab-panel" id="tab-map" role="tabpanel" aria-labelledby="navtab-map" tabindex="-1">
 
   <div class="flex-between mb-12 wrap gap-8">
-    <h2 class="section-title"><span class="title-icon">🗺️</span>Local Map</h2>
-    <div id="gps-coords" class="font-sm text-muted">GPS: waiting...</div>
+    <h2 class="section-title">Local Map</h2>
+    <div id="gps-coords" class="font-sm text-muted" aria-live="polite">Looking for your location…</div>
   </div>
 
   <div class="card">
-    <div class="map-toolbar">
-      <span class="map-btn active" onclick="MapTool.setMode('select',this)" title="Pan/select mode">👆 Select</span>
-      <span class="map-btn" onclick="MapTool.setMode('meeting',this)" title="Drop a meeting point">📍 Meeting</span>
-      <span class="map-btn" onclick="MapTool.setMode('water',this)" title="Mark a water source">💧 Water</span>
-      <span class="map-btn" onclick="MapTool.setMode('shelter',this)" title="Mark a shelter">🏠 Shelter</span>
-      <span class="map-btn" onclick="MapTool.setMode('hazard',this)" title="Mark a hazard">⚠️ Hazard</span>
-      <span class="map-btn" onclick="MapTool.setMode('medical',this)" title="Mark a medical site">🏥 Medical</span>
-      <span style="margin-left:auto;display:flex;gap:4px">
-        <span class="map-btn" id="map-btn-zoomin" onclick="MapTool.zoomIn()" title="Zoom in" aria-label="Zoom in">＋</span>
-        <span class="map-btn" id="map-btn-zoomout" onclick="MapTool.zoomOut()" title="Zoom out" aria-label="Zoom out">－</span>
-        <span class="map-btn" id="map-btn-locate" onclick="MapTool.locateMe()" title="Center on my GPS location" aria-label="Center on my GPS location">🎯 Me</span>
-        <span class="map-btn" id="map-btn-cache" onclick="MapTool.preCacheArea()" title="Cache nearby tiles for offline use" aria-label="Cache nearby tiles for offline use">📥 Cache Area</span>
-        <span class="map-btn" onclick="MapTool.clearAll()" title="Remove all markers">🗑️</span>
-        <span class="map-btn" onclick="MapTool.exportImg()" title="Save map as image">💾</span>
-      </span>
+    <div class="kicker mb-8">Pick a marker, then tap the map</div>
+    <div class="map-toolbar" role="group" aria-label="What a tap on the map does">
+      <button type="button" class="map-btn active" aria-pressed="true" onclick="MapTool.setMode('select',this)" title="Drag the map around without adding markers"><svg class="hi" aria-hidden="true"><use href="#i-map"/></svg> Move map</button>
+      <button type="button" class="map-btn" aria-pressed="false" onclick="MapTool.setMode('meeting',this)" title="Mark a meeting point"><svg class="hi" aria-hidden="true"><use href="#i-pin"/></svg> Meeting</button>
+      <button type="button" class="map-btn" aria-pressed="false" onclick="MapTool.setMode('water',this)" title="Mark a water source"><svg class="hi" aria-hidden="true"><use href="#i-droplet"/></svg> Water</button>
+      <button type="button" class="map-btn" aria-pressed="false" onclick="MapTool.setMode('shelter',this)" title="Mark a shelter"><svg class="hi" aria-hidden="true"><use href="#i-house"/></svg> Shelter</button>
+      <button type="button" class="map-btn" aria-pressed="false" onclick="MapTool.setMode('hazard',this)" title="Mark a danger"><svg class="hi" aria-hidden="true"><use href="#i-alert"/></svg> Hazard</button>
+      <button type="button" class="map-btn" aria-pressed="false" onclick="MapTool.setMode('medical',this)" title="Mark a place to get medical help"><svg class="hi" aria-hidden="true"><use href="#i-cross"/></svg> Medical</button>
     </div>
-    <canvas class="w-full" id="map-canvas" width="860" height="500" style="border-radius:var(--radius-md)"></canvas>
-    <div class="font-xs text-muted mt-8">Click to place markers. Scroll to zoom. Tiles cached locally after first load — works offline once visited.</div>
+    <canvas class="w-full" id="map-canvas" width="860" height="500" style="border-radius:var(--radius-md);touch-action:none" role="img" tabindex="0" aria-label="Map of your area. Arrow keys move it, plus and minus zoom. Your saved places are also listed below the map."></canvas>
+    <div class="map-toolbar mt-8" role="group" aria-label="Map controls">
+      <button type="button" class="map-btn" id="map-btn-zoomin" onclick="MapTool.zoomIn()" title="Zoom in" aria-label="Zoom in"><svg class="hi" aria-hidden="true"><use href="#i-plus"/></svg></button>
+      <button type="button" class="map-btn" id="map-btn-zoomout" onclick="MapTool.zoomOut()" title="Zoom out" aria-label="Zoom out"><span aria-hidden="true" style="font-size:1.25em;line-height:1">&minus;</span></button>
+      <button type="button" class="map-btn" id="map-btn-locate" onclick="MapTool.locateMe()" title="Show where I am on the map"><svg class="hi" aria-hidden="true"><use href="#i-user"/></svg> Find me</button>
+      <button type="button" class="map-btn" id="map-btn-cache" onclick="MapTool.preCacheArea()" title="Save this part of the map on this device so it works without internet"><svg class="hi" aria-hidden="true"><use href="#i-download"/></svg> Save this area</button>
+      <button type="button" class="map-btn" onclick="MapTool.exportImg()" title="Save a picture of the map"><svg class="hi" aria-hidden="true"><use href="#i-camera"/></svg> Picture</button>
+    </div>
+    <div class="font-xs text-muted mt-8" style="line-height:1.6">Drag to move. Pinch, or use + and &minus;, to zoom. The map picture comes from the internet the first time you look at a place. While you still have internet, tap <strong>Save this area</strong> so the map of your neighbourhood keeps working without it. Your markers are always kept on this device.</div>
   </div>
 
   <!-- Map Tools -->
   <div class="grid-2">
     <div class="card">
-      <div class="card-title mb-8"><span class="card-icon">📐</span>Distance & Bearing</div>
+      <div class="card-title mb-8"><span class="card-icon"><svg class="hi" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>How far, and which way</div>
       <div class="form-group">
-        <label class="form-label">Point A (lat, lon)</label>
-        <div style="display:flex;gap:6px">
-          <input class="form-input" id="dist-a" placeholder="37.7749, -122.4194" style="flex:1">
-          <button class="btn btn-ghost btn-sm" onclick="MapTool.fillDistPoint('dist-a')" title="Fill from GPS" style="flex-shrink:0;white-space:nowrap">📍 Me</button>
+        <label class="form-label" for="dist-a">From (latitude, longitude)</label>
+        <div class="flex" style="gap:6px">
+          <input class="form-input" id="dist-a" placeholder="37.7749, -122.4194" autocomplete="off" style="flex:1;min-width:0">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="MapTool.fillDistPoint('dist-a')" title="Use my location" aria-label="Use my location for the From point" style="flex-shrink:0;white-space:nowrap"><svg class="hi" aria-hidden="true"><use href="#i-user"/></svg> Me</button>
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Point B (lat, lon)</label>
-        <div style="display:flex;gap:6px">
-          <input class="form-input" id="dist-b" placeholder="37.7849, -122.4094" style="flex:1">
-          <button class="btn btn-ghost btn-sm" onclick="MapTool.fillDistPoint('dist-b')" title="Fill from GPS" style="flex-shrink:0;white-space:nowrap">📍 Me</button>
+        <label class="form-label" for="dist-b">To (latitude, longitude)</label>
+        <div class="flex" style="gap:6px">
+          <input class="form-input" id="dist-b" placeholder="37.7849, -122.4094" autocomplete="off" style="flex:1;min-width:0">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="MapTool.fillDistPoint('dist-b')" title="Use my location" aria-label="Use my location for the To point" style="flex-shrink:0;white-space:nowrap"><svg class="hi" aria-hidden="true"><use href="#i-user"/></svg> Me</button>
         </div>
       </div>
-      <button class="btn btn-secondary btn-sm" onclick="MapTool.calcDistance()">Calculate</button>
-      <div id="dist-result" class="font-sm text-secondary mt-8" style="line-height:1.6"></div>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="MapTool.calcDistance()">Work it out</button>
+      <div id="dist-result" class="font-sm text-secondary mt-8" style="line-height:1.6" aria-live="polite"></div>
+      <div class="font-xs text-muted mt-8">Tip: every saved place below shows its two numbers. Type them here.</div>
     </div>
     <div class="card">
-      <div class="card-title mb-8"><span class="card-icon">🧭</span>Compass & Bearing</div>
-      <div style="font-size:48px;text-align:center;padding:10px;line-height:1"><span id="compass-display" style="display:inline-block;transition:transform 0.3s ease">🧭</span></div>
-      <div id="compass-heading" class="text-center font-sm text-secondary">Heading: --°</div>
-      <button class="btn btn-secondary btn-sm mt-8 btn-block" onclick="MapTool.startCompass()">Use Device Compass</button>
+      <div class="card-title mb-8"><span class="card-icon"><svg class="hi" aria-hidden="true"><use href="#i-compass"/></svg></span>Compass</div>
+      <div style="text-align:center;padding:10px;line-height:1;color:var(--accent)"><span id="compass-display" style="display:inline-block;transition:transform 0.3s ease;opacity:.35"><svg class="hi" aria-hidden="true" style="width:56px;height:56px;stroke-width:1.4;transform:rotate(-90deg)"><use href="#i-arrow-right"/></svg></span></div>
+      <div id="compass-heading" class="text-center font-sm text-secondary" aria-live="off">Not started yet</div>
+      <button type="button" class="btn btn-secondary btn-sm mt-8 btn-block" onclick="MapTool.startCompass()">Use Device Compass</button>
+      <div class="font-xs text-muted mt-8">Works on most phones. Hold the phone flat, away from metal. When it is on, the arrow points north. A phone compass can be wrong, so check it against a landmark you know.</div>
     </div>
   </div>
 
   <!-- Saved Locations -->
   <div class="card">
-    <div class="card-header">
-      <div class="card-title"><span class="card-icon">📌</span>Saved Locations</div>
-      <button class="btn btn-ghost btn-sm" onclick="MapTool.openLocationForm()">+ Add Manual</button>
+    <div class="card-header wrap gap-8">
+      <div class="card-title"><span class="card-icon"><svg class="hi" aria-hidden="true"><use href="#i-pin"/></svg></span>Saved places</div>
+      <div class="flex gap-8 wrap">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="MapTool.openLocationForm()"><svg class="hi" aria-hidden="true"><use href="#i-plus"/></svg> Add a place</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="MapTool.clearAll()" title="Remove all markers from the map"><svg class="hi" aria-hidden="true"><use href="#i-trash"/></svg> Remove all</button>
+      </div>
     </div>
     <div id="saved-locations">
-      <div class="text-secondary font-sm" style="padding:12px 0;text-align:center">No locations saved — tap the map or use Add Location</div>
+      <div class="text-secondary font-sm" style="padding:12px 0;text-align:center">No places saved yet. Pick a marker above and tap the map, or tap Add a place.</div>
     </div>
   </div>
 </div><!-- /tab-map -->
-

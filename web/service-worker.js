@@ -6,23 +6,31 @@
  *
  *   App page (/app and /ARK-CRISIS-SUITE.html) → network first (3 s limit), saved copy as fallback
  *   Welcome page ("/")                          → network first, saved copy, else the app itself
- *   Icons, manifest, preview image              → saved copy first, refreshed in the background
+ *   Hub setup page (/hub), /connect             → network first, saved copy, else the app itself
+ *   Stylesheet, font, icons, manifest, images   → saved copy first, refreshed in the background
  *   On-device AI library (esm.run / jsDelivr)   → saved copy first, so HALO+ can start offline
- *   /?patches, /?bugs, /?admin, hub APIs        → never touched (always live, never cached)
+ *   Any other address typed by hand (a typo)    → network, else the saved app (never a dead end)
+ *   /?patches, /?bugs, /?connect, /?admin, APIs → never touched (always live, never cached)
  *
  * Bump CACHE_VERSION whenever this file changes.
  */
 
-const CACHE_VERSION = 'ark-v6';
+const CACHE_VERSION = 'ark-v9';
 const CACHE_NAME = `ark-cache-${CACHE_VERSION}`;
 const APP_SHELL = '/ARK-CRISIS-SUITE.html';
 const NETWORK_TIMEOUT_MS = 3000;
 
-// Only files that are certain to exist — one missing file would cancel the whole install.
+// Each file is fetched on its own, so one missing file cannot cancel the install.
 const LANDING = '/landing.html';
+const HUB_PAGE = '/hub.html';          // how to set up a hub — must be readable with no internet
+const CONNECT_PAGE = '/connect.html';
 const PRECACHE_URLS = [
   APP_SHELL,
   LANDING,
+  HUB_PAGE,
+  CONNECT_PAGE,
+  '/site.css',                         // without these two the saved pages would open unstyled
+  '/brand/geist-latin.woff2',
   '/brand/halo-mascot.webp',
   '/manifest.json',
   '/icons/icon-192.png',
@@ -82,8 +90,9 @@ function page(request, key) {
 /** Static files: answer from the saved copy at once, refresh it quietly for next time. */
 function savedFirst(request) {
   return caches.match(request).then(saved => {
-    const refresh = fetch(request).then(response => saveCopy(request, response)).catch(() => saved);
-    return saved || refresh;
+    const refresh = fetch(request).then(response => saveCopy(request, response));
+    if (saved) { refresh.catch(() => {}); return saved; }
+    return refresh;
   });
 }
 
@@ -99,20 +108,36 @@ self.addEventListener('fetch', event => {
   }
 
   // Live endpoints and hub APIs are never cached or intercepted.
-  if (url.search && /[?&](patches|bugs|admin)\b/.test(url.search)) return;
+  if (url.search && /[?&](patches|bugs|connect|admin)\b/.test(url.search)) return;
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/ark-data/')) return;
 
-  if (url.pathname === '/app' || url.pathname === '/app/' || url.pathname === APP_SHELL) {
+  // Phone keyboards capitalise the first letter ("/App", "/Hub"), so compare without case.
+  const path = url.pathname.toLowerCase();
+
+  if (path === '/app' || path === '/app/' || path === APP_SHELL.toLowerCase()) {
     event.respondWith(page(request, APP_SHELL));
     return;
   }
-  if (url.pathname === '/' || url.pathname === '/index.php' || url.pathname === LANDING) {
+  if (path === '/' || path === '/index.php' || path === LANDING) {
     event.respondWith(page(request, LANDING));
     return;
   }
+  if (path === '/hub' || path === '/hub/' || path === HUB_PAGE) {
+    event.respondWith(page(request, HUB_PAGE));
+    return;
+  }
+  if (path === '/connect' || path === '/connect/' || path === CONNECT_PAGE) {
+    event.respondWith(page(request, CONNECT_PAGE));
+    return;
+  }
 
-  if (/\.(png|webp|svg|ico|json|webmanifest)$/.test(url.pathname)) {
+  if (/\.(css|woff2|png|webp|svg|ico|json|webmanifest)$/.test(url.pathname)) {
     event.respondWith(savedFirst(request));
+  }
+  else if (request.mode === 'navigate') {
+    // A mistyped address with no internet: open the saved app instead of the browser's error page.
+    event.respondWith(fetch(request).catch(() =>
+      caches.match(APP_SHELL, { ignoreSearch: true }).then(saved => saved || Response.error())));
   }
   // Anything else: default browser behaviour.
 });

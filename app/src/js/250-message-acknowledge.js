@@ -1,7 +1,8 @@
 // === MESSAGE ACKNOWLEDGE ===
 const MsgAck = {
   _KEY: 'msg_acks',
-  _data() { return Store.get(this._KEY, {}); },
+  // Always an object, even if the saved value is damaged, so marking a message never throws.
+  _data() { const d = Store.get(this._KEY, {}); return (d && typeof d === 'object' && !Array.isArray(d)) ? d : {}; },
   isAcked(id) { if (!id) return false; return !!this._data()[id]; },
   getCount(id) { if (!id) return 0; return this._data()[id] || 0; },
   toggle(id) {

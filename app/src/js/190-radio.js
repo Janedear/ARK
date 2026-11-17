@@ -10,6 +10,24 @@ const Radio = {
     this._inited = true;
     this.initPhonetic();
     this.initMorseChart();
+    this._initCopyKeys();
+  },
+
+  // Make every "tap to copy" frequency reachable and usable from a keyboard too.
+  _initCopyKeys() {
+    const panel = document.getElementById('tab-radio');
+    if (!panel) return;
+    panel.querySelectorAll('.freq-copyable').forEach(el => {
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('role', 'button');
+    });
+    panel.addEventListener('keydown', ev => {
+      if (ev.key !== 'Enter' && ev.key !== ' ') return;
+      const el = ev.target && ev.target.closest ? ev.target.closest('.freq-copyable') : null;
+      if (!el || el !== ev.target) return;
+      ev.preventDefault();
+      el.click();
+    });
   },
 
   initPhonetic() {
@@ -38,7 +56,7 @@ const Radio = {
     const btn = document.getElementById('morse-play-btn');
     const status = document.getElementById('morse-status');
     if (btn) {
-      btn.textContent = active ? '⏸ Playing…' : '▶ Play';
+      btn.textContent = active ? 'Playing…' : 'Play';
       if (active) btn.classList.add('morse-playing');
       else btn.classList.remove('morse-playing');
     }
@@ -62,18 +80,26 @@ const Radio = {
   },
 
   playMorse() {
-    const rawInput = document.getElementById('morse-input').value.trim();
-    if (!rawInput) { Toast.show('Enter text to encode as Morse', 'warning'); return; }
+    const inputEl = document.getElementById('morse-input');
+    // An empty box plays SOS, the example shown in the box.
+    const rawInput = (inputEl ? inputEl.value.trim() : '') || 'SOS';
     const input = rawInput.toUpperCase();
+    if (![...input].some(ch => MORSE[ch])) {
+      Toast.show('Morse only has letters and numbers. Type a word like SOS, then tap Play.', 'warning'); return;
+    }
     this.stopMorse();
     try {
       this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     } catch(e) {
-      Toast.show('Audio not available in this browser', 'error'); return;
+      this._audioCtx = null;
+      this.updateEncodeOutput();
+      Toast.show('This device cannot play the sound. Read the dots and dashes on screen instead.', 'error'); return;
     }
     const ctx = this._audioCtx;
+    const gen = ++this._morseGen;
     // Resume is mandatory on user gesture — browsers start AudioContext suspended.
     const startPlayback = () => {
+      if (gen !== this._morseGen) return; // stopped before the sound could start
       const speedEl = document.getElementById('morse-speed');
       const dot = speedEl ? parseFloat(speedEl.value) : 0.1; // seconds per dot unit
       let t = ctx.currentTime + 0.05;
@@ -91,10 +117,12 @@ const Radio = {
         // Visual flash + vibration synced to tone
         const wallDelay = (t - ctx.currentTime) * 1000;
         setTimeout(() => {
+          if (gen !== this._morseGen) return; // Stop was tapped
           const flash = document.getElementById('morse-flash');
           if (flash) { flash.style.display = 'block'; flash.style.opacity = '1'; }
-          if (navigator.vibrate) navigator.vibrate(Math.round(dur * 1000));
+          try { if (navigator.vibrate) navigator.vibrate(Math.round(dur * 1000)); } catch (e) {}
           setTimeout(() => {
+            if (gen !== this._morseGen) return;
             if (flash) { flash.style.opacity = '0'; setTimeout(() => { if (flash) flash.style.display = 'none'; }, 100); }
           }, Math.round(dur * 1000));
         }, wallDelay);
@@ -120,13 +148,20 @@ const Radio = {
     };
 
     if (ctx.state === 'suspended') {
-      ctx.resume().then(startPlayback);
+      const retry = () => Toast.show('The sound could not start. Tap Play again.', 'warning');
+      try {
+        const p = ctx.resume();
+        if (p && p.then) p.then(startPlayback).catch(retry); else startPlayback();
+      } catch (e) { retry(); }
     } else {
       startPlayback();
     }
   },
 
+  _morseGen: 0,
+
   stopMorse() {
+    this._morseGen++; // cancels flashes and buzzes that are still queued
     if (this._morseEndTimer) { clearTimeout(this._morseEndTimer); this._morseEndTimer = null; }
     if (this._audioCtx) {
       try { this._audioCtx.close(); } catch(e) {}
@@ -134,7 +169,7 @@ const Radio = {
     }
     const flash = document.getElementById('morse-flash');
     if (flash) { flash.style.opacity = '0'; flash.style.display = 'none'; }
-    if (navigator.vibrate) navigator.vibrate(0);
+    try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) {}
     this._setMorsePlaying(false);
   },
 
@@ -143,46 +178,72 @@ const Radio = {
     const raw = inputOverride !== undefined
       ? inputOverride
       : (document.getElementById('morse-decode-input') ? document.getElementById('morse-decode-input').value.trim() : '');
-    if (!raw) { Toast.show('Enter Morse code to decode', 'warning'); return; }
-    const words = raw.split(' / ');
+    if (!raw) { Toast.show('Type the dots and dashes first, like ... --- ... then tap Decode.', 'warning'); return; }
+    // Phones often turn . and - into other marks. Put them back first.
+    const clean = String(raw)
+      .replace(/\u2026/g, '...')
+      .replace(/[\u00b7\u2022\u2219\u22c5*]/g, '.')
+      .replace(/[\u2010-\u2015\u2212_]/g, '-')
+      .replace(/\|/g, '/');
+    const words = clean.split(/\s*\/\s*|\s{3,}|\n+/);
     const decoded = words.map(word => {
       if (!word.trim()) return '';
-      return word.trim().split(' ').map(sym => {
-        sym = sym.trim();
+      return word.trim().split(/\s+/).map(sym => {
         if (!sym) return '';
         return MORSE_REV[sym] || '?';
       }).join('');
-    }).join(' ');
+    }).filter(Boolean).join(' ');
     const out = document.getElementById('morse-decode-output');
     if (out) {
       out.style.display = 'block';
-      out.textContent = decoded;
+      out.textContent = decoded.indexOf('?') >= 0
+        ? decoded + '   (? = a letter that could not be read. Check its dots and dashes.)'
+        : decoded;
     }
     return decoded;
   },
 
   copyFreq(text, el) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(() => {
-        Toast.show('Copied: ' + text, 'success', 1800);
-        if (el) {
-          const orig = el.style.background;
-          el.style.background = 'var(--accent-glow)';
-          setTimeout(() => { el.style.background = orig; }, 600);
-        }
-      }).catch(() => {
-        Toast.show('Could not copy — select the frequency manually', 'warning');
-      });
-    } else {
-      Toast.show('Clipboard not available in this browser', 'warning');
-    }
+    text = String(text == null ? '' : text);
+    const ok = () => {
+      Toast.show('Copied: ' + text, 'success', 1800);
+      if (el) {
+        el.style.background = 'var(--accent-glow)';
+        setTimeout(() => { el.style.background = ''; }, 600);
+      }
+    };
+    const fail = () => Toast.show('Could not copy. Write it down instead: ' + text, 'warning', 5000);
+    // Works without the clipboard API, which browsers switch off on a local hub address.
+    const legacy = () => {
+      let done = false;
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.left = '0'; ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { ta.setSelectionRange(0, text.length); } catch (e) {}
+        done = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (el && el.focus) { try { el.focus(); } catch (e) {} }
+      } catch (e) { done = false; }
+      if (done) ok(); else fail();
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok).catch(legacy);
+        return;
+      }
+    } catch (e) {}
+    legacy();
   },
 
   setFilter(band, btn) {
     // Update active button
     const bar = document.getElementById('radio-filter-bar');
-    if (bar) bar.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
+    if (bar) bar.querySelectorAll('.map-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+    if (btn) { btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true'); }
     // Show/hide cards
     const panel = document.getElementById('tab-radio');
     if (!panel) return;

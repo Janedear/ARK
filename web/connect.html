@@ -13,39 +13,44 @@
 <meta property="og:description" content="Ask to link your organisation with ARK: share verified local information, or connect your own hub.">
 <meta property="og:image" content="https://arks.solutions/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#faf9f5">
+<meta name="theme-color" content="#fbf7ef">
 <meta name="referrer" content="no-referrer">
+<link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="preload" href="/brand/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/site.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to the page</a>
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="ark-roof" viewBox="0 0 60 26"><path d="M4 22 30 5l26 17"/><path d="M18 23l12-8 12 8" stroke-width="3.4"/></symbol>
   <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
 </svg>
+
+<div class="fast">In an emergency? <a href="/app">Open ARK now</a> · In danger, call 911 or your local emergency number.</div>
 
 <header class="nav">
   <div class="wrap">
     <a class="wordmark" href="/" aria-label="ARK home"><span class="ark"><svg aria-hidden="true"><use href="#ark-roof"/></svg>ARK</span><small>by HaloSuite</small></a>
     <nav class="nav-links" aria-label="Main">
       <a href="/">Home</a>
-      <a href="/hub">ARK Hub</a>
+      <a class="keep" href="/hub">ARK Hub</a>
       <a class="button button-dark" href="/app">Open ARK</a>
     </nav>
   </div>
 </header>
 
-<main class="wrap">
+<main class="wrap" id="main">
   <div class="page-head">
     <div class="kicker">For official services</div>
-    <h1>Connect to ARK.<em>Reach people when the network can't.</em></h1>
-    <p class="lead">If your organisation helps people in an emergency, ask to link with ARK.</p>
-    <p>ARK is used by households and neighbourhoods when normal communication is down. Linking lets you share verified local information with them, or connect a hub your team runs. Every request is checked by a person before anything is linked.</p>
+    <h1>Connect to ARK. <em>Be there when the usual networks are down.</em></h1>
+    <p class="lead">In a crisis, ARK makes its own internet from the devices around you. If your organisation helps people in an emergency, ask to link with it.</p>
+    <p>One laptop becomes the hub, nearby phones join it over Wi-Fi, and hubs pass messages on to each other. Linking lets you share verified local information on those hubs, or connect a hub your team runs. The network is local: it reaches only as far as the hubs people have set up. Every request is checked by a person before anything is linked.</p>
   </div>
 
   <div class="split" style="padding-bottom:clamp(56px,8vw,110px)">
-    <form id="connect-form" novalidate>
+    <form id="connect-form" method="post" action="/?connect" novalidate>
       <label>Organisation
         <input name="organisation" autocomplete="organization" required maxlength="160">
       </label>
@@ -76,12 +81,12 @@
       <label>Area you serve <small>City, county, district or region.</small>
         <input name="area" required maxlength="200">
       </label>
-      <fieldset style="border:0;display:grid;gap:10px">
-        <legend style="font-size:14px;font-weight:500;margin-bottom:8px">What would you like to do?</legend>
-        <label class="check"><input type="checkbox" name="wants" value="Share verified alerts and local information">Share verified alerts and local information with ARK users in our area</label>
-        <label class="check"><input type="checkbox" name="wants" value="Connect our own ARK hub">Connect a hub our team runs (shelter, command post, station)</label>
-        <label class="check"><input type="checkbox" name="wants" value="Receive community reports">Receive community reports posted to local hubs</label>
-        <label class="check"><input type="checkbox" name="wants" value="Something else">Something else</label>
+      <fieldset>
+        <legend>What would you like to do?</legend>
+        <label class="check"><input type="checkbox" name="wants[]" value="Share verified alerts and local information">Share verified alerts and local information with ARK users in our area</label>
+        <label class="check"><input type="checkbox" name="wants[]" value="Connect our own ARK hub">Connect a hub our team runs (shelter, command post, station)</label>
+        <label class="check"><input type="checkbox" name="wants[]" value="Receive community reports">Receive community reports posted to local hubs</label>
+        <label class="check"><input type="checkbox" name="wants[]" value="Something else">Something else</label>
       </fieldset>
       <label>Anything we should know <small>Optional.</small>
         <textarea name="message" maxlength="3000"></textarea>
@@ -89,13 +94,13 @@
       <div class="hp" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
       <p id="connect-error" role="alert" hidden></p>
       <div><button class="button button-dark button-lg" type="submit" id="connect-submit">Request to connect <svg aria-hidden="true"><use href="#arrow"/></svg></button></div>
-      <p class="note">This form is not monitored for emergencies. In immediate danger, call 911.</p>
+      <p class="note">This form is not monitored for emergencies. In immediate danger, call 911 or your local emergency number.</p>
     </form>
 
     <div style="display:grid;gap:18px">
-      <div class="record" id="connect-done" role="status" hidden>
+      <div class="record done" id="connect-done" role="status" tabindex="-1" hidden>
         <strong>Request received.</strong>
-        <p>Thank you. A person at HaloSuite will reply to your work email after checking the details. Your reference is <strong id="connect-ref"></strong>.</p>
+        <p>Thank you. A person at HaloSuite will reply to your work email after checking the details. Your reference is <strong id="connect-ref"></strong>. Please write it down.</p>
       </div>
       <div class="record">
         <strong>What happens next</strong>
@@ -122,8 +127,20 @@
   var form = document.getElementById('connect-form');
   var error = document.getElementById('connect-error');
   var button = document.getElementById('connect-submit');
-  function fail(message) { error.textContent = message; error.hidden = false; error.focus && error.focus(); }
+  function fail(message, field) {
+    // Show the message right under the field it is about, so it is on screen when the field is focused.
+    var label = field && field.parentNode;
+    form.insertBefore(error, label && label.parentNode === form ? label.nextSibling : button.parentNode);
+    error.textContent = message; error.hidden = false;
+    if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); }
+    else if (error.scrollIntoView) error.scrollIntoView({ block: 'center' });
+  }
+  form.addEventListener('input', function (event) {
+    if (event.target && event.target.removeAttribute) event.target.removeAttribute('aria-invalid');
+  });
   form.addEventListener('submit', function (event) {
+    // Very old browsers cannot send in the background: let the form send itself the plain way.
+    if (!window.fetch) return;
     event.preventDefault();
     error.hidden = true;
     var data = { wants: [] };
@@ -134,25 +151,36 @@
     });
     var required = { organisation: 'your organisation', name: 'your name', role: 'your role', email: 'your work email', area: 'the area you serve' };
     for (var key in required) {
-      if (!String(data[key] || '').trim()) { fail('Please add ' + required[key] + '.'); form.elements[key].focus(); return; }
+      if (!String(data[key] || '').trim()) { fail('Please add ' + required[key] + '.', form.elements[key]); return; }
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(data.email).trim())) {
+      fail('That email address does not look right. Please check it and try again.', form.elements.email); return;
+    }
+    if (!navigator.onLine) {
+      fail('You are not connected to the internet, so this cannot be sent yet. Connect and try again, or email hello@halosuite.ai later.'); return;
     }
     button.disabled = true;
     var label = button.firstChild; var original = label.nodeValue; label.nodeValue = 'Sending… ';
     fetch('/?connect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
       .then(function (response) { return response.json().catch(function () { return {}; }).then(function (body) { return { ok: response.ok, body: body }; }); })
       .then(function (result) {
-        if (!result.ok) throw new Error(result.body.error || 'Something went wrong. Please email hello@halosuite.ai.');
+        if (!result.ok) throw { shown: result.body.error || 'Something went wrong and your request was not sent. Please try again, or email hello@halosuite.ai.' };
+        var done = document.getElementById('connect-done');
         document.getElementById('connect-ref').textContent = result.body.reference || 'saved';
-        document.getElementById('connect-done').hidden = false;
+        done.hidden = false;
         form.reset();
-        document.getElementById('connect-done').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        done.scrollIntoView({ block: 'center' });
+        try { done.focus({ preventScroll: true }); } catch (e) {}
       })
       .catch(function (err) {
-        fail(err && err.message && err.message !== 'Failed to fetch' ? err.message : 'We could not reach ARK just now. Please try again, or email hello@halosuite.ai.');
+        fail(err && err.shown ? err.shown : 'We could not reach ARK just now, so your request was not sent. Check your internet and try again, or email hello@halosuite.ai.');
       })
       .then(function () { button.disabled = false; label.nodeValue = original; });
   });
 })();
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  navigator.serviceWorker.register('/service-worker.js', {scope: '/'}).catch(function () {});
+}
 </script>
 </body>
 </html>
