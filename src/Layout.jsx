@@ -1,16 +1,25 @@
 import React from 'react';
-import { Shield } from 'lucide-react';
 import NetworkNavigation from '@/components/network/NetworkNavigation';
 import ConnectionNotice from '@/components/network/ConnectionNotice';
 import PageOrientation from '@/components/network/PageOrientation';
+import HaloHeader from '@/components/halo/HaloHeader';
+import BottomTabs from '@/components/halo/BottomTabs';
+import { ArkMark } from '@/components/halo/brand';
 import '@/components/crisis/fieldOperations.css';
 import '@/components/fieldTheme.css';
 import '@/components/network/network.css';
+import '@/components/halo/halo.css';
+import '@/components/halo/haloApp.css';
 
 export default function Layout({ children, currentPageName }) {
-  return <div className="field-shell">
-    <div className="network-banner"><div className="flex items-center justify-between"><div className="flex items-center gap-3"><Shield className="h-5 w-5" /><span>ARK</span></div><div>PREPAREDNESS PROTOTYPE — NOT EMERGENCY SERVICES, NOT A MESH NETWORK</div></div></div>
+  return <div className="field-shell halo-shell">
+    <HaloHeader />
     <div className="network-workspace"><NetworkNavigation currentPageName={currentPageName} /><main className="network-main"><ConnectionNotice /><PageOrientation page={currentPageName} />{children}</main></div>
-    <footer><div><div>ARK</div><div><div>Preparedness and local coordination prototype. Not authorized for operational use.</div><div>No emergency dispatch or guaranteed delivery. Public relay tools are not a native mesh network.</div><div>For immediate danger call your local emergency number. Use verified local guidance and qualified responders.</div></div></div></footer>
+    <footer className="halo-footer">
+      <div className="halo-footer-brand"><ArkMark size={26} /><span>Prepare <i>•</i> Connect <i>•</i> Recover</span></div>
+      <p>ARK, a HaloSuite product. Preparedness and local coordination prototype. Not authorized for operational use.</p>
+      <p>No emergency dispatch or guaranteed delivery. Public relay tools are not a native mesh network. For immediate danger call your local emergency number.</p>
+    </footer>
+    <BottomTabs currentPageName={currentPageName} />
   </div>;
 }

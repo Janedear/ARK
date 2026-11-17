@@ -8,7 +8,7 @@
 }
 
 .ark-tile-gap {
-  background: repeating-linear-gradient(45deg, #dfe6dd, #dfe6dd 8px, #e8ede6 8px, #e8ede6 16px);
+  background: repeating-linear-gradient(45deg, #EFE8DA, #EFE8DA 8px, #F7F5F0 8px, #F7F5F0 16px);
 }
 
 .ark-map .leaflet-control-attribution {

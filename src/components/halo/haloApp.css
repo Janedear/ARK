@@ -1,0 +1,57 @@
+/* HaloSuite skin for every in-app screen. Loaded after the older field styles. */
+.halo-shell{background:var(--fo-bg);font-family:var(--font-body)}
+.halo-app-header{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 32px;background:rgba(247,245,240,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--fo-line)}
+.halo-app-header-right{display:flex;align-items:center;gap:18px}
+.halo-app-proto{font-size:12.5px;color:var(--fo-muted)}
+
+/* Plain, calm type everywhere: no monospace, no shouting caps. */
+.halo-shell :is(h1,h2,h3,.fo-h2,.fo-btn,.fo-lb,.fo-st,.fo-q,.fo-bd,.fo-idx,.fo-idx div,.fo-card-title,.fo-control,.fo-badge,.fo-filter,.network-nav section>h2,.network-orientation-grid b,.ll-eyebrow,.ll-strip b,.ll-tag,.ll-status-table th){font-family:var(--font-body)!important;text-transform:none!important;letter-spacing:-.005em!important}
+.halo-shell :is(h1){font-weight:500!important;letter-spacing:-.03em!important}
+.halo-shell :is(.fo-card-title,.fo-h2){font-size:16px!important;font-weight:600!important}
+.halo-shell :is(.ll-eyebrow,.network-nav section>h2,.network-orientation-grid b){font-size:12px!important;font-weight:600!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#6E5634!important}
+
+/* Page headers become soft cream cards with a gold glow. */
+.halo-shell :is(.fo-page-header,.fo-incident-header,.fo-mission){background:radial-gradient(ellipse at 100% 0%,var(--fo-gold-soft),transparent 60%),var(--fo-surface)!important;color:var(--fo-ink)!important;border:1px solid var(--fo-line)!important;border-radius:22px!important;box-shadow:0 12px 32px -20px rgba(60,40,10,.25)!important}
+.halo-shell :is(.fo-page-header,.fo-incident-header,.fo-mission) h1{color:var(--fo-ink)!important;font-size:clamp(26px,3vw,36px)!important}
+.halo-shell :is(.fo-page-header,.fo-incident-header,.fo-mission) p,.halo-shell .fo-incident-header :is(.text-gray-400,.text-gray-500,.text-gray-600,.text-gray-800){color:var(--fo-muted)!important}
+.halo-shell :is(.fo-page-header,.fo-incident-header,.fo-mission) :is(.fo-control,.fo-btn):not([data-variant=link]){background:var(--fo-ink)!important;color:var(--fo-surface)!important}
+.halo-shell :is(.fo-page-header,.fo-incident-header,.fo-mission) :is(.fo-control,.fo-btn):not([data-variant=link]):hover{background:var(--fo-primary-hover)!important}
+.halo-shell :is(.fo-page-header,.fo-incident-header) .fo-badge,.halo-shell .fo-incident-header .fo-control[data-variant=link]{color:var(--fo-ink)!important;border-color:var(--fo-line)!important}
+
+/* Softer shapes. */
+.halo-shell :is(.fo-panel,.fo-ui-card,.fo-card,.fo-band,.fo-sys,.ll-card,.ll-tile,.ll-item,.ll-urgent,.ll-alert,.network-orientation-grid,.fo-notice){border-radius:18px!important}
+.halo-shell :is(.fo-ui-card,.ll-card,.fo-panel){box-shadow:0 8px 24px -16px rgba(60,40,10,.2)!important}
+.halo-shell :is(.fo-control,.fo-btn,.ll-btn,.fo-field,.fo-inp,.ll-field input,.ll-field textarea,.ll-field select,.ll-search input,button[role=combobox]){border-radius:12px!important}
+.fo-ui-dialog{border-radius:20px!important}
+.halo-shell .fo-control{font-size:14px!important;font-weight:600!important}
+.halo-shell .fo-badge,.halo-shell .ll-chip,.halo-shell .ll-tags button{border-radius:999px!important}
+
+/* Side menu. */
+.halo-shell .network-sidebar{background:var(--fo-surface)}
+.halo-shell .network-brand{display:none}
+.halo-shell .network-nav a{border-radius:12px}
+.halo-shell .network-nav a:hover{background:var(--fo-bg)}
+.halo-shell .network-nav a[aria-current=page]{background:var(--fo-gold-soft);color:var(--fo-ink);box-shadow:inset 3px 0 0 var(--fo-gold)}
+.halo-shell .network-nav a[aria-current=page] small{color:var(--fo-muted)}
+.halo-shell .network-connection{background:transparent}
+
+/* Footer. */
+.halo-shell>.halo-footer{max-width:none;margin-top:32px;padding:32px;background:var(--fo-surface);color:var(--fo-muted);text-align:left;font-size:13px;line-height:1.6;border-top:1px solid var(--fo-line)}
+.halo-footer-brand{display:flex;align-items:center;gap:10px;margin-bottom:10px;color:var(--fo-ink);font-size:13px;letter-spacing:.2em;text-transform:uppercase}
+.halo-footer-brand svg,.halo-footer-brand i{color:var(--fo-gold);font-style:normal}
+
+/* Phone bottom menu. */
+.halo-tabs{display:none}
+.halo-tabs-sheet .network-sidebar{border:0;padding-top:28px}
+.halo-tabs-sheet .network-nav{display:flex!important;flex-direction:column}
+@media(max-width:900px){
+  .halo-shell .network-workspace>.network-sidebar{display:none}
+  .halo-app-header{padding:12px 16px}
+  .halo-app-proto{display:none}
+  .halo-shell{padding-bottom:84px}
+  .halo-tabs{display:flex;position:fixed;left:10px;right:10px;bottom:10px;z-index:50;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom));background:#1F1E1C;border-radius:22px;box-shadow:0 12px 30px -10px rgba(0,0,0,.45)}
+  .halo-tabs :is(a,button){display:flex;flex-direction:column;align-items:center;gap:3px;min-width:56px;padding:6px 4px;font-size:11px;color:#CFC8BA;border-radius:12px}
+  .halo-tabs [aria-current=page]{color:#E2C896}
+}
+@media(max-width:600px){.halo-app-header .halo-pill{padding:8px 14px;font-size:13px}.halo-app-header .halo-wordmark{font-size:17px}.halo-app-header .halo-divider{height:20px}}
+@media print{.halo-app-header,.halo-tabs,.halo-shell>.halo-footer{display:none!important}.halo-shell{padding:0}}
