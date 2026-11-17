@@ -1,23 +1,23 @@
 <?php
-// ─── ARK Crisis Suite — Single-File Backend + App ────────────────────────────
-// Upload this ONE file to public_html/ARK.php — that's it.
-// Admin panel: yoursite.com/ARK.php?admin
+// ─── ARK Crisis Suite — Single-File PHP + App ────────────────────────────────
+// Upload ONE file to public_html/ARK.php on Hostinger — done.
+// Admin: yoursite.com/ARK.php?admin  |  Password: ARK-admin-2024
 // ─────────────────────────────────────────────────────────────────────────────
-
 define('ADMIN_PASSWORD', 'ARK-admin-2024');
 define('DATA_DIR', __DIR__ . '/ark-data');
-
-// Auto-create data dirs on first run
 @mkdir(DATA_DIR . '/bugs',    0755, true);
 @mkdir(DATA_DIR . '/patches', 0755, true);
-
 $patchFile = DATA_DIR . '/patches/latest.json';
 if (!file_exists($patchFile)) file_put_contents($patchFile, '{"active":false}');
-
 $uri    = $_SERVER['REQUEST_URI'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-
-// ─── API: Bug report (POST ?bugs) ────────────────────────────────────────────
+if ($method === 'OPTIONS') {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type');
+    exit;
+}
+// POST ?bugs — receive bug report
 if ($method === 'POST' && strpos($uri, '?bugs') !== false) {
     header('Access-Control-Allow-Origin: *');
     header('Content-Type: application/json');
@@ -29,16 +29,7 @@ if ($method === 'POST' && strpos($uri, '?bugs') !== false) {
     echo json_encode(['status'=>'ok','id'=>$id]);
     exit;
 }
-
-// ─── API: OPTIONS preflight ───────────────────────────────────────────────────
-if ($method === 'OPTIONS') {
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type');
-    exit;
-}
-
-// ─── API: Patches (GET ?patches) ─────────────────────────────────────────────
+// GET ?patches — serve latest patch
 if ($method === 'GET' && strpos($uri, '?patches') !== false) {
     header('Access-Control-Allow-Origin: *');
     header('Content-Type: application/json');
@@ -46,8 +37,7 @@ if ($method === 'GET' && strpos($uri, '?patches') !== false) {
     echo file_exists($patchFile) ? file_get_contents($patchFile) : '{"active":false}';
     exit;
 }
-
-// ─── ADMIN PANEL ─────────────────────────────────────────────────────────────
+// ADMIN PANEL
 if (isset($_GET['admin'])) {
     session_start();
     if (isset($_GET['logout'])) { session_destroy(); header('Location: ARK.php?admin'); exit; }
@@ -62,9 +52,9 @@ if (isset($_GET['admin'])) {
         }
         if (isset($_GET['clear_patch'])) { file_put_contents($patchFile,'{"active":false}'); header('Location: ARK.php?admin'); exit; }
         if (isset($_GET['del'])) { @unlink(DATA_DIR.'/bugs/'.basename($_GET['del'])); header('Location: ARK.php?admin'); exit; }
-        if (isset($_GET['clear_bugs'])) { foreach(glob(DATA_DIR.'/bugs/*.json')as$f)@unlink($f); header('Location: ARK.php?admin'); exit; }
-        $bugs=[]; foreach(array_reverse(glob(DATA_DIR.'/bugs/*.json') ?: [])as$f){$b=json_decode(file_get_contents($f),true);if($b){$b['_f']=basename($f);$bugs[]=$b;}}
-        $cp=json_decode(file_get_contents($patchFile),true)??['active'=>false];
+        if (isset($_GET['clear_bugs'])) { foreach(glob(DATA_DIR.'/bugs/*.json') ?: [] as $f) @unlink($f); header('Location: ARK.php?admin'); exit; }
+        $bugs=[]; foreach(array_reverse(glob(DATA_DIR.'/bugs/*.json') ?: []) as $f){$b=json_decode(file_get_contents($f),true);if($b){$b['_f']=basename($f);$bugs[]=$b;}}
+        $cp=json_decode(file_get_contents($patchFile),true) ?? ['active'=>false];
     }
     ?>
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -101,37 +91,31 @@ textarea:focus{border-color:var(--a)}
 <div class="hdr"><h1>🛡 ARK Admin</h1><?php if(!empty($_SESSION['ark_admin'])):?><a href="ARK.php?admin&logout=1">Sign out</a><?php endif;?></div>
 <div class="wrap">
 <?php if(empty($_SESSION['ark_admin'])):?>
-<div class="card login">
-  <h2>Admin Login</h2>
-  <?php if(!empty($loginError)):?><p class="err"><?=htmlspecialchars($loginError)?></p><?php endif;?>
-  <form method="post"><input type="password" name="password" placeholder="Password" autofocus><button class="btn btn-p" style="width:100%">Sign In</button></form>
-</div>
+<div class="card login"><h2>Admin Login</h2>
+<?php if(!empty($loginError)):?><p class="err"><?=htmlspecialchars($loginError)?></p><?php endif;?>
+<form method="post"><input type="password" name="password" placeholder="Password" autofocus><button class="btn btn-p" style="width:100%">Sign In</button></form></div>
 <?php else:?>
-<div class="card">
-  <h2>Patch <span class="badge <?=!empty($cp['active'])?'bon':'boff'?>"><?=!empty($cp['active'])?'ACTIVE':'INACTIVE'?></span></h2>
-  <div class="pre"><?=htmlspecialchars(json_encode($cp,JSON_PRETTY_PRINT))?></div>
-  <?php if(!empty($patchMsg)):?><div class="msg <?=strpos($patchMsg,'✅')!==false?'msg-ok':'msg-err'?>"><?=htmlspecialchars($patchMsg)?></div><?php endif;?>
-  <form method="post">
-    <textarea name="patch_json" rows="8" placeholder='{"active":true,"version":"1.0.1","ops":[{"action":"replace","selector":"#el","content":"<p>fix</p>"}]}'></textarea>
-    <div class="gap"><button class="btn btn-p" type="submit">Push Patch</button><a class="btn btn-g" href="ARK.php?admin&clear_patch=1" onclick="return confirm('Clear patch?')">Clear</a></div>
-  </form>
-</div>
-<div class="card">
-  <h2>Bug Reports (<?=count($bugs)?>)</h2>
-  <?php if(count($bugs)):?>
-  <div class="gap" style="margin-bottom:12px"><a class="btn btn-d" href="ARK.php?admin&clear_bugs=1" onclick="return confirm('Delete all?')">Delete All</a></div>
-  <?php foreach($bugs as $b):?>
-  <div class="bug"><div class="bugh"><span class="bugts"><?=htmlspecialchars($b['timestamp']??$b['_f'])?> &nbsp; <?=htmlspecialchars($b['ip']??'')?></span>
-  <a class="btn btn-g" style="font-size:11px;padding:3px 9px" href="ARK.php?admin&del=<?=urlencode($b['_f'])?>" onclick="event.stopPropagation();return confirm('Delete?')">Del</a></div>
-  <div class="bugb"><?=htmlspecialchars(json_encode($b['data']??$b,JSON_PRETTY_PRINT))?></div></div>
-  <?php endforeach;?>
-  <?php else:?><div class="none">No reports yet.</div><?php endif;?>
-</div>
+<div class="card"><h2>Patch <span class="badge <?=!empty($cp['active'])?'bon':'boff'?>"><?=!empty($cp['active'])?'ACTIVE':'INACTIVE'?></span></h2>
+<div class="pre"><?=htmlspecialchars(json_encode($cp,JSON_PRETTY_PRINT))?></div>
+<?php if(!empty($patchMsg)):?><div class="msg <?=strpos($patchMsg,'✅')!==false?'msg-ok':'msg-err'?>"><?=htmlspecialchars($patchMsg)?></div><?php endif;?>
+<form method="post"><textarea name="patch_json" rows="8" placeholder='{"active":true,"ops":[]}'></textarea>
+<div class="gap"><button class="btn btn-p" type="submit">Push Patch</button><a class="btn btn-g" href="ARK.php?admin&clear_patch=1" onclick="return confirm('Clear?')">Clear</a></div></form></div>
+<div class="card"><h2>Bug Reports (<?=count($bugs)?>)</h2>
+<?php if(count($bugs)):?>
+<div class="gap" style="margin-bottom:12px"><a class="btn btn-d" href="ARK.php?admin&clear_bugs=1" onclick="return confirm('Delete all?')">Delete All</a></div>
+<?php foreach($bugs as $b):?>
+<div class="bug"><div class="bugh"><span class="bugts"><?=htmlspecialchars($b['timestamp']??$b['_f'])?> &nbsp; <?=htmlspecialchars($b['ip']??'')?></span>
+<a class="btn btn-g" style="font-size:11px;padding:3px 9px" href="ARK.php?admin&del=<?=urlencode($b['_f'])?>" onclick="event.stopPropagation();return confirm('Delete?')">Del</a></div>
+<div class="bugb"><?=htmlspecialchars(json_encode($b['data']??$b,JSON_PRETTY_PRINT))?></div></div>
+<?php endforeach;?>
+<?php else:?><div class="none">No reports yet.</div><?php endif;?></div>
 <?php endif;?>
 </div>
 <script>document.querySelectorAll('.bugh').forEach(h=>h.addEventListener('click',function(e){if(e.target.tagName==='A')return;this.closest('.bug').classList.toggle('o')}));</script>
 </body></html>
-<?php exit; } ?>
+<?php exit; }
+// ─── SERVE THE APP ─────────────────────────────────────────────────────────
+?>
 <!DOCTYPE html>
 <!--
   ARK Crisis Suite — Single-File Emergency Communication App
@@ -8582,7 +8566,7 @@ const ShareARK = (() => {
     }
   }
 
-  const ARK_DOWNLOAD_URL = 'https://ark.halosuite.ai/ARK-CRISIS-SUITE.html';
+  const ARK_DOWNLOAD_URL = 'https://ark.halosuite.ai/halo/ARK-CRISIS-SUITE.html';
   const ARK_SHORT_MSG = 'I\'m sharing ARK Crisis Suite with you — a free offline emergency app that works without internet. Download it here: ' + ARK_DOWNLOAD_URL;
   const ARK_EMAIL_SUBJECT = 'ARK Crisis Suite — Free Offline Emergency App';
   const ARK_EMAIL_BODY = `Hi,\n\nI wanted to share ARK Crisis Suite with you — it's a free emergency communication app that works completely offline. No install needed — just open the HTML file in any browser.\n\nDownload it here: ${ARK_DOWNLOAD_URL}\n\nIt's useful for coordinating with neighbours and family during power outages, natural disasters, or any emergency where the internet is down.\n\nStay safe.`;
