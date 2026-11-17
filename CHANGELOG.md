@@ -5,11 +5,23 @@
 First public release on **arks.solutions**.
 
 ### New look
-- HaloSuite design throughout: warm cream, charcoal and soft gold, the ARK roof mark, and the Halo
-  mascot (tap it to ask the built-in assistant).
+- ARK is its own brand — the roof mark, "by HaloSuite" — in the HaloSuite design language: warm
+  paper, near-black ink, restrained gold, the Geist typeface, Georgia italic accents, line icons.
+- Halo, the mascot, is your guide: tap it on the home screen to ask a question.
 - New home screen: *My Emergency Plan*, *Local Messages*, *Saved Guides*, *ARK Hub*.
 - New bottom bar: Home · Plan · Guides · Messages · Hub.
-- Welcome page at arks.solutions, hub download page at arks.solutions/hub, new link-preview image.
+- Welcome page at arks.solutions, the app at /app, the hub kit at /hub.
+- The link preview is rendered from the real welcome page, so it always matches.
+- Typeface and mascot are embedded, so ARK looks the same with no internet.
+
+### New
+- **Connect to ARK** (arks.solutions/connect): emergency services and agencies can ask to link
+  with ARK. Requests are stored on the server and reviewed by a person in the admin panel.
+
+### For contributors
+- The app's source is now ~60 small files in `app/src/`, joined by `scripts/build.py` into the
+  single file. See CONTRIBUTING.md and docs/ARCHITECTURE.md.
+- One branch (`main`), automatic checks on every pull request, issue and pull-request templates.
 
 ### Fixed — things that would have failed in an emergency
 - Messages now actually reach an ARK Hub (the app was posting to an address hubs do not have).

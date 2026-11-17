@@ -9,20 +9,18 @@
 <link rel="stylesheet" href="/site.css">
 <style>
   html,body{width:1200px;height:630px;overflow:hidden}
-  .og{display:grid;grid-template-columns:660px 540px;height:630px;background:var(--bg)}
-  .og-copy{padding:54px 0 0 72px;display:flex;flex-direction:column}
-  .og-copy .wordmark{font-size:34px;margin-bottom:58px}
-  .og-copy .wordmark svg{width:40px;height:19px}
-  .og-copy .wordmark small{font-size:10px}
-  .og-copy h1{font-size:68px;margin:24px 0 22px;line-height:1.04}
-  .og-copy .lead{font-size:22px;max-width:520px}
-  .og-foot{margin-top:auto;padding-bottom:46px;display:flex;align-items:center;gap:18px;font-size:13px;color:var(--muted);letter-spacing:.02em}
-  .og-foot b{font-weight:500;color:var(--ink);font-size:15px;letter-spacing:0}
-  .og-foot i{width:1px;height:14px;background:var(--line-strong)}
-  .room{min-height:0;height:630px;border-left:1px solid var(--line)}
-  .room::before{background:linear-gradient(90deg,var(--bg) 0%,rgba(250,249,245,.5) 12%,transparent 30%)}
-  .mascot{width:300px;bottom:150px;animation:none}
-  .guide{left:auto;right:36px;bottom:34px}
+  .og{display:grid;grid-template-columns:640px 560px;height:630px}
+  .og-copy{padding:52px 0 0 68px;display:flex;flex-direction:column}
+  .og-copy .wordmark .ark{font-size:44px}
+  .og-copy .wordmark svg{width:56px;height:26px}
+  .og-copy .wordmark small{font-size:12px}
+  .og-copy h1{font-size:62px;margin:40px 0 20px;line-height:1.04}
+  .og-copy .lead{font-size:25px;max-width:540px;line-height:1.35}
+  .og-foot{margin-top:auto;padding-bottom:44px;display:flex;align-items:center;gap:16px;font-size:17px;color:var(--muted)}
+  .og-foot b{font-weight:700;color:var(--ink);font-size:19px}
+  .og-foot i{width:5px;height:5px;border-radius:50%;background:var(--gold-soft)}
+  .network{align-self:center;width:560px;margin-left:-10px}
+  .mascot{animation:none}
 </style>
 </head>
 <body>
@@ -32,24 +30,42 @@
 <div class="og">
   <div class="og-copy">
     <span class="wordmark"><span class="ark"><svg><use href="#ark-roof"/></svg>ARK</span><small>by HaloSuite</small></span>
-    <div class="kicker">Backup internet, AI &amp; more — for when crisis hits</div>
     <h1>Prepared for the unexpected.<em>Connected when it matters.</em></h1>
+    <p class="lead">In a crisis, ARK makes its own internet — from the devices around you.</p>
     <div class="og-foot"><b>arks.solutions</b><i></i>Free<i></i>No account<i></i>Works offline</div>
   </div>
-  <div class="room">
-    <div class="room-caption"><span>Your guide, Halo</span><span>A little room to be ready</span></div>
-    <svg class="scene" viewBox="0 0 800 700" preserveAspectRatio="xMidYMid slice">
-      <circle class="sun" cx="610" cy="210" r="88"/>
-      <g class="floor">
-        <path d="M-40 560h880M-40 600h880M-40 648h880M-40 700h880"/>
-        <path d="M400 520L120 700M400 520L260 700M400 520v180M400 520l140 180M400 520l280 180M400 520L-40 640M400 520l440 120"/>
-      </g>
-      <path d="M0 470c90-34 190-40 300-14M520 452c80-26 170-28 280-2"/>
-      <path d="M664 452v-30l28-22 28 22v30zM682 452v-18h18v18"/>
-      <path class="arch-out" d="M262 560V330c0-88 62-158 138-158s138 70 138 158v230z"/>
-      <path class="arch-in" d="M296 560V336c0-68 46-124 104-124s104 56 104 124v224"/>
-      <ellipse class="plinth" cx="400" cy="566" rx="150" ry="20"/>
-      <ellipse class="plinth" cx="400" cy="556" rx="108" ry="13"/>
+  <div class="network">
+    <svg class="scene" viewBox="0 0 640 520" preserveAspectRatio="xMidYMid meet">
+      <circle class="sun" cx="486" cy="150" r="70"/>
+      <path d="M0 378c70-40 150-52 236-30 60 16 110 16 170-8 76-30 160-30 234 4"/>
+      <path d="M0 452c110-30 220-34 330-12 100 20 200 20 310-10"/>
+      <path d="M566 330V212M556 330h20M566 212l-12 118M566 212l12 118M558 270h16"/>
+      <path d="M546 200a28 28 0 0 1 40 0M534 188a46 46 0 0 1 64 0"/>
+      <circle class="dot" cx="566" cy="208" r="4"/>
+      <path class="wall" d="M52 372v-52l44-36 44 36v52z"/>
+      <path d="M82 372v-28h28v28"/>
+      <rect class="win" x="60" y="330" width="14" height="14"/>
+      <path class="wall" d="M444 356v-46l40-32 40 32v46z"/>
+      <path d="M472 356v-24h24v24"/>
+      <rect class="win" x="504" y="322" width="12" height="12"/>
+      <path class="wall" d="M300 150v-26l24-19 24 19v26z"/>
+      <path class="link" d="M96 270C140 190 230 150 318 150"/>
+      <path class="link" d="M330 150c70 0 130 30 156 110"/>
+      <path class="link" d="M500 268c20-30 40-48 62-58"/>
+      <path class="link" d="M110 300c60 40 130 60 196 66"/>
+      <path class="link" d="M334 366c50-6 96-24 130-52"/>
+      <circle class="node" cx="96" cy="270" r="7"/><circle class="dot" cx="96" cy="270" r="2.500"/>
+      <circle class="node" cx="324" cy="150" r="7"/><circle class="dot" cx="324" cy="150" r="2.500"/>
+      <circle class="node" cx="486" cy="264" r="7"/><circle class="dot" cx="486" cy="264" r="2.500"/>
+      <ellipse class="glow" cx="320" cy="430" rx="150" ry="22"/>
+      <path class="roof" d="M176 330L320 226l144 104"/>
+      <path class="roof-in" d="M236 340l84-60 84 60"/>
+      <path d="M220 432h200"/>
+      <rect class="wall" x="150" y="404" width="26" height="44" rx="5"/>
+      <path d="M159 440h8"/>
+      <path class="wall" d="M462 410h56v34h-56z"/>
+      <path d="M452 448h76"/>
+      <path class="link" d="M176 420c20-8 40-10 62-6M462 424c-20-8-38-10-58-6"/>
     </svg>
     <img class="mascot" src="/brand/halo-mascot.png" alt="">
   </div>

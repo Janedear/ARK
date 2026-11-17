@@ -26,6 +26,8 @@ public_html/
 ├── landing.html            welcome page (shown at /)
 ├── ARK-CRISIS-SUITE.html   the app (shown at /app, and the file people save)
 ├── hub.html                hub download page (shown at /hub)
+├── connect.html            "Connect to ARK" form for official services (shown at /connect)
+├── site.css                styles shared by the three pages
 ├── .htaccess               https, clean addresses, security headers
 ├── service-worker.js       offline copy for people who visited once
 ├── manifest.json  robots.txt  og-image.png
@@ -40,6 +42,7 @@ public_html/
 | `https://arks.solutions/` | Welcome page with the Halo mascot |
 | `https://arks.solutions/app` | The app |
 | `https://arks.solutions/hub` | Hub download page |
+| `https://arks.solutions/connect` | Connect to ARK form; sending it shows a reference number |
 | `https://arks.solutions/?patches` | `{"version":"0.0.0","summary":"","patches":[]}` |
 | `https://arks.solutions/ark-data/` | **403 Forbidden** (this must not open) |
 
@@ -48,8 +51,8 @@ If `/app` gives "not found", the host is ignoring `.htaccess`; the app still wor
 
 ## Turn on the admin panel
 
-The panel at `https://arks.solutions/?admin` lets you read bug reports and publish a small fix to
-every running copy. It is **off** until a password exists on the server. The password is never
+The panel at `https://arks.solutions/?admin` lets you read bug reports and "Connect to ARK" requests
+from official services, and publish a small fix to every running copy. It is **off** until a password exists on the server. The password is never
 stored in this repository.
 
 1. Pick a long password and keep it in a password manager.

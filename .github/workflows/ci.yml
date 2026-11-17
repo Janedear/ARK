@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Built app matches its source
+        run: python scripts/build.py --check
       - name: Hub self-tests
         run: |
           node src/hub/selftest.mjs
@@ -28,7 +30,7 @@ jobs:
         run: node src/toolkit/selftest.mjs
       - name: JavaScript syntax
         run: |
-          for f in src/hub/*.mjs src/toolkit/*.mjs web/service-worker.js; do node --check "$f"; done
+          for f in app/src/js/*.js src/hub/*.mjs src/toolkit/*.mjs web/service-worker.js; do node --check "$f"; done
           node -e "const s=require('fs').readFileSync('ARK-CRISIS-SUITE.html','utf8');for(const m of s.matchAll(/<script>([\s\S]*?)<\/script>/g))new Function(m[1]);console.log('app scripts parse')"
       - name: PHP syntax
         run: php -l web/index.php
