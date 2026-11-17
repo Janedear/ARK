@@ -2,7 +2,7 @@
 <!--
   ARK Crisis Suite — Single-File Emergency Communication App
   ==========================================================
-  Version : 1.0 (prototype)
+  Version : 1.2.0
   License : MIT
   Repo    : https://github.com/Janedear/ARK
   Contact : hello@halosuite.ai
@@ -60,19 +60,26 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://fonts.googleapis.com https://fonts.gstatic.com; connect-src *;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://esm.run https://cdn.jsdelivr.net; worker-src 'self' blob:; connect-src *;">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ARK Crisis Suite — Offline Emergency Tool</title>
-<meta name="description" content="ARK — offline-first emergency communication suite. Works when the internet is gone. Offline AI, maps, Morse code, mesh messaging — one file.">
+<title>ARK — Backup internet, AI &amp; more for when crisis hits</title>
+<meta name="description" content="A free emergency app that keeps working when the internet is down: messaging between nearby phones, an offline AI helper, maps, first-aid and survival guides, and your family plan. No account. Save it now, before you need it.">
+<link rel="canonical" href="https://arks.solutions/">
 <!-- Open Graph / social sharing -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="ARK Crisis Suite — Offline Emergency Tool">
-<meta property="og:description" content="No internet? Your phones can still connect, share the app, use offline AI, pull up cached maps, and communicate in Morse code. One self-contained file. Zero accounts. Works anywhere.">
-<meta property="og:site_name" content="ARK by HaloSuite">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ARK Crisis Suite">
-<meta name="twitter:description" content="Offline emergency preparedness in a single HTML file — AI, maps, radio reference, mesh messaging, Morse code. No internet required after first load.">
+<meta property="og:url" content="https://arks.solutions/">
+<meta property="og:title" content="ARK — Backup internet, AI &amp; more for when crisis hits">
+<meta property="og:description" content="Free. No account. Keeps working when the internet is down: messaging between nearby phones, an offline AI helper, maps, first-aid guides and your family plan. Save it now, before you need it.">
+<meta property="og:site_name" content="ARK Crisis Suite">
+<meta property="og:image" content="https://arks.solutions/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ARK — Backup internet, AI and more for when crisis hits. Free emergency app that works offline.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ARK — Backup internet, AI &amp; more for when crisis hits">
+<meta name="twitter:description" content="Free emergency app that keeps working when the internet is down. Messaging, offline AI, maps, first-aid guides, family plan. Save it before you need it.">
+<meta name="twitter:image" content="https://arks.solutions/og-image.png">
 <meta name="application-name" content="ARK Crisis Suite">
 <meta name="theme-color" content="#dcbf78">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -83,7 +90,8 @@
 <meta name="apple-mobile-web-app-title" content="ARK">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<!-- Web fonts load without blocking the page: on Wi-Fi that has no internet, ARK must still appear instantly (it falls back to the device's own fonts). -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 /* =====================================================================
    ARK Crisis Suite — Cinematic Design System (matches landing page)
@@ -788,9 +796,10 @@ select.form-input{cursor:pointer}
 #onboard-overlay{
   position:fixed;inset:0;z-index:9000;
   background:rgba(5,8,15,.95);
-  display:flex;align-items:center;justify-content:center;
+  display:flex;justify-content:center;
   padding:16px;
   overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
   animation:ob-fadein .25s ease both;
 }
 #onboard-overlay.hidden{display:none!important;animation:none}
@@ -801,7 +810,16 @@ select.form-input{cursor:pointer}
   max-width:580px;width:100%;
   padding:32px;
   position:relative;
+  /* margin:auto centres the box when it fits and lets the whole box scroll when it does not
+     (centring with align-items would cut off the top on small phones) */
+  margin:auto;
   animation:ob-fadein .3s ease .05s both;
+}
+@media (max-width:480px){
+  .onboard-box{padding:22px 18px}
+  .onboard-tagline,.onboard-progress{margin-bottom:18px}
+  /* Keep Back / Continue on screen at all times, so nobody has to discover that the card scrolls */
+  .onboard-nav{flex-wrap:wrap;position:sticky;bottom:0;z-index:2;background:var(--bg-card);margin:16px -18px -22px;padding:12px 18px 16px;border-top:1px solid var(--border);border-radius:0 0 16px 16px}
 }
 .onboard-logo{font-size:2.4rem;font-weight:900;color:var(--accent);letter-spacing:-.03em;margin-bottom:4px}
 .onboard-tagline{font-size:14px;color:var(--text-secondary);margin-bottom:28px}
@@ -883,7 +901,10 @@ select.form-input{cursor:pointer}
       <div class="ob-warn">⚡ This app requires no internet. All data is stored only on your device. Nothing is transmitted to any company or server unless you connect to a local hub.</div>
       <div class="onboard-nav">
         <span class="onboard-step-label">Step 1 of 5</span>
-        <button class="btn btn-primary" onclick="Onboarding.next()">Get Started →</button>
+        <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost" onclick="Onboarding.finish()" title="Go straight to the app. You can run setup later from Settings.">Skip — I need help now</button>
+          <button class="btn btn-primary" onclick="Onboarding.next()">Get Started →</button>
+        </span>
       </div>
     </div>
 
@@ -1027,7 +1048,7 @@ select.form-input{cursor:pointer}
         <button class="btn" onclick="ShareARK.shareViaFacebook()" style="font-size:.82rem;background:#1877f2;color:#fff;border:none;white-space:nowrap">👍 Facebook</button>
         <button class="btn" onclick="ShareARK.shareViaInstagram()" style="font-size:.82rem;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none;white-space:nowrap">📷 Instagram</button>
       </div>
-      <p style="font-size:.75rem;color:var(--text-muted);margin-top:8px;margin-bottom:0">Sends a link to <strong>ark.halosuite.ai</strong> — works over internet. For offline spread, use the Download + AirDrop method above.</p>
+      <p style="font-size:.75rem;color:var(--text-muted);margin-top:8px;margin-bottom:0">Sends a link to <strong>arks.solutions</strong> — works over internet. For offline spread, use the Download + AirDrop method above.</p>
     </div>
 
     <!-- AirDrop / Nearby Share -->
@@ -1216,7 +1237,7 @@ select.form-input{cursor:pointer}
       <div class="card-title mb-8"><span class="card-icon">🛰</span> Network</div>
       <div class="font-sm text-secondary" id="last-sync-display">Not synced</div>
       <div class="font-xs text-muted mt-4" id="hub-url-display">Hub: not configured</div>
-      <div id="softhub-home-status" class="font-xs mt-4" style="color:var(--text-muted)">📡 Peer mode</div>
+      <div id="softhub-home-status" class="font-xs mt-4" style="color:var(--text-muted)">📡 Not connected to a hub — messages stay on this device</div>
       <div class="mt-8 flex gap-8 wrap" id="hub-home-actions">
         <button class="btn btn-secondary btn-sm" onclick="Hub.sync(true)" id="hub-sync-btn" style="display:none">🔄 Sync</button>
         <button class="btn btn-primary btn-sm" onclick="UI.switchTab('network')" id="hub-connect-btn">📡 Network →</button>
@@ -1699,24 +1720,23 @@ select.form-input{cursor:pointer}
   <!-- First-time tip — hidden once hub is configured or soft-hub claimed -->
   <div id="network-first-use-tip" class="warn-box" style="background:rgba(139,111,62,.08);border-color:rgba(139,111,62,.3);color:var(--text-secondary);font-size:13px;line-height:1.6;margin-bottom:12px">
     <strong style="color:var(--accent)">📡 How networking works:</strong>
-    One device on your Wi-Fi becomes the <em>Hub</em> — it syncs everyone's messages.
-    Tap <strong>Become the Hub</strong> below if you want this device to be the hub,
-    or enter an address under <strong>Join a Hub</strong> if someone else is already running one.
-    ARK works fully offline too — your messages are saved on this device even without a hub.
+    One laptop or Raspberry Pi on your Wi-Fi runs the free <em>ARK Hub</em> program — it shares everyone's messages, with no internet needed.
+    If someone is already running a hub, enter its address under <strong>Join a Hub</strong>.
+    Everything else in ARK works without a hub — your plan, guides and notes are saved on this device.
   </div>
 
   <!-- ONE-TAP HUB DEPLOY CARD -->
   <div class="hub-deploy-card" id="hub-deploy-card">
     <div class="hub-deploy-label">This Device</div>
-    <div class="hub-deploy-title" id="hub-deploy-title">🛰 Start Hub on This Device</div>
-    <div class="hub-deploy-sub" id="hub-deploy-sub">Turn this device into the network hub. Anyone on the same Wi-Fi can connect instantly — no setup needed on their end.</div>
+    <div class="hub-deploy-title" id="hub-deploy-title">🛰 Link phones with no internet</div>
+    <div class="hub-deploy-sub" id="hub-deploy-sub">A hub is one laptop or Raspberry Pi running the free ARK Hub program. Every phone on its Wi-Fi can then share messages — even with the internet down. Set it up before you need it.</div>
 
     <!-- PEER STATE (default) -->
     <div id="hub-deploy-peer-state">
-      <button class="btn btn-primary w-full" id="hub-start-btn" onclick="Network.startSoftHub()" style="font-size:1rem;padding:14px 20px;border-radius:var(--radius-md)">
-        🛰 Become the Hub
+      <button class="btn btn-primary w-full" id="hub-start-btn" onclick="Network.showHubHelp()" style="font-size:1rem;padding:14px 20px;border-radius:var(--radius-md)">
+        📖 How to set up a hub
       </button>
-      <div class="font-xs text-muted mt-8" style="text-align:center">Tap once — your device starts sharing messages with nearby ARK users on the same Wi-Fi</div>
+      <div class="font-xs text-muted mt-8" style="text-align:center">A phone cannot be a hub on its own — these steps take about 10 minutes on a laptop</div>
     </div>
 
     <!-- HUB ACTIVE STATE (shown when isHub) -->
@@ -1904,7 +1924,7 @@ select.form-input{cursor:pointer}
         <li>Use <strong>1 or 2 hands</strong> on center of chest.</li>
         <li>Push <strong>2 inches deep at 100–120/min</strong>.</li>
         <li>Allow full recoil. 30 compressions then 2 rescue breaths.</li>
-        <li>Rescue breath: cover mouth + nose; small puff until chest rises.</li>
+        <li>Rescue breath: pinch the nose, seal your mouth over the child's mouth; breathe gently until the chest rises.</li>
         <li>Continue until help arrives or child responds.</li>
       </ol>
     </div>
@@ -1914,7 +1934,7 @@ select.form-input{cursor:pointer}
         <li>Flick foot gently — no response? Call 911.</li>
         <li>Lay on firm flat surface on back.</li>
         <li>Tilt head back slightly — do not hyperextend.</li>
-        <li>Use <strong>2 fingers</strong> (index + middle) on center of chest just below nipple line.</li>
+        <li>Wrap both hands around the chest and press with <strong>both thumbs</strong> side by side on the center of the chest, just below the nipple line. If you cannot reach around, use the <strong>heel of one hand</strong>.</li>
         <li>Push <strong>1.5 inches deep at 100–120/min</strong>.</li>
         <li>After 30 compressions: cover mouth AND nose, give 2 small gentle puffs.</li>
         <li>Continue 30:2 until help arrives.</li>
@@ -1950,7 +1970,7 @@ select.form-input{cursor:pointer}
         <li>Hold infant face-down on your forearm, head lower than body.</li>
         <li>Give <strong>5 firm back blows</strong> between shoulder blades with heel of hand.</li>
         <li>Flip infant face-up on your forearm, head lower.</li>
-        <li>Use 2 fingers on chest (below nipple line): give <strong>5 chest thrusts</strong>.</li>
+        <li>Use the heel of one hand on the center of the chest (just below nipple line): give <strong>5 chest thrusts</strong>.</li>
         <li>Check mouth for visible object — only remove if you can clearly see it.</li>
         <li>Alternate 5 back blows + 5 chest thrusts until cleared or infant becomes unconscious.</li>
         <li>If unconscious: begin infant CPR.</li>
@@ -2194,7 +2214,7 @@ select.form-input{cursor:pointer}
         <tr><td>International Distress (HF)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('2182 kHz',this)" title="Tap to copy">2182 kHz<span class="copy-hint">📋</span></td><td>Marine/aviation distress</td></tr>
         <tr><td>Marine Channel 16 — Distress &amp; Calling <span class="badge badge-red" style="font-size:10px;padding:1px 5px;vertical-align:middle">PRIORITY</span></td><td class="monospace freq-copyable" onclick="Radio.copyFreq('156.800 MHz',this)" title="Tap to copy">156.800 MHz<span class="copy-hint">📋</span></td><td>International distress / calling</td></tr>
         <tr><td>Aviation Distress</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('121.5 MHz',this)" title="Tap to copy">121.5 MHz<span class="copy-hint">📋</span></td><td>Guard frequency</td></tr>
-        <tr><td>FEMA IPAWS / Federal Interop</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('155.340 MHz',this)" title="Tap to copy">155.340 MHz<span class="copy-hint">📋</span></td><td>FEMA IPAWS &amp; federal coordination</td></tr>
+        <tr><td>Hospital / EMS (HEAR)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('155.340 MHz',this)" title="Tap to copy">155.340 MHz<span class="copy-hint">📋</span></td><td>Ambulance-to-hospital — listen only</td></tr>
         <tr><td>National Calling (Ham 2m)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('146.520 MHz',this)" title="Tap to copy">146.520 MHz<span class="copy-hint">📋</span></td><td>Ham radio simplex calling</td></tr>
         <tr><td>National Calling (Ham 70cm)</td><td class="monospace freq-copyable" onclick="Radio.copyFreq('446.000 MHz',this)" title="Tap to copy">446.000 MHz<span class="copy-hint">📋</span></td><td>Ham radio simplex calling</td></tr>
       </tbody>
@@ -2652,7 +2672,7 @@ select.form-input{cursor:pointer}
       <div class="card-title" style="margin:0">🧠 HALO+ Upgrade <span class="badge badge-muted font-xs" style="vertical-align:middle">Optional</span></div>
       <span id="ai-status-badge" class="badge badge-muted">Not loaded</span>
     </div>
-    <p class="font-sm text-secondary mb-8">Upgrade to a full neural language model (Llama&nbsp;3.2). Requires internet <em>once</em> to download &amp; cache (650&nbsp;MB – 1.8&nbsp;GB depending on model). After that, runs fully offline on your device. Needs Chrome&nbsp;113+ / Edge&nbsp;113+ (WebGPU).</p>
+    <p class="font-sm text-secondary mb-8">Upgrade to a full neural language model (Llama&nbsp;3.2). Needs internet to download (650&nbsp;MB – 1.8&nbsp;GB depending on model) — do this <em>before</em> an emergency, on Wi-Fi. Once downloaded it runs on your device with no internet, as long as you open ARK the same way you did when you downloaded it. Needs a recent Chrome or Edge on a fairly new phone or computer. The built-in assistant above always works, with or without this.</p>
     <div class="flex gap-8 mb-8 wrap">
       <select id="ai-model-select" class="form-input" style="flex:1;min-width:180px">
         <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B — Fast (~650 MB)</option>
@@ -2722,7 +2742,7 @@ window.onerror = (msg, src, line, col, err) => {
 // === EMBEDDED DATA ===
 const ARK_GUIDES = [
   {slug:'water-safety',category:'water',title:'Drinking water in an outage',updated:'2024-01',summary:'How much to store, exactly how to treat water you are unsure about, and when treating is pointless.',seeAlso:['water-purification','sanitation-no-water'],quickSteps:['Store at least 1 gallon (about 4 litres) per person per day for drinking and sanitation. Three days minimum, two weeks if you can.','Boil uncertain water at a rolling boil for 1 minute, or 3 minutes above roughly 6,500 ft (2,000 m). Let it cool covered before drinking.','If told to disinfect with bleach: 8 drops (about 1/8 teaspoon) of unscented 5–8.25% chlorine bleach per gallon of clear water, 16 drops if cloudy, then wait 30 minutes. It should smell faintly of chlorine.','A do-not-drink notice is different from a boil notice. If the warning is chemical, boiling concentrates it. Use bottled water or another source instead.','Never drink from radiators, hot-water heating systems, swimming pools, spas or water beds.'],sections:[{heading:'Fill up before the pressure drops',body:['Fill clean containers, the bathtub and any food-grade buckets while pressure is still available. Label each with the date and rotate stored water every six months.','A bathtub of water is for washing and flushing, not for drinking, unless you have a food-grade liner and treat it first.']},{heading:'Boiling beats everything else',body:['Boiling is the most reliable method against bacteria, viruses and parasites. A rolling boil for one minute is enough at low altitude; add two minutes above 6,500 ft.','Boiling does not remove chemicals, salt or heavy metals. If you suspect those, use bottled water or a filter certified for them.']},{heading:'Filters, tablets and bleach',body:['Use a filter rated for the contaminants you are worried about. Many camping filters handle bacteria and protozoa but not viruses; boiling or chemical treatment covers that gap.','Chlorine dioxide or iodine tablets need the contact time on the label, usually 30 minutes or more, and colder water needs longer.']},{heading:'Sanitation matters as much as drinking',body:['Reserve water for handwashing before meals and after using the toilet. Hand hygiene prevents more illness in a prolonged outage than any water treatment upgrade.','If plumbing fails, follow your local health department instructions for waste.']}],sources:[{label:'Ready.gov — Water',url:'https://www.ready.gov/water'},{label:'CDC — Make water safe during an emergency',url:'https://www.cdc.gov/water-emergency'},{label:'EPA — Emergency disinfection',url:'https://www.epa.gov/ground-water-and-drinking-water/emergency-disinfection-drinking-water'}]},
-  {slug:'water-purification',category:'water',title:'Water purification in the field',updated:'2024-01',summary:'How to make water safe from streams, rain, ponds or unknown sources using what you have.',seeAlso:['water-safety','foraging'],quickSteps:['Never drink untreated surface water — even clear mountain streams can carry Giardia and Cryptosporidium.','Boiling is the most reliable: a full rolling boil for 1 minute (3 minutes above 6,500 ft/2,000 m). Let cool in a covered container.','If boiling is not possible, use iodine or chlorine dioxide tablets per the label — usually 30 min contact time; double in cold or cloudy water.','Portable filters (0.1–0.2 micron) remove bacteria and protozoa but NOT viruses. Combine with chemical treatment in areas with human sewage.','Solar disinfection (SODIS): fill a clear PET bottle, lay it in direct sunlight for 6 hours (12 if cloudy). Effective against bacteria and viruses.'],sections:[{heading:'Improvised filtration before purification',body:['Filtering first removes particles that protect pathogens from chemical treatment. Layer grass, crushed charcoal (not briquettes) and sand in a container with small holes — coarsest material first (grass), finest last (sand/charcoal).','This is pre-treatment only, not purification. Always follow with boiling or chemical treatment.','Let filtered water settle 30 minutes and decant the clear top before treating.']},{heading:'Disinfection by chemical method',body:['Household unscented bleach (5–8.25% sodium hypochlorite): 8 drops per gallon of clear water, 16 drops if cloudy. Wait 30 minutes. Water should have a faint chlorine smell; if not, repeat the dose and wait 15 more minutes.','Iodine tablets or chlorine dioxide tablets follow label instructions — usually 1 tablet per litre; 30–60 minutes contact time.','Chemical methods are less effective against Cryptosporidium — boiling or a 1-micron absolute filter is preferred for that.']},{heading:'Collecting and storing clean water',body:['Rain collection from roof or tarp is relatively clean — discard the first few minutes of runoff to flush contaminants.','Store treated water in food-grade, opaque containers with tight lids. Keep out of sunlight to prevent algae and reduce chlorine loss.','Label the date. Treated water stored properly stays safe about 6 months.']}],sources:[{label:'CDC — Water purification',url:'https://www.cdc.gov/healthywater/emergency/making-water-safe.html'},{label:'WHO — SODIS',url:'https://www.who.int/publications/m/item/sodis-manual'},{label:'EPA — Emergency disinfection',url:'https://www.epa.gov/ground-water-and-drinking-water/emergency-disinfection-drinking-water'}]},
+  {slug:'water-purification',category:'water',title:'Water purification in the field',updated:'2024-01',summary:'How to make water safe from streams, rain, ponds or unknown sources using what you have.',seeAlso:['water-safety','foraging'],quickSteps:['Never drink untreated surface water — even clear mountain streams can carry Giardia and Cryptosporidium.','Boiling is the most reliable: a full rolling boil for 1 minute (3 minutes above 6,500 ft/2,000 m). Let cool in a covered container.','If boiling is not possible, use iodine or chlorine dioxide tablets per the label — usually 30 min contact time; double in cold or cloudy water.','Portable filters (0.1–0.2 micron) remove bacteria and protozoa but NOT viruses. Combine with chemical treatment in areas with human sewage.','Solar disinfection (SODIS): fill a clear PET bottle, lay it in direct sunlight for at least 6 hours on a mostly sunny day, or 2 full days in a row if the sky is more than half cloudy. Use clear water in bottles of 2 litres or less; it does not work during continuous rain. Effective against bacteria and viruses.'],sections:[{heading:'Improvised filtration before purification',body:['Filtering first removes particles that protect pathogens from chemical treatment. Layer grass, crushed charcoal (not briquettes) and sand in a container with small holes — coarsest material first (grass), finest last (sand/charcoal).','This is pre-treatment only, not purification. Always follow with boiling or chemical treatment.','Let filtered water settle 30 minutes and decant the clear top before treating.']},{heading:'Disinfection by chemical method',body:['Household unscented bleach (5–8.25% sodium hypochlorite): 8 drops per gallon of clear water, 16 drops if cloudy. Wait 30 minutes. Water should have a faint chlorine smell; if not, repeat the dose and wait 15 more minutes.','Iodine tablets or chlorine dioxide tablets follow label instructions — usually 1 tablet per litre; 30–60 minutes contact time.','Chemical methods are less effective against Cryptosporidium — boiling or a 1-micron absolute filter is preferred for that.']},{heading:'Collecting and storing clean water',body:['Rain collection from roof or tarp is relatively clean — discard the first few minutes of runoff to flush contaminants.','Store treated water in food-grade, opaque containers with tight lids. Keep out of sunlight to prevent algae and reduce chlorine loss.','Label the date. Treated water stored properly stays safe about 6 months.']}],sources:[{label:'CDC — Water purification',url:'https://www.cdc.gov/healthywater/emergency/making-water-safe.html'},{label:'WHO — SODIS',url:'https://www.who.int/publications/m/item/sodis-manual'},{label:'EPA — Emergency disinfection',url:'https://www.epa.gov/ground-water-and-drinking-water/emergency-disinfection-drinking-water'}]},
   {slug:'food-safety',category:'food',title:'Keeping food safe without power',updated:'2024-01',summary:'The exact time and temperature limits, and how to decide what to throw out without guessing.',seeAlso:['foraging','water-safety'],quickSteps:['Keep the refrigerator and freezer closed. A closed refrigerator holds food safe for about 4 hours. A full freezer holds about 48 hours; a half-full one about 24.','Throw out perishable food that has been above 40°F (4°C) for more than 2 hours.','Never taste food to decide whether it is safe. Pathogens do not change smell, colour or texture.','Refreeze food only if it still contains ice crystals or is at or below 40°F.','Never burn charcoal, a camping stove or a generator indoors — carbon monoxide kills.'],sections:[{heading:'Make the cold last',body:['Group frozen items together and fill gaps with frozen water bottles or a block of ice. A full freezer stays cold far longer than a half-empty one.','Keep a thermometer in the refrigerator and freezer so you can read the temperature instead of guessing.']},{heading:'A cooler is a second freezer',body:['Keep raw meat below ready-to-eat food, and keep ice in sealed containers so meltwater does not contaminate anything.','Check the cooler temperature. If it rises above 40°F for more than 2 hours, treat the contents as spoiled.']},{heading:'Eating well without cooking',body:['Plan for meals that need no heat: canned beans and fish, nut butters, crackers, shelf-stable milk, dried fruit. Keep a manual can opener with the food.','Rotate the pantry every six months and eat what you store, so nothing in the kit is unfamiliar when it matters.']}],sources:[{label:'FoodSafety.gov',url:'https://www.foodsafety.gov/food-safety-charts/food-safety-during-power-outage'},{label:'USDA FSIS',url:'https://www.fsis.usda.gov'}]},
   {slug:'sanitation-no-water',category:'water',title:'Toilets and waste when water fails',updated:'2024-01',summary:'Keeping waste away from people, water and food when the plumbing stops working.',seeAlso:['water-safety','water-purification'],quickSteps:['Stop flushing once you know pressure is lost. Each flush wastes several gallons you may need.','Line the toilet bowl with a double plastic bag, use it, then cover with sawdust, cat litter or shredded paper and seal when about half full.','Keep waste at least 100 feet (30 m) from wells, streams, ditches and house foundations.','Wash hands with soap and treated water after every contact.','Follow your local health department instructions as soon as they publish any.'],sections:[{heading:'Set up before it is urgent',body:['Store heavy-duty bags, gloves, a lidded bucket, disinfectant and paper towels with the rest of the kit.','Decide in advance where the emergency toilet goes: away from food, sleeping areas and any water source.']},{heading:'Keep it separate',body:['Designate one container as the toilet and never use it for anything else. Keep a lid on it and keep it outside the main living space if you can.','People who are ill, pregnant, very young or immunocompromised should have the cleanest available option.']}],sources:[{label:'CDC — Sanitation in emergencies',url:'https://www.cdc.gov/sanitation/'},{label:'Ready.gov',url:'https://www.ready.gov/sanitation'}]},
   {slug:'generator-carbon-monoxide',category:'power',title:'Generators and carbon monoxide',updated:'2024-01',summary:'Carbon monoxide is invisible and kills whole households. Placement matters more than generator size.',seeAlso:['power-outage-prep','shelter-building'],quickSteps:['Run a generator outdoors only, at least 20 feet (6 m) from doors, windows and vents, with the exhaust pointing away from the building.','Never run one in a garage, basement, crawlspace, attached carport or porch, even with the door open.','Keep working carbon monoxide alarms on every level of the home and outside sleeping areas, and test them monthly.','If anyone has a headache with dizziness, nausea, weakness, chest pain or confusion, get everyone into fresh air and call 911.','Never plug a generator into a wall outlet — that backfeeds the utility line and can kill a line worker.'],sections:[{heading:'Why proximity is the whole problem',body:['Carbon monoxide from a generator can seep through a window, a vent or a wall opening even when the unit sits outside. Twenty feet with the exhaust directed away is the minimum.','Smaller spaces are more dangerous: a garage or a tent concentrates the gas. Every year people die running generators in exactly those places.']},{heading:'Alarms and detection',body:['A carbon monoxide alarm is the only reliable warning. Replace the unit by the date on the back even if it still beeps when tested.','Do not rely on the smell of exhaust. Carbon monoxide has no smell.']}],sources:[{label:'CDC — Carbon monoxide prevention',url:'https://www.cdc.gov/carbon-monoxide'},{label:'CPSC — Generator safety',url:'https://www.cpsc.gov'}]},
@@ -2735,16 +2755,16 @@ const ARK_GUIDES = [
   {slug:'community-assistance',category:'community',title:'Helping neighbours without creating harm',updated:'2024-01',summary:'How to organise local help, protect vulnerable people, and avoid becoming a second emergency.',seeAlso:['communication-failure','family-reunification'],quickSteps:['Work through an identified coordinator and a staffed, safe location wherever one exists.','Share needs, not identities. Never publish a vulnerable person\'s address, condition or location on a public board.','Only accept tasks you are trained and equipped for. Untrained volunteers should not do medical care, electrical work or security duties.','Offer a paper route for people with no phone, no account or no identification.','Do not send volunteers into damaged buildings, floodwater, or areas under an evacuation order.'],sections:[{heading:'Matching help to need',body:['Confirm with the person that help actually arrived. A claimed delivery is not a delivery, and in a crisis the difference matters.','Keep a written record of who received what, so recovery support can be targeted and effort is not duplicated.']},{heading:'Protecting people',body:['Set one route for concerns about a volunteer or a request, and name one person responsible for acting on them.','Never ask for or record bank details, passwords or identity documents as part of informal aid.']}],sources:[{label:'Ready.gov — Volunteering',url:'https://www.ready.gov/volunteer'},{label:'FEMA',url:'https://www.fema.gov/how-you-can-help'}]},
   {slug:'fire-starting',category:'fire',title:'Starting a fire in an emergency',updated:'2024-01',summary:'How to reliably start a fire for warmth, signaling or cooking when you have limited tools.',seeAlso:['shelter-building','signaling-rescue'],quickSteps:['Choose a sheltered site away from overhanging branches, dry grass and structures. Clear a 3-foot ring of debris.','Build a fire lay before igniting: tinder (dry grass, birch bark, shredded material) → kindling (pencil-thin sticks) → fuel (thumb-thick and larger wood). Do not skip steps.','With a lighter or matches, ignite the tinder at the base of the structure and feed air gently — blow at the base, not the top.','If you have a ferro rod: scrape firmly and quickly at a low angle. Hold tinder close. Practice the motion before you need it.','Maintain the fire with graduated fuel additions. A fire that dies from too little air or too much wet wood wastes your effort.'],sections:[{heading:'Three methods when matches are wet or absent',body:['Magnification: a convex lens (reading glasses, water-filled bag, clear bottle) focused on tinder in direct sunlight. Hold steady until smoke appears, then blow gently into a bundle.','Friction — bow drill: requires a dry softwood board (cedar, willow, cottonwood), a spindle, a bow and tinder nest. This takes practice. If you have never done it, start with the lens method.','Flint and steel: strike the flint at a sharp angle against high-carbon steel. Direct sparks onto a char cloth or dry fungus. Without char cloth, success is rare.']},{heading:'Fire in wet conditions',body:['Stand-dead wood (dead branches still on the tree) is drier than wood on the ground. Split wood exposes the drier interior.','Build a dry platform of thick logs before laying the tinder to keep the fire off wet ground.','Birch bark and pine resin ignite even when damp. Pine knot — resin-saturated heartwood — burns intensely.']},{heading:'Fire safety and extinguishing',body:['Never leave a fire unattended. Keep water or a pile of dirt nearby.','To extinguish: pour water on all embers, stir, pour again. Repeat until steam stops rising. Coals can reignite hours later.','In a survival signal fire: build it high and open. Add green leaves or rubber to produce dark smoke (visible against sky). Wet leaves produce white smoke (visible against forest).']}],sources:[{label:'USFS — Campfire safety',url:'https://www.fs.usda.gov/detail/r1/recreation/?cid=stelprdb5399668'},{label:'Boy Scouts of America — Fire building',url:'https://www.scouting.org'}]},
   {slug:'shelter-building',category:'shelter',title:'Building an emergency shelter',updated:'2024-01',summary:'How to build a shelter that keeps body heat in and weather out, using natural or found materials.',seeAlso:['fire-starting','extreme-heat-cold'],quickSteps:['Prioritise shelter over food and fire if conditions are wet and cold — hypothermia kills in hours.','Choose a site on high ground, away from drainages and dead trees (widow-makers). Check overhead for branches before lying down.','Size matters: a small shelter is warmer. The space inside only needs to hold your body. Bigger sheds more heat.','Insulation from the ground is as important as insulation from above — 4 inches (10 cm) of dry leaves or debris under you.','Finish building while you still have energy and daylight. A rough shelter completed early beats a perfect one started in the dark.'],sections:[{heading:'Debris hut — no tools needed',body:['Find or prop a ridgepole 9 feet (2.7 m) long at chest height on one end (use a forked branch or rock), tapering to the ground on the other.','Lean branches against both sides of the ridge to form ribs, then pile debris (dry leaves, pine needles, bark) 2–3 feet (60–90 cm) thick on the outside.','Stuff the interior with dry leaves for insulation. Plug the entrance with a bundle of leaves or a backpack.','In rain, the debris must be thick enough that you can bury your arm in it and not feel the ridgepole.']},{heading:'Tarp or emergency blanket shelter',body:['A reflective emergency blanket (space blanket) increases radiated heat retention significantly. Carry one.','Ridgeline tie-off: tie a cord between two trees at chest height. Drape the tarp over and anchor the corners low to the ground. This diverts rain to the sides.','Angle the opening away from wind. Keep the pitch steep so rain runs off quickly.']},{heading:'Snow shelter',body:['In deep dry snow: dig into a slope or mound snow and pack it. Wait 20 minutes for it to sinter (harden), then hollow out. Temperature inside stays near 32°F/0°C regardless of outside cold.','Poke a ventilation hole in the ceiling with a stick or pole. CO2 and melt-water are the main hazards.','Mark the shelter with a ski pole or branch so rescuers can find it and so you can find the entrance after a storm.']}],sources:[{label:'NOLS — Wilderness medicine',url:'https://www.nols.edu'},{label:'US Army Survival Manual FM 21-76',url:'https://www.fm21-76.com'}]},
-  {slug:'first-aid',category:'medical',title:'First aid essentials',updated:'2024-01',summary:'The interventions that save lives in the first minutes: bleeding, airway, CPR, shock.',seeAlso:['trauma-care','medical-escalation'],quickSteps:['Scene safety first: do not become a second casualty. Identify and remove hazards before approaching.','Massive bleeding: apply direct pressure with both hands, do not remove cloths (add on top), and maintain pressure without letting go for at least 10 full minutes.','Airway: unresponsive adult — tilt head back and lift chin. Look, listen and feel for breathing for no more than 10 seconds.','No breathing or only gasping: begin CPR — 30 chest compressions (hard and fast, 2 inches deep at 100 bpm) then 2 rescue breaths. Continue until help arrives or you are physically unable.','Choking in conscious adult: 5 back blows with heel of hand between shoulder blades, then 5 abdominal thrusts (Heimlich). Alternate until cleared or unconscious.'],sections:[{heading:'The order of priorities — C-A-B',body:['Catastrophic haemorrhage → Airway → Breathing → Circulation. Control severe bleeding before anything else.','Once bleeding is controlled, open the airway, confirm breathing, and begin CPR only if the person is unresponsive and not breathing normally.']},{heading:'Tourniquet use',body:['Use a tourniquet for extremity (limb) bleeding that cannot be controlled by pressure alone. Apply 2–3 inches (5–7 cm) above the wound. Tighten until bleeding stops.','Write the time of application on the skin or tourniquet. Never remove in the field.','Improvised tourniquet: a belt or strip of cloth twisted with a stick works. It must be 1.5–2 inches (4–5 cm) wide to avoid nerve damage.']},{heading:'Shock',body:['Signs: pale, cold, clammy skin; rapid weak pulse; rapid breathing; anxiety or confusion.','Treatment: lay the person flat, elevate legs 12 inches if no spinal injury, keep warm, do not give fluids by mouth.','Act fast: shock can progress to death. Keep the person talking, monitor breathing, and call for help immediately.']}],sources:[{label:'American Red Cross — First Aid',url:'https://www.redcross.org/take-a-class/first-aid'},{label:'Stop the Bleed',url:'https://www.stopthebleed.org'}]},
+  {slug:'first-aid',category:'medical',title:'First aid essentials',updated:'2024-01',summary:'The interventions that save lives in the first minutes: bleeding, airway, CPR, shock.',seeAlso:['trauma-care','medical-escalation'],quickSteps:['Scene safety first: do not become a second casualty. Identify and remove hazards before approaching.','Massive bleeding: apply direct pressure with both hands, do not remove cloths (add on top), and maintain pressure without letting go for at least 10 full minutes.','Airway: unresponsive adult — tilt head back and lift chin. Look, listen and feel for breathing for no more than 10 seconds.','No breathing or only gasping: begin CPR — 30 chest compressions (hard and fast, 2 inches deep at 100 bpm) then 2 rescue breaths. Continue until help arrives or you are physically unable.','Choking in conscious adult: 5 back blows with heel of hand between shoulder blades, then 5 abdominal thrusts (Heimlich). Alternate until cleared or unconscious.'],sections:[{heading:'The order of priorities — bleeding first, then A-B-C',body:['Catastrophic haemorrhage → Airway → Breathing → Circulation. Control severe bleeding before anything else.','Once bleeding is controlled, open the airway, confirm breathing, and begin CPR only if the person is unresponsive and not breathing normally.']},{heading:'Tourniquet use',body:['Use a tourniquet for extremity (limb) bleeding that cannot be controlled by pressure alone. Apply 2–3 inches (5–7 cm) above the wound. Tighten until bleeding stops.','Write the time of application on the skin or tourniquet. Never remove in the field.','Improvised tourniquet: a belt or strip of cloth twisted with a stick works. It must be 1.5–2 inches (4–5 cm) wide to avoid nerve damage.']},{heading:'Shock',body:['Signs: pale, cold, clammy skin; rapid weak pulse; rapid breathing; anxiety or confusion.','Treatment: lay the person flat, elevate legs 12 inches if no spinal injury, keep warm, do not give fluids by mouth.','Act fast: shock can progress to death. Keep the person talking, monitor breathing, and call for help immediately.']}],sources:[{label:'American Red Cross — First Aid',url:'https://www.redcross.org/take-a-class/first-aid'},{label:'Stop the Bleed',url:'https://www.stopthebleed.org'}]},
   {slug:'signaling-rescue',category:'signaling',title:'Signaling for rescue',updated:'2024-01',summary:'How to make yourself visible and findable to rescuers on land, air or water.',seeAlso:['navigation','radio-comms'],quickSteps:['Stay put unless staying puts you in immediate danger. Rescuers search last known position first.','Three of anything is a universal distress signal — three whistle blasts, three fires, three shots. Repeat at regular intervals.','Signal mirror is the most effective daylight signal — visible for 10+ miles. Aim the reflection toward aircraft by forming a V with two fingers and aligning the mirror flash with it.','Ground-to-air signals: stomp a large X in snow or on a beach (minimum 3m/10ft). Use rocks, logs or clothing to contrast with background.','At night: flash light in groups of three (SOS is 3 short–3 long–3 short in Morse). A strobe light is more visible than a steady beam.'],sections:[{heading:'Signal fire',body:['A fire produces light at night and smoke by day. Build on a hill, clearing or shore — anywhere with open sky.','Daytime: add green leaves, plastic or rubber for dark smoke (visible against bright sky). Wet leaves produce white smoke (visible against dark forest).','Have the fire pre-built and ready to light the moment you hear aircraft. You may have only 30 seconds.']},{heading:'Whistle and mirror',body:['A plastic pea-less whistle (like a Fox 40) can be heard over a mile in calm conditions and uses almost no energy.','A signal mirror generates a flash visible to aircraft up to 10 miles away even in haze. Aim the flash by looking through the sighting hole and tracking the craft.','Cell phones: even without a network, a 911 call may still route. Keep battery above 20%.']},{heading:'Leaving a trail',body:['If you must move, leave clear signs: arrows made from rocks or sticks pointing your direction of travel; a note in a weatherproof container at your last camp.','Break branches at eye level every 20 metres along your path of travel. This is the fastest method for a search team on foot.']}],sources:[{label:'SAR best practices — NASAR',url:'https://www.nasar.org'},{label:'REI — Signaling for rescue',url:'https://www.rei.com/learn/expert-advice/rescue-signals.html'}]},
   {slug:'navigation',category:'navigation',title:'Navigation without GPS',updated:'2024-01',summary:'How to establish direction and navigate using the sun, stars, natural signs and a map.',seeAlso:['signaling-rescue','shelter-building'],quickSteps:['Establish north before you move: in the northern hemisphere, the sun rises roughly east and sets roughly west. At solar noon (highest point) it is due south.','Analog watch method (northern hemisphere): hold the watch horizontal. Point the hour hand at the sun. The midpoint between the hour hand and 12 o\'clock is south.','Night: find Polaris (North Star) by following the pointer stars at the end of the Big Dipper\'s cup about 5 times their own distance.','Mark your direction with a distant landmark before you walk — a mountain, a distinctive tree. Recheck every 30 minutes in dense cover.','In unfamiliar terrain: follow water downhill. It leads to larger water, settlements, roads and other humans.'],sections:[{heading:'Using a map without a compass',body:['Orient the map to the terrain: rotate it until features on the map (ridges, rivers, roads) align with what you see in front of you.','Take a bearing from known landmarks — triangulation. You are where two bearing lines on the map cross.','Pace count: know how many of your double steps equal 100 metres. Count steps over known ground at home. This lets you measure distance on a map and walk it blind.']},{heading:'Dead reckoning',body:['Dead reckoning: know your starting point, your direction of travel, your speed and elapsed time. Use these to estimate your current position.','It accumulates error — recheck against a landmark every hour and correct your estimate.','In forest: aim off. If your target is at a river crossing, aim deliberately 100m upstream or downstream. When you hit the river, you know which way to turn.']},{heading:'Natural navigation indicators',body:['Moss grows on all sides of trees in damp climates but tends toward north-facing aspects in exposed locations — useful as a rough indicator, not a compass substitute.','In the northern hemisphere, trees on south-facing slopes are more widely spaced with broader canopy. Snow melts first on south slopes.','Prevailing wind: sand dunes, snow ridges and bent trees point downwind — know the prevailing wind direction for your region.']}],sources:[{label:'Tristan Gooley — Natural Navigator',url:'https://www.naturalnavigator.com'},{label:'USGS — Map reading',url:'https://www.usgs.gov/programs/national-geospatial-program/topographic-maps'}]},
-  {slug:'foraging',category:'food',title:'Safe foraging and food in the wild',updated:'2024-01',summary:'How to identify safe plants, avoid poisoning yourself, and prioritise effort correctly.',seeAlso:['water-purification','fire-starting'],quickSteps:['Food is last in the survival priority order: shelter > water > fire > signals > food. You can survive 3+ weeks without eating.','Never eat unknown white or yellow berries, plants with milky sap, umbrella-shaped flowers (carrot family), or anything that smells of almonds (cyanide).','Apply the Universal Edibility Test (UET) for any unknown plant: touch, smell, skin contact (15 min), lip contact (3 min), tongue (15 min), chew-no-swallow (15 min), swallow a teaspoon (8 hrs). If no reaction, eat small amounts.','Prioritise calorie-dense, abundant, unambiguous species: dandelion (all parts edible), cattail (roots, pollen), acorns (leach tannins first), pine needles (vitamin C tea).','Insects are high-protein and low-risk: avoid brightly coloured insects. Cook all insects — boiling or roasting kills parasites.'],sections:[{heading:'Three universally safe plants',body:['Dandelion (Taraxacum officinale): all parts edible raw or cooked. Toothed leaves, hollow stem, yellow flowers, white spherical seed head. Grows everywhere.','Cattail (Typha): found at water edges. The cylindrical brown seed head is unmistakeable. Pollen head is edible in spring. Roots are starchy year-round — peel, boil, eat.','Plantain (Plantago major/minor): rosette of oval ribbed leaves. Not the banana — a common lawn weed. Leaves edible raw or cooked. High in vitamins.']},{heading:'Acorns — leaching tannins',body:['Acorns are calorie-rich (fat + starch) but bitter raw from tannins. Leach before eating: crush the kernels, soak in cold water for several hours, changing water until no longer bitter, then dry or cook.','Boiling in multiple changes of water works faster. Cold-water leaching preserves more starch and makes flour.','All oak species produce edible acorns after leaching. White oaks are less bitter than red oaks.']},{heading:'What to absolutely avoid',body:['Hemlock (Conium maculatum): often mistaken for wild carrot. Purple-spotted hollow stem, fine white flowers. Fatal. Smell the crushed leaves — musty, unpleasant.','Deadly nightshade (Atropa belladonna): shiny black berries in clusters with a star-shaped calyx. Fatal.','Mushrooms: even experts make fatal errors. Without formal training, avoid all wild mushrooms in a survival situation.']}],sources:[{label:'USDA Plants Database',url:'https://plants.usda.gov'},{label:'Eat The Weeds',url:'https://www.eattheweeds.com'}]},
+  {slug:'foraging',category:'food',title:'Safe foraging and food in the wild',updated:'2024-01',summary:'How to identify safe plants, avoid poisoning yourself, and prioritise effort correctly.',seeAlso:['water-purification','fire-starting'],quickSteps:['Food is last in the survival priority order: shelter > water > fire > signals > food. You can survive 3+ weeks without eating.','Never eat unknown white or yellow berries, plants with milky sap, umbrella-shaped flowers (carrot family), or anything that smells of almonds (cyanide).','Apply the Universal Edibility Test (UET) for any unknown plant: touch, smell, skin contact (15 min), lip contact (3 min), tongue (15 min), chew-no-swallow (15 min), swallow a teaspoon (8 hrs). If no reaction, eat small amounts.','Prioritise calorie-dense, abundant, unambiguous species: dandelion (all parts edible), cattail (roots, pollen), acorns (leach tannins first), pine needles (vitamin C tea).','Insects are high-protein and low-risk: avoid brightly coloured insects. Cook all insects — boiling or roasting kills parasites.'],sections:[{heading:'Three universally safe plants',body:['Dandelion (Taraxacum officinale): all parts edible raw or cooked. Toothed leaves, hollow stem, yellow flowers, white spherical seed head. Grows everywhere.','Cattail (Typha): found at water edges. The cylindrical brown seed head is unmistakeable. Pollen head is edible in spring. Roots are starchy year-round — peel, boil, eat.','Plantain (Plantago major/minor): rosette of oval ribbed leaves. Not the banana — a common lawn weed. Leaves edible raw or cooked. High in vitamins.']},{heading:'Acorns — leaching tannins',body:['Acorns are calorie-rich (fat + starch) but bitter raw from tannins. Leach before eating: crush the kernels, soak in cold water for several hours, changing water until no longer bitter, then dry or cook.','Boiling in multiple changes of water works faster. Cold-water leaching preserves more starch and makes flour.','All oak species produce edible acorns after leaching. White oaks are less bitter than red oaks.']},{heading:'What to absolutely avoid',body:['Hemlock (Conium maculatum): often mistaken for wild carrot. Purple-spotted hollow stem, fine white flowers. Fatal. Smell the crushed leaves — musty, unpleasant.','Deadly nightshade (Atropa belladonna): shiny black berries growing singly, each sitting on a green star-shaped calyx. Fatal.','Mushrooms: even experts make fatal errors. Without formal training, avoid all wild mushrooms in a survival situation.']}],sources:[{label:'USDA Plants Database',url:'https://plants.usda.gov'},{label:'Eat The Weeds',url:'https://www.eattheweeds.com'}]},
   {slug:'radio-comms',category:'comms',title:'Emergency radio communications',updated:'2024-01',summary:'How to use a handheld radio to call for help, monitor alerts, and coordinate with others.',seeAlso:['signaling-rescue','communication-failure'],quickSteps:['NOAA Weather Radio (US) broadcasts on 162.400–162.550 MHz. Keep a battery-powered or hand-crank NOAA radio in your kit.','CB radio Channel 9 is the official emergency channel in the US. FRS/GMRS Channel 1 (462.5625 MHz) is a common default for neighbourhood coordination.','To call for help on VHF marine: Channel 16 is the international distress channel. All vessels monitor it.','When calling Mayday: "MAYDAY MAYDAY MAYDAY, this is [your name/vessel/location], I have [nature of emergency], I need [type of assistance]." Transmit on the designated emergency channel.','Keep your transmission brief. Say your location first, then the emergency, then your callsign or name.'],sections:[{heading:'Radio types and their reach',body:['NOAA Weather Radio: receive-only. Essential for official alerts. Works during power outages on battery.','FRS/GMRS radios: 1–5 mile range in open terrain. No licence for FRS. GMRS requires a US FCC licence. Good for neighbourhood coordination.','Ham radio: requires licence. Much greater range (local repeaters extend to dozens of miles; HF can be global). Provides access to Skywarn and emergency nets.','Satellite communicators (Garmin inReach, SPOT): two-way texting via satellite anywhere in the world. No local infrastructure needed.']},{heading:'Phonetic alphabet and discipline',body:['Use the NATO phonetic alphabet to spell critical information — location names, medication names, callsigns: Alpha Bravo Charlie Delta…','Speak slowly and clearly. Say "over" when you have finished and expect a reply. Say "out" when you have finished the conversation.','Keep emergency channels clear. Brief reports only. Save conversation for a secondary channel.']},{heading:'Hand-crank and solar radios',body:['A hand-crank + solar radio is a core kit item. It operates indefinitely without batteries, can charge a phone via USB, and receives AM/FM/SW/NOAA.','Recommended minimum: a radio with NOAA Weather Alert that activates automatically when a warning is issued for your area.']}],sources:[{label:'ARRL — Amateur radio emergency',url:'https://www.arrl.org/ares'},{label:'FCC — Emergency communications',url:'https://www.fcc.gov/consumers/guides/emergency-communications'},{label:'NOAA Weather Radio',url:'https://www.weather.gov/nwr/'}]},
   {slug:'psychological-resilience',category:'medical',title:'Psychological resilience in crisis',updated:'2024-01',summary:'How to manage fear, panic and decision paralysis during and after an emergency.',seeAlso:['trauma-care','communication-failure'],quickSteps:['Stop, Breathe, Think, Act (SBTA). When panic rises, physically stop what you are doing, take three slow breaths, inventory your situation factually, then act on the highest priority item only.','Assign roles and tasks to everyone capable. Purposeful activity reduces panic and paralysis, including your own.','Acknowledge fear in others: "I know this is scary. What you are feeling is normal." Then redirect: "The next thing we need to do is…"','Communicate your plan clearly even when it is imperfect. Uncertainty is more paralysing than a flawed plan stated with confidence.','After the acute event: eat, drink, sleep as soon as safely possible. Physical depletion accelerates psychological decompensation.'],sections:[{heading:'The survival mindset',body:['Research on survival situations consistently shows that mindset — particularly the will to survive — predicts outcome more than physical skills.','Positive self-talk is not denial. It is directing cognitive resources toward problem-solving instead of threat amplification.','Break the situation into five-minute tasks. The question is not "can I survive this week?" It is "what do I do in the next five minutes?"']},{heading:'Managing others in crisis',body:['Calm is contagious. Lower your voice, slow your movements, and make eye contact. This physiologically down-regulates people around you.','Children look to adults for cues. A calm adult presence reduces acute stress response in children more than any reassurance.','Identify and gently neutralise panic-spreaders. Give them a task that removes them from the group temporarily.']},{heading:'Post-crisis: acute stress and grief',body:['Acute stress responses (flashbacks, hypervigilance, difficulty sleeping) in the first 30 days are normal. They do not predict PTSD.','Seek professional support if symptoms persist beyond 30 days, worsen, or prevent functioning.','Reconnecting with community — even briefly — is one of the strongest predictors of recovery after disaster.']}],sources:[{label:'SAMHSA — Disaster mental health',url:'https://www.samhsa.gov/find-help/disaster-distress-helpline'},{label:'Psychology Today — Crisis resilience',url:'https://www.psychologytoday.com'}]},
   {slug:'cpr-guide',category:'medical',title:'CPR — adult, child and infant',updated:'2024-01',summary:'Step-by-step CPR for unresponsive, non-breathing victims. No training required to try — imperfect CPR saves lives.',seeAlso:['first-aid','medical-escalation'],quickSteps:['Confirm the scene is safe. Tap the person\'s shoulders firmly and shout "Are you OK?"','Call 911 (or have someone call) before starting. Put the phone on speaker.','Place the heel of one hand on the centre of the chest (lower half of the breastbone). Place the second hand on top. Lock your fingers.','Push down hard and fast: at least 2 inches (5 cm) deep, 100–120 compressions per minute (think of the song "Stayin\' Alive"). Allow full chest recoil between compressions.','After 30 compressions: tilt the head back, lift the chin, pinch the nose, seal your mouth over theirs, and give 2 rescue breaths — each over 1 second, enough to see the chest rise.','Continue 30:2 cycles until an AED arrives, emergency services take over, the person starts breathing normally, or you are physically unable to continue.'],sections:[{heading:'Compression-only CPR (hands only)',body:['If you are untrained or unwilling to give rescue breaths, continuous chest compressions alone are effective for the first few minutes of cardiac arrest.','Push hard and fast in the centre of the chest without stopping. This is better than doing nothing — do not wait.','Compression-only CPR is equally effective as standard CPR for witnessed adult cardiac arrest. For children and drowning victims, rescue breaths are more important — use 30:2 if you can.']},{heading:'Children (1 year to puberty)',body:['Procedure is the same as adults. Use one hand only for smaller children to avoid too much depth.','Compression depth: 2 inches (5 cm) or at least one-third of the chest depth.','For infants (under 1 year): use two fingers on the centre of the chest, just below the nipple line. Push down about 1.5 inches (4 cm).']},{heading:'AED use',body:['Power on the AED and follow the voice prompts exactly. It will tell you everything.','Apply pads as shown in the diagram: one below the right collarbone, one on the left side below the armpit. Dry the chest if wet.','Ensure no one is touching the person before the shock is delivered — shout "Clear!" and visually confirm before pressing the shock button.','After the shock, immediately resume CPR. The AED will prompt you when to stop and analyse again.']}],sources:[{label:'American Heart Association — CPR',url:'https://cpr.heart.org'},{label:'Red Cross — CPR steps',url:'https://www.redcross.org/take-a-class/cpr'}]},
-  {slug:'bites-stings',category:'medical',title:'Bites, stings and envenomation',updated:'2024-01',summary:'First aid for snake bites, bee stings, severe allergic reactions, and tick removal.',seeAlso:['first-aid','medical-escalation'],quickSteps:['Snake bite: keep the person still and calm. Remove jewellery and tight clothing near the bite. Keep the bitten limb below heart level. Get to a hospital — antivenom is the definitive treatment.','Do NOT cut, suck, tourniquet, apply electricity or ice to a snake bite. These cause harm without helping.','Bee/wasp sting with no allergy: remove the stinger by scraping sideways with a card or fingernail (never squeeze). Apply a cold compress for pain.','Severe allergic reaction (anaphylaxis): adrenaline (epinephrine) auto-injector if prescribed, then call 911. Signs: throat swelling, difficulty breathing, hives, sudden drop in consciousness.','Tick removal: grasp the tick as close to the skin as possible with fine-tipped tweezers. Pull upward steadily — do not twist. Clean the site with alcohol. Do not crush the tick.'],sections:[{heading:'Identifying dangerous vs harmless snakes',body:['In North America: triangular head, elliptical pupils, heat pit between eye and nostril indicate a pit viper (rattlesnake, copperhead, cottonmouth). Coral snakes are slender with red-yellow-black bands ("Red touches yellow, kill a fellow").','Rule: treat all unknown snake bites as potentially venomous. Even non-venomous bites can cause infection.','Photograph the snake if safe to do so without approaching it. This helps medical staff identify treatment needed.','Time is critical with venom — do not delay transport to treat symptoms beyond basic first aid.']},{heading:'Anaphylaxis — act immediately',body:['Anaphylaxis can be fatal within minutes. Act before you are sure.','If prescribed: use the epinephrine auto-injector (EpiPen) into the outer thigh, through clothing if needed. Hold for 10 seconds.','After epinephrine: call 911 even if the person feels better. The reaction can return (biphasic anaphylaxis) in 1–12 hours.','Position: lie the person flat with legs elevated unless breathing is easier sitting up. If unconscious, recovery position.']},{heading:'Tick-borne illness prevention',body:['After outdoor activity: check the whole body including scalp, groin, armpits and behind ears.','A tick must usually be attached 36–48 hours to transmit Lyme disease. Daily checks and prompt removal are highly effective prevention.','After removing a tick: watch for a bull\'s-eye rash, fever, fatigue or joint pain in the following weeks. If these appear, seek medical care and mention the tick bite.','Dispose of removed ticks in alcohol, sealed bag, or by flushing. Never crush with fingers.']}],sources:[{label:'CDC — Venomous snakes',url:'https://www.cdc.gov/niosh/topics/snakes'},{label:'American College of Allergy — Anaphylaxis',url:'https://acaai.org/allergies/anaphylaxis'},{label:'CDC — Tick removal',url:'https://www.cdc.gov/ticks/removing_a_tick.html'}]},
-  {slug:'hypothermia-frostbite',category:'medical',title:'Hypothermia and frostbite',updated:'2024-01',summary:'Recognising and treating dangerous cold injuries before they become fatal.',seeAlso:['extreme-heat-cold','shelter-building','first-aid'],quickSteps:['Hypothermia — suspect it in anyone who is cold AND confused, shivering uncontrollably, stumbling, or losing consciousness.','Move the person to shelter. Remove wet clothing. Insulate the whole body including the head. Warm the core first (torso, neck, groin, armpits) — not the extremities.','For mild hypothermia (shivering, confused but responsive): warm beverages if the person is fully conscious. Body-to-body warmth under insulation.','For severe hypothermia (not shivering, unconscious, stiff): handle gently — sudden movement can trigger cardiac arrest. Keep horizontal, insulate, and evacuate urgently.','Frostbite — do not rewarm if there is any risk of re-freezing. Walking on frozen feet is safer than thawed, refrozen feet.','Rewarm frostbite only if evacuation is not imminent: immerse in gently moving water at 37–39°C (98–102°F) for 15–30 minutes until the tissue turns pink-red and soft. This is very painful — give pain relief if available.'],sections:[{heading:'Stages of hypothermia',body:['Mild (32–35°C / 90–95°F): shivering, impaired coordination, pale skin, confusion. The person still generates body heat. Warm, dry, insulate — recovery is straightforward.','Moderate (28–32°C / 82–90°F): shivering stops (a danger sign), increasing confusion or sleepiness, heart rhythm may become abnormal. Medical evacuation required.','Severe (below 28°C / 82°F): unconscious, rigid muscles, barely detectable pulse. Can appear dead. Never declare death from hypothermia until warm and dead ("you\'re not dead until you\'re warm and dead"). Continue resuscitation.']},{heading:'Frostbite: assessment and care',body:['Frostnip (superficial): skin is red, painful, blistered — not frozen. Warm with body heat. Full recovery expected.','Superficial frostbite: skin is white/grey, firm on the surface but soft underneath. Rewarm actively (see above). Blisters form after rewarming — do not break them.','Deep frostbite: tissue is completely hard, cold and white or mottled. This requires hospital care. Keep frozen until definitive care is available. Avoid pressure and friction on the affected area.','After rewarming: elevate the limb, loosely bandage with clean dry material between toes/fingers. Do not walk on rewarmed feet if avoidable.']},{heading:'Prevention',body:['The wet-cold combination is more dangerous than dry cold. Prioritise staying dry over staying warm.','Layer clothing: moisture-wicking base layer, insulating mid-layer, wind/waterproof outer shell. Avoid cotton next to skin.','Identify early warning signs in yourself and others: numbness, clumsiness, slurred speech. Act on them before they worsen.','Calorie and fluid intake are critical in the cold. Dehydration and starvation accelerate hypothermia.']}],sources:[{label:'Wilderness Medical Society — Cold injuries',url:'https://www.wms.org'},{label:'CDC — Hypothermia',url:'https://www.cdc.gov/disasters/winter/staysafe/hypothermia.html'}]},
-  {slug:'trauma-care',category:'medical',title:'Trauma care and wound management',updated:'2024-01',summary:'Managing serious injuries when emergency services cannot arrive quickly: bleeding, fractures, burns, impalement.',seeAlso:['first-aid','medical-escalation'],quickSteps:['Severe bleeding: apply direct pressure. If a limb — tourniquet 2–3 inches above the wound, tighten until bleeding stops, write the time.','For impaled objects: do NOT remove. Stabilise the object with improvised padding and bandage around it. Removal causes rapid, uncontrollable bleeding.','Burns: cool immediately with cool running water for 20 minutes. Do not use ice, butter or toothpaste. Cover with a clean non-fluffy material (cling wrap is ideal).','Fracture — improvised splint: pad the limb, apply rigid material (sticks, board) on both sides, bandage firmly. Splint the joint above and below the fracture.','Spinal injury suspicion: do not move the person unless in immediate danger. If you must move them, minimise spinal motion.'],sections:[{heading:'Wound closure and infection prevention',body:['Clean wounds: irrigate copiously with clean water under pressure (a syringe or squeeze bottle). Remove visible debris.','For gaping wounds: bring the edges together with strips of tape (butterfly closures), or strips of clean fabric if no tape is available.','Wound infection signs: increasing warmth, swelling, redness spreading from the wound, pus, red streaks running from the wound (tracking), fever. These require urgent medical care.','Keep wounds covered with the cleanest material available. Change dressings at least daily.']},{heading:'Chest injuries',body:['Open chest wound (sucking chest wound): seal three sides with plastic (creates one-way valve). The person may feel a little better quickly as the lung re-expands.','Tension pneumothorax: worsening breathing difficulty, absent breath sounds on one side, trachea deviated. This is a medical emergency requiring trained needle decompression.','Rib fractures: support the injury with the person\'s arm or a sling. Have the person take deliberate deep breaths regularly despite the pain to prevent lung complications.']},{heading:'Head injuries',body:['Any loss of consciousness, however brief, requires evacuation and evaluation.','Warning signs after head injury: worsening headache, repeated vomiting, seizure, unequal pupils, confusion or unusual behaviour. These indicate serious injury.','Keep the person awake and talking. The old advice of "keep them awake all night" is debated, but assess neurological status regularly.']}],sources:[{label:'Wilderness Medical Society — Field Guide',url:'https://www.wms.org'},{label:'Stop the Bleed',url:'https://www.stopthebleed.org'},{label:'Remote Area Medical',url:'https://www.ramusa.org'}]},
+  {slug:'bites-stings',category:'medical',title:'Bites, stings and envenomation',updated:'2024-01',summary:'First aid for snake bites, bee stings, severe allergic reactions, and tick removal.',seeAlso:['first-aid','medical-escalation'],quickSteps:['Snake bite: keep the person still and calm. Remove jewellery and tight clothing near the bite. Keep the bitten limb below heart level. Get to a hospital — antivenom is the definitive treatment.','Do NOT cut, suck, tourniquet, apply electricity or ice to a snake bite. These cause harm without helping.','Bee/wasp sting with no allergy: remove the stinger by scraping sideways with a card or fingernail (never squeeze). Apply a cold compress for pain.','Severe allergic reaction (anaphylaxis): adrenaline (epinephrine) auto-injector if prescribed, then call 911. Signs: throat swelling, difficulty breathing, hives, sudden drop in consciousness.','Tick removal: grasp the tick as close to the skin as possible with fine-tipped tweezers. Pull upward steadily — do not twist. Clean the site with alcohol. Do not crush the tick.'],sections:[{heading:'Identifying dangerous vs harmless snakes',body:['In North America: triangular head, elliptical pupils, heat pit between eye and nostril indicate a pit viper (rattlesnake, copperhead, cottonmouth). Coral snakes are slender with red-yellow-black bands ("Red touches yellow, kill a fellow").','Rule: treat all unknown snake bites as potentially venomous. Even non-venomous bites can cause infection.','Photograph the snake if safe to do so without approaching it. This helps medical staff identify treatment needed.','Time is critical with venom — do not delay transport to treat symptoms beyond basic first aid.']},{heading:'Anaphylaxis — act immediately',body:['Anaphylaxis can be fatal within minutes. Act before you are sure.','If prescribed: use the epinephrine auto-injector (EpiPen) into the outer thigh, through clothing if needed. Hold for 10 seconds.','After epinephrine: call 911 even if the person feels better. The reaction can return (biphasic anaphylaxis) in 1–12 hours.','Position: lie the person flat with legs elevated unless breathing is easier sitting up. If unconscious, recovery position.']},{heading:'Tick-borne illness prevention',body:['After outdoor activity: check the whole body including scalp, groin, armpits and behind ears.','A tick usually has to be attached for more than 24 hours to transmit Lyme disease. Daily checks and prompt removal are highly effective prevention.','After removing a tick: watch for a bull\'s-eye rash, fever, fatigue or joint pain in the following weeks. If these appear, seek medical care and mention the tick bite.','Dispose of removed ticks in alcohol, sealed bag, or by flushing. Never crush with fingers.']}],sources:[{label:'CDC — Venomous snakes',url:'https://www.cdc.gov/niosh/topics/snakes'},{label:'American College of Allergy — Anaphylaxis',url:'https://acaai.org/allergies/anaphylaxis'},{label:'CDC — Tick removal',url:'https://www.cdc.gov/ticks/removing_a_tick.html'}]},
+  {slug:'hypothermia-frostbite',category:'medical',title:'Hypothermia and frostbite',updated:'2024-01',summary:'Recognising and treating dangerous cold injuries before they become fatal.',seeAlso:['extreme-heat-cold','shelter-building','first-aid'],quickSteps:['Hypothermia — suspect it in anyone who is cold AND confused, shivering uncontrollably, stumbling, or losing consciousness.','Move the person to shelter. Remove wet clothing. Insulate the whole body including the head. Warm the core first (torso, neck, groin, armpits) — not the extremities.','For mild hypothermia (shivering, confused but responsive): warm beverages if the person is fully conscious. Body-to-body warmth under insulation.','For severe hypothermia (not shivering, unconscious, stiff): handle gently — sudden movement can trigger cardiac arrest. Keep horizontal, insulate, and evacuate urgently.','Frostbite — do not rewarm if there is any risk of re-freezing. Walking on frozen feet is safer than thawed, refrozen feet.','Rewarm frostbite only if evacuation is not imminent: immerse in gently moving water at 37–39°C (98–102°F) for 15–30 minutes until the tissue turns pink-red and soft. This is very painful — give pain relief if available.'],sections:[{heading:'Stages of hypothermia',body:['Mild (32–35°C / 90–95°F): shivering, impaired coordination, pale skin, confusion. The person still generates body heat. Warm, dry, insulate — recovery is straightforward.','Moderate (28–32°C / 82–90°F): shivering stops (a danger sign), increasing confusion or sleepiness, heart rhythm may become abnormal. Medical evacuation required.','Severe (below 28°C / 82°F): unconscious, rigid muscles, barely detectable pulse. Can appear dead. Never declare death from hypothermia until warm and dead ("you\'re not dead until you\'re warm and dead"). Continue resuscitation.']},{heading:'Frostbite: assessment and care',body:['Frostnip (superficial): skin is red or pale, cold, tingling or numb — not frozen, and no blisters. Warm with body heat. Full recovery expected. Blisters mean frostbite, not frostnip.','Superficial frostbite: skin is white/grey, firm on the surface but soft underneath. Rewarm actively (see above). Blisters form after rewarming — do not break them.','Deep frostbite: tissue is completely hard, cold and white or mottled. This requires hospital care. Keep frozen until definitive care is available. Avoid pressure and friction on the affected area.','After rewarming: elevate the limb, loosely bandage with clean dry material between toes/fingers. Do not walk on rewarmed feet if avoidable.']},{heading:'Prevention',body:['The wet-cold combination is more dangerous than dry cold. Prioritise staying dry over staying warm.','Layer clothing: moisture-wicking base layer, insulating mid-layer, wind/waterproof outer shell. Avoid cotton next to skin.','Identify early warning signs in yourself and others: numbness, clumsiness, slurred speech. Act on them before they worsen.','Calorie and fluid intake are critical in the cold. Dehydration and starvation accelerate hypothermia.']}],sources:[{label:'Wilderness Medical Society — Cold injuries',url:'https://www.wms.org'},{label:'CDC — Hypothermia',url:'https://www.cdc.gov/disasters/winter/staysafe/hypothermia.html'}]},
+  {slug:'trauma-care',category:'medical',title:'Trauma care and wound management',updated:'2024-01',summary:'Managing serious injuries when emergency services cannot arrive quickly: bleeding, fractures, burns, impalement.',seeAlso:['first-aid','medical-escalation'],quickSteps:['Severe bleeding: apply direct pressure. If a limb — tourniquet 2–3 inches above the wound, tighten until bleeding stops, write the time.','For impaled objects: do NOT remove. Stabilise the object with improvised padding and bandage around it. Removal causes rapid, uncontrollable bleeding.','Burns: cool immediately with cool running water for 20 minutes. Do not use ice, butter or toothpaste. Cover with a clean non-fluffy material (cling wrap is ideal).','Fracture — improvised splint: pad the limb, apply rigid material (sticks, board) on both sides, bandage firmly. Splint the joint above and below the fracture.','Spinal injury suspicion: do not move the person unless in immediate danger. If you must move them, minimise spinal motion.'],sections:[{heading:'Wound closure and infection prevention',body:['Clean wounds: irrigate copiously with clean water under pressure (a syringe or squeeze bottle). Remove visible debris.','For gaping wounds: bring the edges together with strips of tape (butterfly closures), or strips of clean fabric if no tape is available.','Wound infection signs: increasing warmth, swelling, redness spreading from the wound, pus, red streaks running from the wound (tracking), fever. These require urgent medical care.','Keep wounds covered with the cleanest material available. Change dressings at least daily.']},{heading:'Chest injuries',body:['Open chest wound (sucking chest wound): do NOT seal it airtight. Leave it open to the air, or cover it loosely with a clean dry dressing that lets air out. Use a vented chest seal only if you have one. If breathing gets worse after covering the wound, remove the covering at once.','Tension pneumothorax: worsening breathing difficulty, absent breath sounds on one side, trachea deviated. This is a medical emergency requiring trained needle decompression.','Rib fractures: support the injury with the person\'s arm or a sling. Have the person take deliberate deep breaths regularly despite the pain to prevent lung complications.']},{heading:'Head injuries',body:['Any loss of consciousness, however brief, requires evacuation and evaluation.','Warning signs after head injury: worsening headache, repeated vomiting, seizure, unequal pupils, confusion or unusual behaviour. These indicate serious injury.','Keep the person awake and talking. The old advice of "keep them awake all night" is debated, but assess neurological status regularly.']}],sources:[{label:'Wilderness Medical Society — Field Guide',url:'https://www.wms.org'},{label:'Stop the Bleed',url:'https://www.stopthebleed.org'},{label:'Remote Area Medical',url:'https://www.ramusa.org'}]},
 ];
 
 const ALERT_LEVELS = {
@@ -2914,11 +2934,13 @@ const DB = {
       };
       req.onsuccess = e => {
         this._db = e.target.result;
-        // Prune tiles older than 30 days on open (non-blocking)
-        this._pruneTiles().catch(()=>{});
+        // Saved map tiles are kept: an emergency can come long after the map was cached,
+        // and an old map is far better than no map.
         res(this._db);
       };
       req.onerror = e => { console.error('IDB error', e); rej(e); };
+      // Another tab holding an older database open must not leave this promise hanging forever.
+      req.onblocked = () => rej(new Error('IndexedDB blocked by another tab'));
     });
   },
   // ── Tile cache helpers ─────────────────────────────────────────────────────
@@ -3237,7 +3259,7 @@ const UI = {
       if (ta) ta.focus();
     }, 100);
   },
-  shareApp() { if (window.ShareARK) ShareARK.openModal(); },
+  shareApp() { if (typeof ShareARK !== 'undefined') ShareARK.openModal(); },
   showConnStatus() {
     const pill = document.getElementById('conn-pill');
     const state = pill ? pill.textContent.trim() : 'OFFLINE';
@@ -3326,15 +3348,16 @@ const SoftHub = (() => {
     // Update Network tab hub status indicator if present
     const badge = document.getElementById('softhub-role-badge');
     if (badge) {
-      badge.textContent = isHub() ? '🛰 You are the Hub' : '📡 Peer mode';
+      badge.textContent = '📡 ARK tabs open in this browser share messages with each other';
       badge.style.color = isHub() ? 'var(--gold, #8b6f3e)' : 'var(--text-secondary, #666)';
       badge.style.display = '';
     }
     // Show notification once when auto-promoted
     const notified = Store.get('softhub_notified');
     if (isHub() && !notified) {
+      // No announcement: a browser tab cannot share with other devices by itself, and saying
+      // so would give false reassurance. Other devices are reached through an ARK Hub (Network tab).
       Store.set('softhub_notified', true);
-      Toast.show('🛰 You\'re the ARK Hub — your device is sharing messages with neighbours', 'success', 6000);
     }
     // Update hero peer badge
     const heroPeers = document.getElementById('hero-sync-badge');
@@ -3542,7 +3565,7 @@ const SoftHub = (() => {
     banner.id = bannerId;
     banner.style.cssText = [
       'position:fixed', 'bottom:calc(80px + env(safe-area-inset-bottom,0px))', 'left:50%', 'transform:translateX(-50%)',
-      'z-index:9999', 'max-width:min(420px,calc(100vw - 32px))', 'width:100%',
+      'z-index:8500', 'max-width:min(420px,calc(100vw - 32px))', 'width:100%',
       'background:linear-gradient(135deg,#2a2016 0%,#1a1208 100%)',
       'border:1.5px solid rgba(139,111,62,.55)', 'border-radius:20px',
       'padding:16px 20px', 'box-shadow:0 8px 40px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.04) inset',
@@ -3622,16 +3645,30 @@ const Hub = {
       const data = await r.json();
       const msgs = data.messages || data || [];
       if (Array.isArray(msgs)) {
+        // Our own messages come back from the hub under the hub's id. Find the local copies
+        // so each message is shown once, not twice.
+        const mine = new Map();
+        try {
+          for (const lm of (await DB.getAll('messages')) || []) {
+            if (lm && String(lm.id || '').startsWith('local_')) mine.set(String(lm.alias) + '\u0001' + Hub.wireText(lm), lm.id);
+          }
+        } catch(e) {}
         for (const m of msgs) {
-          if (m.id) await DB.put('messages', {
+          if (!m || m.id == null) continue;
+          const text = String(m.body != null ? m.body : (m.text != null ? m.text : ''));
+          const alias = String(m.alias || 'Anonymous');
+          const when = [m.ts, m.issued_at, m.createdAt].find(t => typeof t === 'string' && !isNaN(Date.parse(t)));
+          await DB.put('messages', {
             id: String(m.id),
-            alias: m.alias || 'Anonymous',
-            channel: m.channel || 'general',
-            body: m.body || m.text || '',
-            location: m.location || '',
+            alias: alias,
+            channel: String(m.channel || 'general'),
+            body: text,
+            location: String(m.location || ''),
             urgent: !!m.urgent,
-            ts: m.ts || m.createdAt || new Date().toISOString()
+            ts: when || new Date().toISOString()
           });
+          const localId = mine.get(alias + '\u0001' + text);
+          if (localId) { try { await DB.delete('messages', localId); } catch(e) {} mine.delete(alias + '\u0001' + text); }
         }
       }
       Store.set('last_sync', new Date().toISOString());
@@ -3672,10 +3709,14 @@ const Hub = {
       if (Store.get('dev_mode')) console.warn('Hub sync error:', e);
       if (manual || Store.get('dev_mode')) {
         const hubAddr = this.url || 'unknown';
-        const why = e && e.name === 'AbortError'
-          ? 'Hub at ' + hubAddr + ' timed out — is the hub device on the same Wi-Fi?'
-          : 'Could not reach hub at ' + hubAddr + ' — check the address and that the hub device is on';
-        Toast.show(why + ' Your messages are saved and will retry.', 'warning', 6000);
+        if (this.blockedBySecurePage()) {
+          this.explainSecurePage();
+        } else {
+          const why = e && e.name === 'AbortError'
+            ? 'Hub at ' + hubAddr + ' timed out — is the hub device on the same Wi-Fi?'
+            : 'Could not reach hub at ' + hubAddr + ' — check the address and that the hub device is on';
+          Toast.show(why + ' Your messages are saved and will retry.', 'warning', 6000);
+        }
       }
     } finally {
       this._syncing = false;
@@ -3683,26 +3724,65 @@ const Hub = {
       document.getElementById('messages-list')?.setAttribute('aria-busy', 'false');
     }
   },
+  // The text a hub stores for one of our messages (hubs keep alias + channel + text only).
+  wireText(msg) {
+    let t = String(msg && msg.body != null ? msg.body : '');
+    if (msg && msg.urgent && !/^🚨/.test(t)) t = '🚨 URGENT: ' + t;
+    if (msg && msg.location) t += ' 📍 ' + String(msg.location);
+    return t.trim().slice(0, 1000);
+  },
+  // What we send to a hub. ARK hubs accept this at /api/post and sign it themselves.
+  wirePayload(msg) {
+    const text = this.wireText(msg);
+    return JSON.stringify({ alias: String(msg.alias || 'Anonymous').slice(0, 40), channel: String(msg.channel || 'general'), text: text, body: text });
+  },
+  // A page loaded over https is not allowed by browsers to talk to a plain http:// hub on local Wi-Fi.
+  blockedBySecurePage() {
+    return location.protocol === 'https:' && /^http:\/\//i.test(this.url || '');
+  },
+  explainSecurePage() {
+    const u = this.url || '';
+    Modal.open(
+      '<p style="line-height:1.6;margin-bottom:10px">You opened ARK from a secure website. Browsers do not let a secure website talk to a hub on local Wi-Fi.</p>' +
+      '<p style="line-height:1.6;margin-bottom:10px"><strong>Do one of these instead:</strong></p>' +
+      '<ol style="line-height:1.7;padding-left:20px;margin-bottom:12px">' +
+      '<li>Join the hub\'s Wi-Fi and type this address into your browser:<br><strong style="word-break:break-all">' + esc(u) + '</strong></li>' +
+      '<li>Or open the copy of ARK you saved to this device (the downloaded file), then connect to the hub from there.</li>' +
+      '</ol><button class="btn btn-primary" onclick="Modal.close()">OK</button>',
+      'Cannot reach the hub from this page');
+  },
+  _draining: false,
   async drainQueue() {
+    if (this._draining) return;
     const queue = Store.get('msg_queue', []);
-    if (!queue.length || !this.url) return;
+    if (!Array.isArray(queue) || !queue.length || !this.url) return;
+    this._draining = true;
     const remaining = [];
+    const sentIds = [];
+    try {
     for (const msg of queue) {
       const ctrl = new AbortController();
       const tid = setTimeout(() => ctrl.abort(), 10000);
       try {
-        const r = await fetch(this.url + '/api/messages', {
+        const r = await fetch(this.url + '/api/post', {
           method: 'POST',
           headers: {'content-type':'application/json'},
-          body: JSON.stringify(msg),
+          body: this.wirePayload(msg),
           signal: ctrl.signal
         });
-        if (!r.ok) remaining.push(msg);
+        if (!r.ok) remaining.push(msg); else sentIds.push(msg.id);
       } catch(e) { console.warn('Hub drainQueue:', e); remaining.push(msg); }
       finally { clearTimeout(tid); }
     }
-    Store.set('msg_queue', remaining);
+    // Messages queued while we were sending must not be lost: keep anything not in our snapshot.
+    const snapshotIds = new Set(queue.map(m => m && m.id));
+    const latest = Store.get('msg_queue', []);
+    const added = Array.isArray(latest) ? latest.filter(m => m && !snapshotIds.has(m.id)) : [];
+    Store.set('msg_queue', remaining.concat(added));
+    } finally { this._draining = false; }
+    for (const id of sentIds) await Messages.markSent(id);
     Messages.updateQueueBadge();
+    if (sentIds.length) Messages.refresh();
   },
   // state: 'offline' | 'syncing' | 'local' | 'regional' | 'extended' | 'global' | 'error'
   updateConnState(state) {
@@ -3836,13 +3916,16 @@ const Hub = {
     const ctrl = new AbortController();
     const tid = setTimeout(() => ctrl.abort(), 8000);
     try {
-      const r = await fetch(this.url + '/api/messages', {
+      const r = await fetch(this.url + '/api/post', {
         method: 'POST',
         headers: {'content-type':'application/json'},
-        body: JSON.stringify(msg),
+        body: this.wirePayload(msg),
         signal: ctrl.signal
       });
-      return r.ok;
+      // A hub that answers with an error has NOT stored the message — keep it queued for retry.
+      if (!r.ok) { this.queueMsg(msg); return false; }
+      await Messages.markSent(msg.id);
+      return true;
     } catch(e) {
       this.queueMsg(msg);
       return false;
@@ -3851,7 +3934,9 @@ const Hub = {
     }
   },
   queueMsg(msg) {
-    const q = Store.get('msg_queue', []);
+    let q = Store.get('msg_queue', []);
+    if (!Array.isArray(q)) q = [];
+    if (msg && q.some(m => m && m.id === msg.id)) return; // already waiting
     q.push(msg);
     Store.set('msg_queue', q);
     Messages.updateQueueBadge();
@@ -3899,7 +3984,7 @@ const Messages = {
 
       // Try to post to hub
       const sent = await Hub.post(msg);
-      if (sent) Toast.show('✅ Message posted — neighbors with hubs will see it', 'success');
+      if (sent) Toast.show('✅ Message posted — everyone on this hub can see it', 'success');
       else Toast.show('💾 Message saved on your device — will send when you connect to a hub', 'info', 5000);
 
       const msgTextEl = document.getElementById('msg-text');
@@ -3932,23 +4017,35 @@ const Messages = {
         urgent: false, ts: new Date().toISOString()
       };
       await DB.put('messages', msg);
-      await Hub.post(msg);
-      Toast.show('✅ Safe status posted', 'success');
+      const sent = await Hub.post(msg);
+      // Never tell someone their family has been told when nothing left this device.
+      if (sent) Toast.show('✅ Safe status posted to the hub', 'success');
+      else Toast.show('💾 Saved on this device only — it will send when you connect to a hub', 'warning', 6000);
       this.refresh();
     } finally {
       BtnLoading.stop(safeBtn);
     }
   },
 
+  // Mark a locally written message as delivered so the "Pending sync" badge clears.
+  async markSent(id) {
+    try {
+      if (id == null) return;
+      const all = await DB.getAll('messages');
+      const m = (all || []).find(x => x && x.id === id);
+      if (m && !m.sent) { m.sent = true; await DB.put('messages', m); }
+    } catch(e) {}
+  },
+
   async refresh() {
-    const all = await DB.getAll('messages');
+    const all = ((await DB.getAll('messages')) || []).filter(m => m && typeof m === 'object');
     all.sort((a, b) => new Date(b.ts) - new Date(a.ts));
 
     // Update hero badge + btb badge with total message count
     const heroMsgs = document.getElementById('hero-msgs-badge');
     if (heroMsgs) heroMsgs.textContent = all.length + ' Message' + (all.length !== 1 ? 's' : '');
     // btb unread badge: messages not from self
-    const myAlias = Store.get('alias', '');
+    const myAlias = Store.get('last_alias', '');
     const unread = all.filter(m => m.alias !== myAlias).length;
     const btbBadge = document.getElementById('btb-msg-badge');
     if (btbBadge) {
@@ -4004,7 +4101,7 @@ const Messages = {
       const chLabel = {help:'🆘 Help',safe:'✅ Safe',offers:'🤝 Offers',missing:'🔍 Missing',reunification:'👨‍👩‍👧 Reunification',general:'💬 General',resources:'📦 Resources',medical:'🏥 Medical',water:'💧 Water',power:'⚡ Power',shelter:'🏠 Shelter'};
       const cc = chColors[ch] || '';
       // Show delivery warning for locally-originated messages not yet confirmed by hub
-      const isLocal = m.id && m.id.startsWith('local_');
+      const isLocal = !m.sent && String(m.id || '').startsWith('local_');
       const deliveryWarn = isLocal ? '<span class="badge badge-yellow" title="Not yet confirmed by hub — will sync when hub is reachable">⏳ Pending sync</span>' : '';
       const acked = MsgAck.isAcked(m.id);
       const ackCount = MsgAck.getCount(m.id);
@@ -4019,10 +4116,10 @@ const Messages = {
         </div>
         <div class="msg-body">${esc(m.body)}</div>
         <div class="msg-actions">
-          <button class="btn btn-ghost btn-xs ${acked ? 'msg-ack-active' : ''}" onclick="MsgAck.toggle('${esc(m.id)}');Messages.refresh()" title="${acked ? 'Acknowledged — click to remove' : 'Acknowledge this message'}">
+          <button class="btn btn-ghost btn-xs ${acked ? 'msg-ack-active' : ''}" data-id="${esc(String(m.id))}" onclick="MsgAck.toggle(this.dataset.id);Messages.refresh()" title="${acked ? 'Acknowledged — click to remove' : 'Acknowledge this message'}">
             ${acked ? '✅ Acked' : '👍 Ack'}${ackCount > 1 ? ` <span class="ack-count">${ackCount}</span>` : ''}
           </button>
-          <button class="btn btn-ghost btn-xs" onclick="Messages.prefillReply(${JSON.stringify(m.alias||'Anonymous')}, ${JSON.stringify(m.channel||'general')})" title="Reply in channel">↩ Reply</button>
+          <button class="btn btn-ghost btn-xs" data-alias="${esc(String(m.alias||'Anonymous'))}" data-channel="${esc(String(m.channel||'general'))}" onclick="Messages.prefillReply(this.dataset.alias, this.dataset.channel)" title="Reply in channel">↩ Reply</button>
         </div>
       </div>`;
     }).join('');
@@ -4122,7 +4219,24 @@ const Messages = {
     const packets = bundle.packets || [];
     let count = 0;
     for (const p of packets) {
-      if (p.id && p.body) { await DB.put('messages', p); count++; }
+      // Bundles come from other people's devices: store only known fields, coerced to safe types,
+      // so one malformed packet can never break the message list.
+      if (!p || typeof p !== 'object' || p.id == null) continue;
+      const body = p.body != null ? p.body : p.text;
+      if (body == null || body === '') continue;
+      const ts = (typeof p.ts === 'string' && !isNaN(Date.parse(p.ts))) ? p.ts
+               : (typeof p.issued_at === 'string' && !isNaN(Date.parse(p.issued_at))) ? p.issued_at
+               : new Date().toISOString();
+      await DB.put('messages', {
+        id: String(p.id).slice(0, 200),
+        alias: String(p.alias || 'Anonymous').slice(0, 80),
+        channel: String(p.channel || 'general').slice(0, 40),
+        body: String(body).slice(0, 4000),
+        location: String(p.location || '').slice(0, 200),
+        urgent: !!p.urgent,
+        ts
+      });
+      count++;
     }
     Toast.show(`✅ Imported ${count} message${count !== 1 ? 's' : ''} from bundle`, 'success');
     const bpEl = document.getElementById('bundle-paste'); if (bpEl) bpEl.value = '';
@@ -4221,7 +4335,10 @@ const Guides = {
     const sections = (g.sections||[]).map(s => `<h4>${s.heading}</h4>${s.body.map(p=>`<p>${p}</p>`).join('')}`).join('');
     const sources = g.sources ? `<p><small>Sources: ${g.sources.map(s=>s.url?`${s.label} (${s.url})`:s.label).join(' · ')}</small></p>` : '';
     const w = window.open('','_blank','width=700,height=900');
-    if (!w) return;
+    if (!w) {
+      printInPage(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${g.title}</title><style>body{font-family:sans-serif;max-width:600px;margin:40px auto;line-height:1.6}h1{font-size:1.3rem}h4{margin-top:1rem}li{margin-bottom:.4rem}</style></head><body><h1>${g.title}</h1><p><em>${g.summary}</em></p><h3>Key steps:</h3><ol>${steps}</ol>${sections}${sources}</body></html>`);
+      return;
+    }
     w.document.write(`<!DOCTYPE html><html><head><title>${g.title}</title><style>body{font-family:sans-serif;max-width:600px;margin:40px auto;line-height:1.6}h1{font-size:1.3rem}h4{margin-top:1rem}li{margin-bottom:.4rem}@media print{}</style></head><body><h1>${g.title}</h1><p><em>${g.summary}</em></p><p><strong>Last updated:</strong> ${g.updated||'2024'}</p><h3>Key steps:</h3><ol>${steps}</ol>${sections}${sources}</body></html>`);
     w.document.close();
     w.print();
@@ -4234,9 +4351,11 @@ const Guides = {
     if (navigator.share) {
       navigator.share({title: g.title, text}).catch(()=>{});
     } else {
-      navigator.clipboard.writeText(text).then(()=>Toast.show('📋 Guide copied to clipboard','success',2500)).catch(()=>{
-        Modal.open(`<pre style="white-space:pre-wrap;font-size:12px">${esc(text)}</pre><button class="btn btn-primary mt-8" onclick="Modal.close()">Close</button>`, 'Share Guide');
-      });
+      const showText = () => Modal.open(`<pre style="white-space:pre-wrap;font-size:12px">${esc(text)}</pre><button class="btn btn-primary mt-8" onclick="Modal.close()">Close</button>`, 'Share Guide');
+      // navigator.clipboard does not exist on plain-http pages (e.g. a copy served by a local hub)
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(()=>Toast.show('📋 Guide copied to clipboard','success',2500)).catch(showText);
+      } else showText();
     }
   },
 
@@ -4334,9 +4453,9 @@ const Guides = {
         ${seeAlso}
         ${sources}
         <div class="guide-actions">
-          <button class="${bmClass}" onclick="Guides.toggleBookmark('${esc(g.slug)}')" title="Bookmark this guide">${bmLabel}</button>
-          <button onclick="Guides.printGuide('${esc(g.slug)}')" title="Print this guide">🖨️ Print</button>
-          <button onclick="Guides.shareGuide('${esc(g.slug)}')" title="Share this guide">📤 Share</button>
+          <button class="${bmClass}" onclick="Guides.toggleBookmark(${jsAttr(g.slug)})" title="Bookmark this guide">${bmLabel}</button>
+          <button onclick="Guides.printGuide(${jsAttr(g.slug)})" title="Print this guide">🖨️ Print</button>
+          <button onclick="Guides.shareGuide(${jsAttr(g.slug)})" title="Share this guide">📤 Share</button>
         </div>
       </div>
     </div>`;
@@ -4392,7 +4511,9 @@ const Resources = {
     ];
 
     // Calculate days-of-supply annotations
-    const hhCount = Math.max(1, parseInt(Store.get('household', {}).count) || 1);
+    // People to supply: the saved count, or the members actually added, whichever is larger
+    const hhMembers = Store.get('hh_members', []);
+    const hhCount = Math.max(1, parseInt(Store.get('household', {}).count) || 0, Array.isArray(hhMembers) ? hhMembers.length : 0);
     // Water: ~1 gal/person/day (FEMA standard)
     const waterDays = d.water > 0 ? Math.floor(d.water / hhCount) : 0;
     // Food: already in days (per household)
@@ -4421,8 +4542,8 @@ const Resources = {
       // Survival duration summary banner
       let survivalBanner = '';
       if (waterDays > 0 || foodDays > 0) {
-        const minDays = Math.min(waterDays || 999, foodDays || 999);
-        const effDays = minDays === 999 ? (waterDays || foodDays) : minDays;
+        // You last only as long as whichever runs out first — zero water is zero days, not "unknown".
+        const effDays = Math.min(waterDays, foodDays);
         let survColor = effDays >= 14 ? 'var(--green)' : effDays >= 3 ? 'var(--yellow)' : 'var(--red)';
         let survBg = effDays >= 14 ? 'var(--green-bg)' : effDays >= 3 ? 'var(--yellow-bg)' : 'var(--red-bg)';
         let survLabel = effDays >= 14 ? '✅ Well stocked' : effDays >= 3 ? '⚠️ Moderate supply' : '🚨 Critical — restock now';
@@ -4468,9 +4589,10 @@ const Resources = {
       if (!hist.length) {
         histEl.textContent = 'No history yet — save a snapshot to track changes.';
       } else {
-        histEl.innerHTML = hist.map(h => {
-          const when = h.ts ? new Date(h.ts).toLocaleString() : '?';
-          return `<div style="margin-bottom:6px"><span style="color:var(--text-muted)">${when}</span> — Water ${h.water||0}gal · Food ${h.food||0}d · Fuel ${h.fuel||0}gal · Medical ${h.medical||0}/5 · Shelter ${h.shelter||0}ppl · Power ${h.power||0}hrs</div>`;
+        histEl.innerHTML = hist.filter(h => h && typeof h === 'object').map(h => {
+          const when = h.ts && !isNaN(Date.parse(h.ts)) ? new Date(h.ts).toLocaleString() : '?';
+          const num = v => esc(Number(v) || 0);
+          return `<div style="margin-bottom:6px"><span style="color:var(--text-muted)">${esc(when)}</span> — Water ${num(h.water)}gal · Food ${num(h.food)}d · Fuel ${num(h.fuel)}gal · Medical ${num(h.medical)}/5 · Shelter ${num(h.shelter)}ppl · Power ${num(h.power)}hrs</div>`;
         }).join('');
       }
     }
@@ -4592,10 +4714,20 @@ const Resources = {
           if (!obj.resources) { Toast.show('Invalid file — no resources data found', 'error', 3000); return; }
           const r = obj.resources;
           // Validate fields exist and are numeric/string
-          const valid = typeof r === 'object' && ('water' in r || 'food' in r);
+          const valid = r && typeof r === 'object' && ('water' in r || 'food' in r);
           if (!valid) { Toast.show('Invalid inventory file format', 'error', 3000); return; }
-          Store.set('resources', r);
-          if (Array.isArray(obj.history)) Store.set('res_history', obj.history);
+          // Keep only the fields ARK knows, as numbers/text, so a damaged file cannot break the Resources tab
+          const clean = {};
+          ['water','food','fuel','medical','shelter','power'].forEach(k => { clean[k] = Math.max(0, Number(r[k]) || 0); });
+          clean.notes = String(r.notes == null ? '' : r.notes).slice(0, 2000);
+          if (!Store.set('resources', clean)) return;
+          if (Array.isArray(obj.history)) {
+            Store.set('res_history', obj.history.filter(h => h && typeof h === 'object').slice(-50).map(h => ({
+              ts: typeof h.ts === 'string' ? h.ts : '',
+              water: Number(h.water) || 0, food: Number(h.food) || 0, fuel: Number(h.fuel) || 0,
+              medical: Number(h.medical) || 0, shelter: Number(h.shelter) || 0, power: Number(h.power) || 0
+            })));
+          }
           Store.set('resources_updated', new Date().toISOString());
           this.render();
           Toast.show('✅ Inventory imported successfully', 'success');
@@ -4612,8 +4744,13 @@ const Resources = {
 // === HOUSEHOLD ===
 const Household = {
   _members: [],
+  _loaded: false,
 
   load() {
+    // Fill the form from saved data only once. Coming back to this tab must never wipe
+    // something the user typed but has not saved yet.
+    if (this._loaded) { this._members = Store.get('hh_members', []); this.renderMembers(); return; }
+    this._loaded = true;
     const d = Store.get('household', {});
     const hSetVal = (id, v) => { const e = document.getElementById(id); if (e) e.value = v; };
     hSetVal('hh-name', d.name || ''); hSetVal('hh-count', d.count || '');
@@ -4654,7 +4791,7 @@ const Household = {
       pets: hGetVal('hh-pets').trim(),
       gobag: hGetVal('hh-gobag').trim()
     };
-    Store.set('household', d);
+    if (!Store.set('household', d)) return; // Store already told the user saving failed
     Store.set('hh_id', d.id);
     // Keep hh-count field in sync with actual saved count
     const countEl = document.getElementById('hh-count');
@@ -4745,7 +4882,7 @@ const Household = {
     const roleEmoji = {leader:'👑',medic:'🏥',radio:'📻',security:'🛡️',logistics:'📦',member:'👤',head:'🏠',spouse:'💑',child:'🧒',elderly:'🧓',pet:'🐾',other:'🔵'};
     list.innerHTML = this._members.map((m, i) => {
       const details = [
-        m.age ? `Age ${m.age}` : null,
+        (m.age != null && m.age !== '') ? `Age ${esc(m.age)}` : null,
         m.bloodType ? `Blood: ${esc(m.bloodType)}` : null,
         m.allergies ? `Allergies: ${esc(m.allergies)}` : null,
         m.conditions ? `Conditions: ${esc(m.conditions)}` : null,
@@ -4841,7 +4978,7 @@ const Household = {
     const d = Store.get('household', {});
     const members = Store.get('hh_members', []);
     const roleEmoji = {leader:'👑',medic:'🏥',radio:'📻',security:'🛡️',logistics:'📦',member:'👤',head:'🏠',spouse:'💑',child:'🧒',elderly:'🧓',pet:'🐾',other:'🔵'};
-    const row = (label, value) => value ? `<div style="display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600;min-width:120px;color:var(--accent);flex-shrink:0">${label}</span><span>${value}</span></div>` : '';
+    const row = (label, value) => value ? `<div style="display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600;min-width:120px;color:var(--accent);flex-shrink:0">${label}</span><span>${esc(value)}</span></div>` : '';
     let memberBlock = '';
     if (members.length) {
       memberBlock = `<div style="margin-top:8px"><strong style="color:var(--accent)">👥 Members (${members.length})</strong>`;
@@ -4852,7 +4989,7 @@ const Household = {
           m.conditions ? esc(m.conditions) : null,
           m.needs ? `🦽 ${esc(m.needs)}` : null
         ].filter(Boolean).join(' · ');
-        return `<div style="padding:4px 0 4px 8px;border-left:3px solid var(--accent);margin:4px 0"><strong>${roleEmoji[m.role]||'👤'} ${esc(m.name||'')}</strong>${m.age!=null?' age '+m.age:''}${tags ? '<br><span style="font-size:12px;color:var(--text-secondary)">'+tags+'</span>' : ''}</div>`;
+        return `<div style="padding:4px 0 4px 8px;border-left:3px solid var(--accent);margin:4px 0"><strong>${roleEmoji[m.role]||'👤'} ${esc(m.name||'')}</strong>${(m.age!=null && m.age!=='')?' age '+esc(m.age):''}${tags ? '<br><span style="font-size:12px;color:var(--text-secondary)">'+tags+'</span>' : ''}</div>`;
       }).join('');
       memberBlock += '</div>';
     } else {
@@ -4921,7 +5058,7 @@ const Household = {
 <div class="row"><span class="label">Meet Point 2:</span>${esc(d.meet2||'')}</div>
 <div class="row"><span class="label">Evacuate to:</span>${esc(d.evac||'')}</div>
 <h3>Out-of-Area Contact</h3>
-<div class="row"><span class="label">Contact:</span>${ooaLine}</div>
+<div class="row"><span class="label">Contact:</span>${esc(ooaLine)}</div>
 <h3>Vehicles &amp; Pets</h3>
 <div class="row"><span class="label">Vehicle 1:</span>${esc(d.veh1||'')} — ${esc(d.fuel||'')}</div>
 ${veh2Line}
@@ -4930,15 +5067,18 @@ ${veh2Line}
 ${memberTable}
 <p style="font-size:11px;margin-top:16px">ARK Crisis Suite — Generated ${new Date().toLocaleDateString()}</p>`;
     const w = window.open('', '_blank');
-    if (!w) { Toast.show('Pop-up blocked — allow pop-ups for this page and try again', 'warning', 4000); return; }
+    if (!w) {
+      // Pop-ups are blocked (common in installed apps): print the card from this page instead.
+      printInPage(`<!doctype html><html><head><meta charset="utf-8"><title>Household Emergency Card</title><style>body{font:14px Arial,sans-serif;padding:20px;max-width:680px}h2{font-size:16px;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:12px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #999;padding:4px 8px;font-size:12px;text-align:left}.row{margin:4px 0}.label{font-weight:700;display:inline-block;min-width:120px}</style></head><body>${html}</body></html>`);
+      return;
+    }
     w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Household Emergency Card</title>
 <style>body{font:14px Arial,sans-serif;padding:20px;max-width:680px}h2{font-size:16px;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:12px}h3{font-size:13px;text-transform:uppercase;letter-spacing:0.05em;margin:14px 0 4px;border-bottom:1px solid #ccc;padding-bottom:2px}.row{display:flex;gap:10px;margin:4px 0}.label{font-weight:bold;min-width:120px;flex-shrink:0}td,th{border:1px solid #ccc;padding:4px 8px;font-size:12px;text-align:left}@media print{body{margin:0}button{display:none}.no-print{display:none}}</style></head><body>
 ${html}
 <div style="text-align:center;margin:20px 0" class="no-print"><button onclick="window.print()" style="padding:8px 20px;font-size:14px;cursor:pointer;background:#333;color:#fff;border:none;border-radius:4px">🖨️ Print</button></div>
 </body></html>`);
     w.document.close();
-    w.onload = function() { w.focus(); w.print(); };
-    setTimeout(() => { if (w && !w.closed) { w.focus(); w.print(); } }, 1200);
+    printOnce(w);
   },
 
   shareWithHub() {
@@ -5024,7 +5164,7 @@ const Medical = {
     const html = members.map(m =>
       `<div class="font-sm" style="border:1px solid var(--border);padding:12px;margin:8px 0;border-radius:8px">
         <strong>Name:</strong> ${esc(m.name)}<br>
-        <strong>Medications:</strong> ${meds.filter(md => md.person === m.name).map(md => esc(md.name) + ' (' + esc(md.sched) + ')').join(', ') || 'None'}<br>
+        <strong>Medications:</strong> ${meds.filter(md => String(md.person || '').trim().toLowerCase() === String(m.name || '').trim().toLowerCase()).map(md => esc(md.name) + ' (' + esc(md.sched) + ')').join(', ') || 'None listed'}<br>
         <strong>Household:</strong> ${esc(Store.get('household', {}).name || '')}
       </div>`
     ).join('');
@@ -5041,7 +5181,7 @@ const CPR = {
   _modes: {
     adult:  { bpm: 100, ms: 600,  label: 'Adult (8+ yrs) — 100–120/min · 2 hands · 2 in deep',   breaths: 30 },
     child:  { bpm: 100, ms: 600,  label: 'Child (1–8 yrs) — 100–120/min · 1–2 hands · 2 in deep', breaths: 30 },
-    infant: { bpm: 120, ms: 500,  label: 'Infant (<1 yr) — 100–120/min · 2 fingers · 1.5 in deep', breaths: 30 },
+    infant: { bpm: 120, ms: 500,  label: 'Infant (<1 yr) — 100–120/min · 2 thumbs (or heel of 1 hand) · 1.5 in deep', breaths: 30 },
   },
   _fmt(ms) {
     const s = Math.floor(ms / 1000);
@@ -5083,24 +5223,34 @@ const CPR = {
     const heart = document.getElementById('cpr-heart');
     if (heart) heart.style.animationDuration = cfg.ms + 'ms';
     this._startTime = Date.now() - this._pausedElapsed;
+    // Keep the screen awake: hands are busy, and a dark screen would hide the count.
+    try {
+      if (navigator.wakeLock && navigator.wakeLock.request) {
+        navigator.wakeLock.request('screen').then(lock => { this._wakeLock = lock; }).catch(() => {});
+      }
+    } catch (e) {}
     // Compression interval
     this._int = setInterval(() => {
+      // While the two rescue breaths are being given, compressions (and the count) stop.
+      if (this._breathUntil && Date.now() < this._breathUntil) return;
+      if (this._breathUntil) {
+        this._breathUntil = 0;
+        const cueOff = document.getElementById('cpr-breath-cue');
+        if (cueOff) cueOff.style.display = 'none';
+        if (heart) heart.style.animationPlayState = '';
+      }
       this._count++;
       this._cycleCount++;
       if (counter) { counter.textContent = this._count; counter.style.color = ''; }
-      // Every 30 compressions: show breath cue for 3 seconds
+      // After every 30 compressions: pause about 5 seconds for 2 breaths
       if (this._cycleCount >= cfg.breaths) {
         this._cycleCount = 0;
+        this._breathUntil = Date.now() + 5000;
         const cue = document.getElementById('cpr-breath-cue');
-        if (cue) {
-          cue.style.display = '';
-          if (counter) counter.style.color = 'var(--blue)';
-          clearTimeout(this._breathTimeout);
-          this._breathTimeout = setTimeout(() => {
-            if (cue) cue.style.display = 'none';
-            if (counter) counter.style.color = '';
-          }, 3000);
-        }
+        if (cue) cue.style.display = '';
+        if (counter) counter.style.color = 'var(--blue)';
+        if (heart) heart.style.animationPlayState = 'paused';
+        try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
       }
     }, cfg.ms);
     // Elapsed time interval
@@ -5116,16 +5266,27 @@ const CPR = {
     this._pausedElapsed = Date.now() - this._startTime;
     clearInterval(this._int); this._int = null;
     clearInterval(this._elapsedInt); this._elapsedInt = null;
+    this._releaseWake();
     const box = document.getElementById('cpr-box');
     if (box) { box.classList.add('cpr-paused'); box.classList.remove('cpr-active'); }
     const startBtn = document.getElementById('cpr-start-btn');
     if (startBtn) { startBtn.textContent = '▶ RESUME'; startBtn.disabled = false; }
+  },
+  _breathUntil: 0,
+  _wakeLock: null,
+  _releaseWake() {
+    try { if (this._wakeLock) this._wakeLock.release(); } catch (e) {}
+    this._wakeLock = null;
   },
   reset() {
     this._running = false;
     clearInterval(this._int); this._int = null;
     clearInterval(this._elapsedInt); this._elapsedInt = null;
     clearTimeout(this._breathTimeout);
+    this._releaseWake();
+    this._breathUntil = 0;
+    const heartEl = document.getElementById('cpr-heart');
+    if (heartEl) heartEl.style.animationPlayState = '';
     this._count = 0; this._cycleCount = 0; this._pausedElapsed = 0;
     const box = document.getElementById('cpr-box');
     if (box) { box.classList.add('cpr-paused'); box.classList.remove('cpr-active'); }
@@ -5241,7 +5402,8 @@ const MapTool = {
     const s = servers[(x + y) % 3];
     const url = `https://${s}.tile.openstreetmap.org/${z}/${x}/${y}.png`;
     // Use fetch so we can get the blob for IDB storage
-    fetch(url).then(r => {
+    // OpenStreetMap asks apps to identify themselves; send the site origin (never the full address).
+    fetch(url, {referrerPolicy: 'origin'}).then(r => {
       if (!r.ok) throw new Error('tile ' + r.status);
       return r.blob();
     }).then(blob => {
@@ -5697,8 +5859,9 @@ const MapTool = {
   async preCacheArea() {
     if (this._preCaching) { Toast.show('Cache already in progress — please wait', 'info'); return; }
     if (!navigator.onLine) { Toast.show('Already offline — tiles cached from previous visits will work', 'info'); return; }
-    const pos = Store.get('last_gps', null);
-    if (!pos) { Toast.show('GPS location needed — start GPS first', 'warning'); return; }
+    // Use the GPS fix if there is one, otherwise the middle of the map as it is shown now.
+    const pos = Store.get('last_gps', null) || { lat: this._lat, lon: this._lon };
+    if (!pos || typeof pos.lat !== 'number' || typeof pos.lon !== 'number') { Toast.show('Move the map to your area first, then tap Cache Area', 'warning', 5000); return; }
 
     this._preCaching = true;
     const btn = document.getElementById('map-btn-cache');
@@ -5725,7 +5888,9 @@ const MapTool = {
     const tileSets = [];
     for (let z = zoomMin; z <= zoomMax; z++) {
       const n = Math.pow(2, z);
-      const radius = Math.max(2, Math.floor(5 / (40075016 / n / 256 / 1000)));
+      // Tiles needed to cover roughly 5 km around the point at this zoom (one tile is 40,075 km / n wide).
+      // Capped so a tap can never queue more than a few hundred downloads.
+      const radius = Math.min(8, Math.max(2, Math.floor(5 / (40075016 / n / 1000))));
       const center = latLonToTile(lat, lon, z);
       for (let dx = -radius; dx <= radius; dx++) {
         for (let dy = -radius; dy <= radius; dy++) {
@@ -5791,12 +5956,21 @@ const MapTool = {
   },
 
   _listenCompass() {
-    window.addEventListener('deviceorientation', e => {
-      const rawHeading = (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null)
-        ? e.webkitCompassHeading           // iOS: clockwise from north, correct
-        : (360 - (e.alpha || 0)) % 360;    // Android: convert counterclockwise to clockwise
-      const h = Math.round(rawHeading);
+    // Android only gives a true compass direction on the "absolute" event; the plain event is
+    // relative to wherever the phone happened to be pointing when it started.
+    const evt = ('ondeviceorientationabsolute' in window) ? 'deviceorientationabsolute' : 'deviceorientation';
+    window.addEventListener(evt, e => {
+      const hasIOS = e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null;
       const el = document.getElementById('compass-heading');
+      if (!hasIOS && (e.alpha === null || e.alpha === undefined || (evt === 'deviceorientation' && e.absolute !== true))) {
+        // No trustworthy reading — say so rather than show a wrong direction.
+        if (el) el.textContent = 'Compass not available on this device';
+        return;
+      }
+      const rawHeading = hasIOS
+        ? e.webkitCompassHeading           // iOS: clockwise from north, correct
+        : (360 - e.alpha) % 360;           // Android: convert counterclockwise to clockwise
+      const h = Math.round(rawHeading);
       if (el) el.textContent = 'Heading: ' + h + '°';
       const compass = document.getElementById('compass-display');
       if (compass) compass.style.transform = 'rotate(' + (-h) + 'deg)';
@@ -5847,7 +6021,7 @@ const MapTool = {
   removeMarker(i) {
     const m = this._markers[i];
     const label = m ? (m.label || m.type || 'this location') : 'this location';
-    Modal.confirm(`Remove "${label}" from the map?`, function() {
+    Modal.confirm(`Remove "${esc(label)}" from the map?`, function() {
       MapTool._markers.splice(i, 1);
       Store.set('map_markers', MapTool._markers);
       MapTool.draw();
@@ -6130,6 +6304,7 @@ const Network = {
     if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
     if (hubInputEl) hubInputEl.value = url; // show normalized URL to user
     Store.set('hub_url', url);
+    if (Hub.blockedBySecurePage()) { Hub.updateSyncDisplay(); Hub.explainSecurePage(); return; }
     SoftHub.yield_to_external(); // yield soft-hub role to the external hub
     // Keep Settings panel in sync
     const settingsEl = document.getElementById('set-hub-url');
@@ -6155,6 +6330,10 @@ const Network = {
 
   async _scanHub() {
     const results = document.getElementById('scan-results');
+    if (location.protocol === 'https:') {
+      if (results) results.innerHTML = '<div class="font-sm text-secondary">Auto-scan cannot work from a secure website. Join the hub\'s Wi-Fi and type the address shown on the hub\'s screen (for example <strong>http://10.42.0.1:8080</strong>) straight into your browser.</div>';
+      return;
+    }
     if (results) results.innerHTML = '<div class="font-sm text-secondary">🔍 Scanning for ARK hubs…</div>';
 
     const found = new Map(); // url → label
@@ -6272,8 +6451,10 @@ const Network = {
 
     // Check for BarcodeDetector support first
     const hasBarcodeDetector = typeof BarcodeDetector !== 'undefined';
-    if (!hasBarcodeDetector && !navigator.mediaDevices) {
-      Toast.show('QR scanning not supported on this browser — enter the hub address manually', 'warning', 5000);
+    // Without a QR decoder (iPhone, Firefox) or camera access (plain-http pages) the camera could
+    // never read a code — say so instead of running the camera for nothing.
+    if (!hasBarcodeDetector || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      Toast.show('This browser cannot scan QR codes inside ARK. Use your phone\'s camera app to scan it, or type the hub address above.', 'warning', 7000);
       return;
     }
 
@@ -6325,6 +6506,21 @@ const Network = {
     if (container) container.classList.add('hidden');
   },
 
+  // Plain-language steps for setting up a real hub (the only way to link different devices offline).
+  showHubHelp() {
+    Modal.open(
+      '<p style="line-height:1.6;margin-bottom:10px">A phone or browser cannot be a hub by itself. One <strong>laptop or Raspberry Pi</strong> runs the free ARK Hub program, and every phone on the same Wi-Fi can then share messages — with no internet at all.</p>' +
+      '<ol style="line-height:1.7;padding-left:20px;margin-bottom:12px">' +
+      '<li><strong>Before an emergency</strong> (needs internet once): on the laptop, download the <strong>ARK Hub kit</strong> from <strong>arks.solutions/hub</strong> and unzip it.</li>' +
+      '<li><strong>Start it:</strong> on Windows double-click <strong>start-hub.cmd</strong> in the hub folder. On Mac, Linux or Raspberry Pi run <strong>sh hub/start-hub.sh</strong>.</li>' +
+      '<li>The hub window shows an address such as <strong>http://192.168.1.20:8080</strong>.</li>' +
+      '<li><strong>Everyone else</strong> joins the same Wi-Fi (a router with no internet is fine) and types that address into their browser.</li>' +
+      '</ol>' +
+      '<p class="font-xs text-muted" style="line-height:1.5;margin-bottom:12px">Practise once while things are normal. The hub message board is public to everyone on that Wi-Fi.</p>' +
+      '<button class="btn btn-primary" onclick="Modal.close()">Got it</button>',
+      'How to set up a hub');
+  },
+
   // === ONE-TAP SOFT HUB ===
   startSoftHub() {
     SoftHub.claimHubManually();
@@ -6372,14 +6568,16 @@ const Network = {
     const homeStatus = document.getElementById('softhub-home-status');
     const qrShare = document.getElementById('hub-qr-share-card');
 
-    const isHub = SoftHub.isHub();
+    // A browser tab cannot accept connections from other devices, so never present this device as a
+    // hub with an address or QR code for neighbours — it would send them to an address that is not there.
+    const isHub = false;
     if (card)   { card.classList.toggle('hub-is-active', isHub); }
     if (peer)   peer.style.display   = isHub ? 'none' : '';
     if (active) active.style.display = isHub ? ''     : 'none';
     if (badge)  { badge.style.display = isHub ? '' : 'none'; }
     if (homeStatus) {
-      homeStatus.textContent = isHub ? '🛰 You are the Hub' : '📡 Peer mode';
-      homeStatus.style.color = isHub ? 'var(--accent)' : 'var(--text-muted)';
+      homeStatus.textContent = Hub.url ? '📡 Hub: ' + Hub.url : '📡 Not connected to a hub — messages stay on this device';
+      homeStatus.style.color = Hub.url ? 'var(--accent)' : 'var(--text-muted)';
     }
     // Show QR share card when soft-hub OR connected to external hub
     const hasExternalHub = !!Hub.url;
@@ -6463,12 +6661,13 @@ const Network = {
   },
 
   // === BUG REPORTING + AUTO-PATCH (hardened) ===
-  PATCH_URL: 'https://ark.halosuite.ai/halo/patches/latest.json',
-  BUG_URL:   'https://ark.halosuite.ai/halo/bugs',
+  PATCH_URL: 'https://arks.solutions/?patches',
+  BUG_URL:   'https://arks.solutions/?bugs',
   _patchCheckInterval: null,
+  _appliedPatchVersion: null, // patch applied in this page load (patches change the screen, not the file)
 
   // Current app version — bump this when deploying new HTML
-  APP_VERSION: '1.1.0',
+  APP_VERSION: '1.2.0',
 
   _submitting: false, // in-flight guard
 
@@ -6487,7 +6686,8 @@ const Network = {
       ts: new Date().toISOString(),
       appVersion: this.APP_VERSION,
       patchLevel: Store.get('ark_patch_level', 'none'),
-      url: window.location.href.substring(0, 300), // page URL (capped) for context
+      // Where ARK is running — never the full address of a saved file, which would reveal folder and user names
+      url: (/^https?:$/.test(location.protocol) ? location.origin + location.pathname : location.protocol).substring(0, 200),
       ua: navigator.userAgent.substring(0, 200), // cap UA length
       online: navigator.onLine,
       hubConnected: !!Hub.url,
@@ -6509,25 +6709,12 @@ const Network = {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(report),
-        signal: AbortSignal.timeout(8000)
+        signal: timeoutSignal(8000)
       });
       if (r.ok || r.status === 201 || r.status === 204) { sent = true; }
     } catch(e) {}
 
-    // 2. Try hub relay (LAN fallback)
-    if (!sent && Hub.url) {
-      try {
-        const r = await fetch(Hub.url + '/api/bug-report', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(report),
-          signal: AbortSignal.timeout(5000)
-        });
-        if (r.ok) { sent = true; }
-      } catch(e) {}
-    }
-
-    // 3. Queue locally for next-available send
+    // 2. Queue locally for next-available send
     if (!sent) {
       try {
         const queue = JSON.parse(localStorage.getItem('ark_bug_queue') || '[]');
@@ -6554,9 +6741,18 @@ const Network = {
         'Patch: ' + (Store.get('ark_patch_level','none')) + '\n' +
         'UA: ' + navigator.userAgent.substring(0, 150)
       );
-      window.open('mailto:hello@halosuite.ai?subject=ARK+Bug+Report&body=' + body);
-      if (statusEl) statusEl.textContent = '📧 Offline — opened email draft. Report queued locally.';
-      if (textEl) textEl.value = '';
+      // Keep the text in the box: nothing has been sent yet.
+      if (statusEl) {
+        statusEl.textContent = '';
+        statusEl.appendChild(document.createTextNode('💾 Saved on this device — it will be sent automatically next time ARK is online. Or '));
+        const mail = document.createElement('a');
+        mail.href = 'mailto:hello@halosuite.ai?subject=ARK%20Bug%20Report&body=' + body;
+        mail.textContent = 'send it by email now';
+        mail.style.color = 'var(--accent)';
+        statusEl.appendChild(mail);
+        statusEl.appendChild(document.createTextNode('.'));
+      }
+      Toast.show('Report saved — it will send when you are back online', 'info', 5000);
     }
 
     this._submitting = false;
@@ -6588,9 +6784,10 @@ const Network = {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(report),
-            signal: AbortSignal.timeout(5000)
+            signal: timeoutSignal(5000)
           });
-          if (!r.ok) remaining.push(report);
+          // 4xx means the server will never accept this report — drop it rather than retry forever.
+          if (!r.ok && !(r.status >= 400 && r.status < 500 && r.status !== 429)) remaining.push(report);
         } catch(e) { remaining.push(report); break; } // stop on network error
       }
       localStorage.setItem('ark_bug_queue', JSON.stringify(remaining));
@@ -6618,16 +6815,15 @@ const Network = {
 
     let patch = null;
 
-    // Try sources in priority order: hub LAN → CDN remote
-    const sources = [];
-    if (Hub.url) sources.push(Hub.url + '/patches/latest.json');
-    sources.push(this.PATCH_URL);
+    // Fixes come only from the official ARK site. A local hub is never trusted to change
+    // what this app says — in a crisis, altered safety instructions could hurt someone.
+    const sources = [this.PATCH_URL];
 
     for (const src of sources) {
       try {
-        const r = await fetch(src + '?v=' + Date.now(), { // bust cache
-          signal: AbortSignal.timeout(6000),
-          headers: {'Cache-Control': 'no-cache'}
+        const r = await fetch(src + (src.indexOf('?') === -1 ? '?' : '&') + 'v=' + Date.now(), { // bust cache
+          signal: timeoutSignal(6000),
+          cache: 'no-store'
         });
         if (!r.ok) continue;
         const data = await r.json();
@@ -6645,20 +6841,32 @@ const Network = {
       return false;
     }
 
-    const currentV  = this.APP_VERSION;
-    const patchedV  = Store.get('ark_patch_level', '0.0.0');
-    const effectiveV = this._semverGt(patchedV, currentV) ? patchedV : currentV;
+    return this._applyPatch(patch, silent);
+  },
 
-    if (!this._semverGt(patch.version, effectiveV)) {
-      if (!silent) {
-        if (statusEl) statusEl.textContent = '✅ Up to date — v' + effectiveV + '.';
-      }
+  // Apply a patch object to the page. Patches change what is on screen, not the saved file, so
+  // the latest one is remembered and re-applied each time ARK opens (even offline).
+  _applyPatch(patch, silent = true) {
+    const statusEl = document.getElementById('patch-status');
+    const currentV = this.APP_VERSION;
+    const hasOps = patch && typeof patch.version === 'string' && Array.isArray(patch.patches) && patch.patches.length > 0;
+
+    if (!hasOps || !this._semverGt(patch.version, currentV)) {
+      // Nothing newer than this copy of ARK: forget any remembered patch.
+      Store.del('ark_patch_cache');
+      if (!this._appliedPatchVersion) Store.del('ark_patch_level');
+      if (!silent && statusEl) statusEl.textContent = '✅ Up to date — v' + (this._appliedPatchVersion || currentV) + '.';
+      return false;
+    }
+    if (this._appliedPatchVersion && !this._semverGt(patch.version, this._appliedPatchVersion)) {
+      if (!silent && statusEl) statusEl.textContent = '✅ Up to date — v' + this._appliedPatchVersion + '.';
       return false;
     }
 
     // === APPLY PATCHES ===
-    // Security: validate each operation before executing
-    const ALLOWED_ACTIONS = new Set(['replace_text','replace_html','add_css','store_set','remove_element','show_element','hide_element','set_attr','remove_class','add_class']);
+    // Security: validate each operation before executing. Patches may change wording, styling and
+    // visibility only — never run code, insert HTML, or touch the user's saved data.
+    const ALLOWED_ACTIONS = new Set(['replace_text','add_css','remove_element','show_element','hide_element','set_attr','remove_class','add_class']);
     let applied = 0, skipped = 0;
     const errors = [];
 
@@ -6759,6 +6967,8 @@ const Network = {
 
     // Only persist patch level when at least one op was successfully applied
     if (applied > 0) {
+      this._appliedPatchVersion = patch.version;
+      Store.set('ark_patch_cache', { version: patch.version, summary: String(patch.summary || '').slice(0, 300), patches: patchList.slice(0, 200) });
       Store.set('ark_patch_level', patch.version);
       Store.set('ark_patch_ts', new Date().toISOString());
       Store.set('ark_patch_summary', patch.summary || '');
@@ -6795,6 +7005,11 @@ const Network = {
 
   // Auto-check for patches on startup (silent)
   async initPatchCheck() {
+    // Re-apply the last official fix straight away, so it also holds when offline
+    try {
+      const cached = Store.get('ark_patch_cache', null);
+      if (cached && typeof cached === 'object') this._applyPatch(cached, true);
+    } catch (e) {}
     // Check after 10s on first load, then every 2 hours
     setTimeout(() => this.checkForUpdates(true), 10000);
     this._patchCheckInterval = setInterval(() => this.checkForUpdates(true), 2 * 60 * 60 * 1000);
@@ -7013,7 +7228,7 @@ const Checklist = {
     const all = this._getAllChecklists();
     row.innerHTML = all.map(cl => `
       <button class="btn btn-sm ${this._activeId === cl.id ? 'btn-primary' : 'btn-ghost'}"
-        onclick="Checklist.switchTo('${esc(cl.id)}')" style="font-size:12px">${esc(cl.label)}</button>
+        onclick="Checklist.switchTo(${jsAttr(cl.id)})" style="font-size:12px">${esc(cl.label)}</button>
     `).join('') +
     `<button class="btn btn-ghost btn-sm" onclick="Checklist.newCustom()" style="font-size:12px" title="Create custom checklist">＋ Custom</button>`;
   },
@@ -7040,7 +7255,7 @@ const Checklist = {
     container.innerHTML =
       '<div id="checklist-progress" class="font-sm" style="padding:6px 0 8px"></div>' +
       items.map(item => `
-      <div class="checklist-item" onclick="Checklist.toggleRow('${esc(item.id)}')" role="button" tabindex="-1">
+      <div class="checklist-item" onclick="Checklist.toggleRow(${jsAttr(item.id)})" role="button" tabindex="-1">
         <div class="check-box ${checked[item.id] ? 'checked' : ''}" id="check-${esc(item.id)}" role="checkbox" tabindex="0" aria-checked="${checked[item.id] ? 'true' : 'false'}" aria-labelledby="label-${esc(item.id)}" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();event.stopPropagation();Checklist.toggleRow('${esc(item.id)}')}">
           ${checked[item.id] ? '✓' : ''}
         </div>
@@ -7207,9 +7422,9 @@ const MissingPersons = {
           <div class="font-xs text-muted" style="margin-top:2px">Reported: ${p.ts ? new Date(p.ts).toLocaleString() : '—'}</div>
         </div>
         <div class="flex gap-8" style="flex-direction:column;flex-shrink:0">
-          <button class="btn btn-secondary btn-sm" onclick="PrintARK.missingPerson('${esc(p.id||'')}')" title="Print flyer">🖨️ Flyer</button>
+          <button class="btn btn-secondary btn-sm" onclick="PrintARK.missingPerson(${jsAttr(p.id||'')})" title="Print flyer">🖨️ Flyer</button>
           <button class="btn btn-primary btn-sm" onclick="MissingPersons.broadcast(${i})" title="Broadcast to network">📡 Broadcast</button>
-          <button class="btn btn-secondary btn-sm" onclick="MissingPersons.updateStatus('${esc(p.id||'')}')" title="Update status">✏️ Status</button>
+          <button class="btn btn-secondary btn-sm" onclick="MissingPersons.updateStatus(${jsAttr(p.id||'')})" title="Update status">✏️ Status</button>
           <button class="btn btn-ghost btn-sm" onclick="MissingPersons.remove(${i})" aria-label="Remove record">✕</button>
         </div>
       </div>`;
@@ -7267,8 +7482,28 @@ const MissingPersons = {
     }
     const reader = new FileReader();
     reader.onload = function(e) {
-      if (img) img.src = e.target.result;
-      if (preview) preview.style.display = '';
+      // Phone photos are several megabytes — far more than the browser lets ARK store.
+      // Shrink to a small JPEG so the record can actually be saved.
+      const full = e.target.result;
+      const show = src => { if (img) img.src = src; if (preview) preview.style.display = ''; };
+      const probe = new Image();
+      probe.onload = function() {
+        try {
+          const max = 360;
+          const scale = Math.min(1, max / Math.max(probe.width, probe.height));
+          const c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(probe.width * scale));
+          c.height = Math.max(1, Math.round(probe.height * scale));
+          c.getContext('2d').drawImage(probe, 0, 0, c.width, c.height);
+          show(c.toDataURL('image/jpeg', 0.7));
+        } catch (err) { show(full); }
+      };
+      probe.onerror = function() {
+        Toast.show('That photo could not be read — try a different one', 'error');
+        input.value = '';
+        if (preview) preview.style.display = 'none';
+      };
+      probe.src = full;
     };
     reader.readAsDataURL(file);
   },
@@ -7327,7 +7562,19 @@ const MissingPersons = {
       ts: new Date().toISOString()
     };
     this._list.push(record);
-    Store.set('missing_persons', this._list);
+    if (!Store.set('missing_persons', this._list)) {
+      // Storage is full. The photo is the big part — try again without it before giving up.
+      record.photoUrl = '';
+      if (!Store.set('missing_persons', this._list)) {
+        this._list.pop();
+        this.render();
+        Toast.show('Could not save — this device\'s storage for ARK is full. Delete old records or export a backup first.', 'error', 7000);
+        return false;
+      }
+      this.render();
+      Toast.show('Record saved, but the photo was too large to keep', 'warning', 6000);
+      return true;
+    }
     this.render();
     Toast.show('Missing person record saved', 'success');
     return true;
@@ -7444,7 +7691,13 @@ const Settings = {
 
   save() {
     const hubInputEl = document.getElementById('set-hub-url');
-    const hubUrl = hubInputEl ? hubInputEl.value.trim() : '';
+    let hubUrl = hubInputEl ? hubInputEl.value.trim() : '';
+    // Same clean-up as the Network tab: "192.168.1.5:8080" must become "http://192.168.1.5:8080"
+    if (hubUrl) {
+      hubUrl = hubUrl.replace(/\/+$/, '');
+      if (!/^https?:\/\//i.test(hubUrl)) hubUrl = 'http://' + hubUrl;
+      if (hubInputEl) hubInputEl.value = hubUrl;
+    }
     Store.set('hub_url', hubUrl);
     if (hubUrl) SoftHub.yield_to_external(); // external hub configured — stop soft-hub
     // Sync hub URL to network panel (always, including when cleared)
@@ -7602,14 +7855,27 @@ const Settings = {
         if (!Store.set(k, v)) failed++;
       });
     }
-    if (data.messages) {
+    if (Array.isArray(data.messages)) {
       for (const m of data.messages) {
-        try { await DB.put('messages', m); } catch(e) { failed++; }
+        if (!m || typeof m !== 'object' || m.id == null) { failed++; continue; }
+        try {
+          await DB.put('messages', {
+            ...m,
+            id: String(m.id),
+            alias: String(m.alias || 'Anonymous'),
+            channel: String(m.channel || 'general'),
+            body: String(m.body != null ? m.body : ''),
+            location: String(m.location || ''),
+            urgent: !!m.urgent,
+            ts: (typeof m.ts === 'string' && !isNaN(Date.parse(m.ts))) ? m.ts : new Date().toISOString()
+          });
+        } catch(e) { failed++; }
       }
     }
     if (failed) Toast.show('⚠️ Backup partly restored — ' + failed + ' item(s) could not be saved', 'error', 5000);
-    else Toast.show('✅ Your backup was restored successfully', 'success');
-    this.load();
+    else Toast.show('✅ Your backup was restored — reloading…', 'success');
+    // Reload so every screen shows the restored data and nothing in memory can overwrite it.
+    setTimeout(() => { try { location.reload(); } catch (e) { this.load(); } }, failed ? 4000 : 1500);
   },
 
   clearCache() {
@@ -7838,7 +8104,7 @@ const FreqLog = {
     body.innerHTML = entries.map((e, i) => `
       <tr>
         <td class="bold">${esc(e.name)}</td>
-        <td class="monospace text-accent freq-copyable" onclick="Radio.copyFreq('${esc(e.freq)}',this)" title="Tap to copy">${esc(e.freq)}<span class="copy-hint">📋</span></td>
+        <td class="monospace text-accent freq-copyable" onclick="Radio.copyFreq(${jsAttr(e.freq)},this)" title="Tap to copy">${esc(e.freq)}<span class="copy-hint">📋</span></td>
         <td class="font-xs text-muted">${esc(e.notes || '')}</td>
         <td class="font-xs text-muted" style="white-space:nowrap">${esc(this._fmtDate(e.ts || ''))}</td>
         <td style="white-space:nowrap">
@@ -7945,7 +8211,8 @@ const HomeStats = {
       const counts = {};
       let urgent = 0;
       msgs.forEach(m => {
-        const ch = m.channel || 'general';
+        if (!m) return;
+        const ch = String(m.channel || 'general');
         counts[ch] = (counts[ch] || 0) + 1;
         if (m.urgent) urgent++;
       });
@@ -7956,8 +8223,9 @@ const HomeStats = {
       // Top channels (max 4)
       const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,4);
       sorted.forEach(([ch, n]) => {
-        const lbl = this.CHANNEL_LABELS[ch] || ch;
-        html += `<button class="btn btn-ghost btn-xs" onclick="UI.switchTab('messages');Messages.setChannel('${ch}')" style="font-size:11px;padding:2px 8px">${lbl} <strong>${n}</strong></button>`;
+        // Channel names arrive from hubs and imported bundles — never trust them as HTML or script.
+        const lbl = this.CHANNEL_LABELS[ch] || esc(ch);
+        html += `<button class="btn btn-ghost btn-xs" data-ch="${esc(ch)}" onclick="UI.switchTab('messages');Messages.setChannel(this.dataset.ch)" style="font-size:11px;padding:2px 8px">${lbl} <strong>${n}</strong></button>`;
       });
       html += `</div>`;
       el.innerHTML = html;
@@ -7992,20 +8260,68 @@ function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+// A value as a JavaScript string literal that is safe inside an HTML attribute, e.g.
+// onclick="doThing(${jsAttr(id)})". (esc() alone is not enough inside inline handlers: the
+// browser decodes &#39; back to ' before the JavaScript runs.)
+function jsAttr(v) {
+  return esc(JSON.stringify(String(v ?? '')));
+}
+
+// AbortSignal.timeout() is missing on older phones; this works everywhere.
+function timeoutSignal(ms) {
+  try { if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) return AbortSignal.timeout(ms); } catch (e) {}
+  const ctrl = new AbortController();
+  setTimeout(() => { try { ctrl.abort(); } catch (e) {} }, ms);
+  return ctrl.signal;
+}
+
+// Ask a freshly opened print window to print exactly once, when it is ready.
+function printOnce(w) {
+  let done = false;
+  const go = () => { if (done) return; done = true; try { if (w && !w.closed) { w.focus(); w.print(); } } catch (e) {} };
+  try { w.onload = go; } catch (e) {}
+  setTimeout(go, 1200);
+}
+
+// Print a complete HTML document without opening a new window (used when pop-ups are blocked).
+function printInPage(docHtml) {
+  try {
+    const old = document.getElementById('ark-print-frame');
+    if (old) old.remove();
+    const frame = document.createElement('iframe');
+    frame.id = 'ark-print-frame';
+    frame.setAttribute('aria-hidden', 'true');
+    frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+    document.body.appendChild(frame);
+    const doc = frame.contentWindow.document;
+    doc.open(); doc.write(docHtml); doc.close();
+    setTimeout(() => {
+      try { frame.contentWindow.focus(); frame.contentWindow.print(); }
+      catch (e) { Toast.show('Printing is not available here — use your browser\'s Share or Print menu', 'warning', 6000); }
+    }, 400);
+  } catch (e) {
+    Toast.show('Printing is not available here — use your browser\'s Share or Print menu', 'warning', 6000);
+  }
+}
+
 function generateID() {
   return 'ARK-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
 }
 
 function today() {
-  return new Date().toISOString().slice(0, 10);
+  // Local calendar date (not UTC) so daily checklists reset at the user's own midnight.
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
 function download(name, content, type) {
   const blob = new Blob([content], {type});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = name; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  a.href = url; a.download = name; a.style.display = 'none';
+  document.body.appendChild(a); // some browsers ignore clicks on links that are not in the page
+  a.click();
+  setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 60000);
 }
 
 // === CHANNEL TABS INIT ===
@@ -8015,7 +8331,8 @@ document.querySelectorAll('.ch-tab').forEach(tab => {
 
 // === NAV HOTKEYS ===
 document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
   // Don't fire tab hotkeys when a modal/dialog is open (focus is trapped there).
   // ARK uses a CSS .hidden class (not the HTML hidden attribute) on the outer overlay.
   const arkModal = document.getElementById('ark-modal');
@@ -8049,73 +8366,15 @@ if ('getBattery' in navigator) {
   }).catch(() => {});
 }
 
-// === SERVICE WORKER (embedded) ===
-const SW_SCRIPT = `
-// Bump this version on every significant update; activate deletes all other caches.
-const CACHE = 'ark-v2';
-self.addEventListener('install', e => {
-  self.skipWaiting();
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ).then(() => self.clients.claim()));
-});
-function cacheIfOk(cache, req, r) {
-  if (r && r.ok && (r.type === 'basic' || r.type === 'cors')) cache.put(req, r.clone());
-  return r;
-}
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return; // never cache POST/PUT (hub writes)
-  const url = new URL(e.request.url);
-  if (url.pathname.startsWith('/api/')) {
-    // Hub API: network only, JSON error when offline
-    e.respondWith(
-      fetch(e.request).catch(() =>
-        new Response(JSON.stringify({error:'offline'}), {status:503, headers:{'content-type':'application/json'}})
-      )
-    );
-  } else if (e.request.mode === 'navigate') {
-    // The app itself (single HTML file): network first so updates land, cache as offline fallback
-    e.respondWith(
-      caches.open(CACHE).then(cache =>
-        fetch(e.request).then(r => cacheIfOk(cache, e.request, r))
-          .catch(() => cache.match(e.request).then(hit => hit || Response.error()))
-      )
-    );
-  } else {
-    // Static assets (fonts etc.): cache first
-    e.respondWith(
-      caches.open(CACHE).then(cache =>
-        cache.match(e.request).then(cached =>
-          cached || fetch(e.request).then(r => cacheIfOk(cache, e.request, r))
-            .catch(() => Response.error())
-        )
-      )
-    );
-  }
-});
-`;
-
+// === SERVICE WORKER ===
+// Keeps ARK available offline when it is opened from the website. A copy opened from a saved
+// file or from a local hub needs no service worker: it is already on the device / local network.
 function registerSW() {
   if (!('serviceWorker' in navigator)) return;
-  // Try real same-origin file first (works when served over http/https from a web server)
+  if (!/^https?:$/.test(location.protocol)) return;
   navigator.serviceWorker.register('/service-worker.js', {scope: '/'})
-    .then(() => { console.info('ARK SW registered via /service-worker.js'); })
-    .catch(() => {
-      // Fallback: blob URL (works for local file:// open but browser security
-      // prevents it from actually intercepting fetches — offline cache won't
-      // activate, but the app still runs fully from its own HTML).
-      try {
-        const blob = new Blob([SW_SCRIPT], {type: 'application/javascript'});
-        const url = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(url, {scope: '/'})
-          .then(() => console.warn('ARK SW registered via blob URL — offline caching will NOT work (blob SWs cannot intercept fetches). Serve the file over HTTP for full offline support.'))
-          .catch(e => console.warn('SW registration skipped:', e.message));
-      } catch(e) {
-        console.warn('SW not available:', e.message);
-      }
-    });
+    .then(reg => { try { reg.update(); } catch (e) {} })
+    .catch(e => console.info('ARK offline cache not available here:', e && e.message));
 }
 
 // === BOOT ===
@@ -8144,6 +8403,7 @@ const Onboarding = (() => {
   }
 
   function start() {
+    _finishing = false; // allow the wizard to be finished again when re-run from Settings
     try {
       const overlay = document.getElementById('onboard-overlay');
       if (overlay) {
@@ -8235,10 +8495,10 @@ const Onboarding = (() => {
     next();
   }
 
-  function downloadARK() {
+  async function downloadARK() {
     try {
-      // Strip first_run_done so the recipient gets the setup wizard on first open
-      const html = _freshDownloadHTML();
+      // A clean copy: the recipient gets the setup wizard and none of this device's data
+      const html = await _freshDownloadHTML();
       download('ARK-CRISIS-SUITE.html', html, 'text/html');
       Toast.show('ARK downloaded — when they open it they\'ll get the setup wizard!', 'success', 3500);
     } catch (e) {
@@ -8280,7 +8540,7 @@ const Onboarding = (() => {
     nudge.id = nudgeId;
     nudge.style.cssText = [
       'position:fixed','bottom:calc(80px + env(safe-area-inset-bottom,0px))','left:50%','transform:translateX(-50%)',
-      'z-index:9998','max-width:min(400px,calc(100vw - 32px))','width:100%',
+      'z-index:8500','max-width:min(400px,calc(100vw - 32px))','width:100%',
       'background:linear-gradient(135deg,rgba(139,111,62,.18) 0%,rgba(240,235,224,.97) 100%)',
       'border:1.5px solid rgba(139,111,62,.35)','border-radius:20px',
       'padding:16px 20px','box-shadow:0 8px 32px rgba(139,111,62,.18)',
@@ -8322,15 +8582,22 @@ const Onboarding = (() => {
 /* ============================================================
    DOWNLOAD HELPER — strips first_run_done so recipient gets wizard
    ============================================================ */
-function _freshDownloadHTML() {
-  // Clone the full page HTML, then remove ark_first_run_done from any
-  // inline Store snapshot so the file is "factory fresh" for the recipient.
-  // The live page's localStorage is NOT modified.
-  let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-  // Remove the first_run_done key from any embedded JSON store init block
-  // (the app stores it in localStorage at runtime, not embedded, so the
-  // downloaded file simply has no first_run_done in localStorage → wizard fires)
-  return html;
+async function _freshDownloadHTML() {
+  // The copy we hand to someone else must be the original app file — never a snapshot of the
+  // screen, which would bake this household's names, medical notes and messages into it.
+  // 1. Re-fetch the original file (works when ARK is opened from a website or a hub).
+  if (/^https?:$/.test(location.protocol)) {
+    try {
+      const r = await fetch(location.href.split('#')[0], {cache: 'no-store'});
+      if (r.ok) {
+        const t = await r.text();
+        if (t.length > 100000 && t.indexOf('ARK_PRISTINE_MARKER') !== -1) return t;
+      }
+    } catch (e) {}
+  }
+  // 2. Opened from a saved file: use the untouched copy captured before the app started.
+  if (window.__ARK_PRISTINE) return window.__ARK_PRISTINE;
+  throw new Error('no clean copy available');
 }
 
 /* ============================================================
@@ -8375,9 +8642,9 @@ const ShareARK = (() => {
     } catch (e) { console.warn('ShareARK.closeModal error:', e); }
   }
 
-  function downloadFile() {
+  async function downloadFile() {
     try {
-      const html = _freshDownloadHTML();
+      const html = await _freshDownloadHTML();
       download('ARK-CRISIS-SUITE.html', html, 'text/html');
       Toast.show('ARK downloaded — recipient gets the setup wizard on first open!', 'success', 4000);
     } catch (e) {
@@ -8448,10 +8715,10 @@ const ShareARK = (() => {
     }
   }
 
-  const ARK_DOWNLOAD_URL = 'https://ark.halosuite.ai/halo/ARK-CRISIS-SUITE.html';
-  const ARK_SHORT_MSG = 'I\'m sharing ARK Crisis Suite with you — a free offline emergency app that works without internet. Download it here: ' + ARK_DOWNLOAD_URL;
+  const ARK_DOWNLOAD_URL = 'https://arks.solutions/';
+  const ARK_SHORT_MSG = 'I\'m sharing ARK with you — a free emergency app that keeps working when the internet is down. Open it now and save it to your phone: ' + ARK_DOWNLOAD_URL;
   const ARK_EMAIL_SUBJECT = 'ARK Crisis Suite — Free Offline Emergency App';
-  const ARK_EMAIL_BODY = `Hi,\n\nI wanted to share ARK Crisis Suite with you — it's a free emergency communication app that works completely offline. No install needed — just open the HTML file in any browser.\n\nDownload it here: ${ARK_DOWNLOAD_URL}\n\nIt's useful for coordinating with neighbours and family during power outages, natural disasters, or any emergency where the internet is down.\n\nStay safe.`;
+  const ARK_EMAIL_BODY = `Hi,\n\nI wanted to share ARK Crisis Suite with you — it's a free emergency app that keeps working when the internet is down. No install or account needed — it opens in any browser.\n\nOpen it here, then save it to your phone or computer so you have it offline: ${ARK_DOWNLOAD_URL}\n\nIt's useful for coordinating with neighbours and family during power outages, natural disasters, or any emergency where the internet is down.\n\nStay safe.`;
 
   function shareViaSMS() {
     try {
@@ -8497,7 +8764,7 @@ const ShareARK = (() => {
   function shareViaInstagram() {
     // Instagram has no web share URI. Best we can do: copy the message, then open Instagram.
     try {
-      const msg = '🆘 ARK Crisis Suite — free offline emergency app. No install needed. Download: ' + ARK_DOWNLOAD_URL + ' — works without internet, perfect for emergencies. Share this with everyone you know. #emergency #preparedness #offlinefirst';
+      const msg = '🆘 ARK Crisis Suite — free offline emergency app. No install needed. Get it: ' + ARK_DOWNLOAD_URL + ' — works without internet, perfect for emergencies. Share this with everyone you know. #emergency #preparedness #offlinefirst';
       if (navigator.clipboard?.writeText) {
         navigator.clipboard.writeText(msg)
           .then(() => {
@@ -8526,9 +8793,7 @@ const ShareARK = (() => {
 const PrintARK = (() => {
 
   function _openPrintWindow(html, title) {
-    const w = window.open('', '_blank', 'width=760,height=900');
-    if (!w) { Toast.show('Pop-up blocked — allow pop-ups for this page and try again', 'warning', 4000); return; }
-    w.document.write(`<!DOCTYPE html><html lang="en"><head>
+    const pageHead = `<!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><title>${esc(title)}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -8548,15 +8813,21 @@ th{background:#eee;font-weight:700}
 .footer{margin-top:24px;padding-top:8px;border-top:1px solid #ccc;font-size:11px;color:#666;text-align:center}
 @media print{body{padding:0}button{display:none}.no-print{display:none}}
 </style></head><body>${html}
-<div class="footer">ARK Crisis Suite · Printed ${new Date().toLocaleString()} · halosuite.ai</div>
+<div class="footer">ARK Crisis Suite · Printed ${new Date().toLocaleString()} · arks.solutions</div>`;
+    const w = window.open('', '_blank', 'width=760,height=900');
+    if (!w) {
+      // Pop-ups are blocked (common in installed apps): print from this page instead.
+      printInPage(pageHead + '</body></html>');
+      return;
+    }
+    w.document.write(pageHead + `
 <div class="no-print" style="text-align:center;margin:20px 0">
   <button onclick="window.print()" style="padding:8px 20px;font-size:14px;cursor:pointer;background:#333;color:#fff;border:none;border-radius:4px">🖨️ Print</button>
 </div>
 </body></html>`);
     w.document.close();
     // Auto-trigger print dialog after render
-    w.onload = function() { w.focus(); w.print(); };
-    setTimeout(() => { if (w && !w.closed) { w.focus(); w.print(); } }, 1200);
+    printOnce(w);
   }
 
   // ── Household emergency card (wallet-size, 2 per page) ─────────────────────
@@ -8611,8 +8882,10 @@ th{background:#eee;font-weight:700}
 <div class="card">
   <div class="card-title">📍 Location at Print Time</div>
   <p>GPS: ${gpsLine} &nbsp;·&nbsp; Printed: ${new Date().toLocaleString()}</p>
-  <p><strong>Meeting point:</strong> _______________________________________</p>
-  <p><strong>Out-of-area contact:</strong> __________________________________</p>
+  <p><strong>Meeting point (near home):</strong> ${esc(Store.get('household', {}).meet1 || '') || '_______________________________________'}</p>
+  <p><strong>Meeting point (further away):</strong> ${esc(Store.get('household', {}).meet2 || '') || '_______________________________________'}</p>
+  <p><strong>Evacuation route / destination:</strong> ${esc(Store.get('household', {}).evac || '') || '_______________________________________'}</p>
+  <p><strong>Out-of-area contact:</strong> ${esc([Store.get('household', {}).ooaName, Store.get('household', {}).ooaPhone].filter(Boolean).join(' — ')) || '__________________________________'}</p>
 </div>`;
     _openPrintWindow(card, 'ARK Emergency Card');
   }
@@ -8633,10 +8906,11 @@ th{background:#eee;font-weight:700}
   </ol>
 </div>
 <div class="card">
-  <div class="card-title">❤️ CPR — Child (1–8 years)</div>
+  <div class="card-title">❤️ CPR — Child (1–8 years) and Infant</div>
   <ol>
     <li>Same check/call as above.</li>
-    <li>One hand (or two fingers for infant). 30 compressions, 1.5 inches deep.</li>
+    <li><strong>Child:</strong> one or two hands. 30 compressions, about 2 inches deep.</li>
+    <li><strong>Infant (under 1):</strong> both thumbs with hands around the chest, or heel of one hand. 30 compressions, about 1.5 inches deep.</li>
     <li>2 gentle rescue breaths. Continue until help arrives.</li>
   </ol>
 </div>
@@ -8653,7 +8927,7 @@ th{background:#eee;font-weight:700}
   <div class="card-title">🤿 Choking — Infant (&lt;1 year)</div>
   <ul>
     <li>5 back blows (face-down on forearm, heel of hand).</li>
-    <li>5 chest thrusts (2 fingers, centre of chest). Do NOT do abdominal thrusts.</li>
+    <li>5 chest thrusts (heel of one hand, centre of chest). Do NOT do abdominal thrusts.</li>
     <li>Alternate until object clears.</li>
   </ul>
 </div>
@@ -9099,7 +9373,7 @@ const ARKQr = (() => {
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${total}" height="${total}" viewBox="0 0 ${total} ${total}"><rect width="${total}" height="${total}" fill="#fff"/><g fill="#000">${rects}</g></svg>`;
       return `<div style="text-align:center;margin:8px 0">${svg}<div class="font-xs" style="color:#888;margin-top:4px">Scan with any camera app</div></div>`;
     } catch(e) {
-      return `<div style="padding:12px;border:1px solid #555;border-radius:6px;font-size:12px;word-break:break-all;color:#aaa"><div style="margin-bottom:4px;color:#888">QR unavailable — open this URL:</div>${text}</div>`;
+      return `<div style="padding:12px;border:1px solid #555;border-radius:6px;font-size:12px;word-break:break-all;color:#aaa"><div style="margin-bottom:4px;color:#888">QR unavailable — open this URL:</div>${esc(text)}</div>`;
     }
   }
 
@@ -9125,11 +9399,21 @@ const ARKai = (() => {
 
   /* ── HALO Lite Knowledge Base ────────────────────────────── */
   const KB = [
+    // Immediate-danger situations first — these must never be answered with a survival-skills article
+    { k:['house fire','on fire','wildfire','building fire','fire in the','fire in my','caught fire','catch fire','smoke in','fire alarm','evacuate fire','forest fire','brush fire'],
+      r:`🔥 FIRE — GET OUT, STAY OUT, CALL 911\n\nHouse or building fire:\n1. Get everyone out NOW. Do not stop for belongings.\n2. Crawl low under smoke — the cleaner air is near the floor.\n3. Feel a closed door with the back of your hand. If it is hot, do NOT open it — use another way out.\n4. Close doors behind you to slow the fire.\n5. Go to your meeting point and call 911 from outside.\n6. NEVER go back inside for people, pets or things — tell firefighters who is missing.\n\nIf your clothes catch fire: STOP, DROP to the ground, cover your face, and ROLL.\n\nIf you are trapped: close the door, block the gap under it with cloth, open a window and signal for help. Call 911 and say exactly where you are.\n\nWildfire: leave as soon as you are told to — or sooner if you see or smell it coming. Do not wait to see how bad it gets. Take your go-bag, tell someone where you are going, and drive away from the fire with headlights on.`},
+    { k:['drowning','drowned','near drowning','pulled from water','pulled out of the water','not breathing after water','went under'],
+      r:`🌊 DROWNING — CALL 911\n\n1. Get the person out of the water ONLY if you can do it safely. Reach with a pole or throw something that floats — do not jump in unless you are trained.\n2. Lay them on their back on a firm surface. Check for breathing.\n3. NOT breathing: start CPR at once and include rescue breaths — a drowned person needs air.\n   • Give 2 rescue breaths first (tilt head back, pinch nose, breathe until the chest rises)\n   • Then 30 chest compressions, 2 breaths, and repeat\n4. Do NOT try to squeeze or drain water from the lungs.\n5. Breathing but unresponsive: roll them onto their side and keep them warm.\n6. Use an AED as soon as one arrives (dry the chest first).\n\nAnyone who was under water and coughed, struggled to breathe or passed out needs a doctor, even if they seem fine afterwards.`},
+    { k:['electric shock','electrocut','electrical shock','downed power line','power line','live wire','shocked by'],
+      r:`⚡ ELECTRIC SHOCK — CALL 911\n\n1. Do NOT touch the person while they are still touching the electricity — you will be shocked too.\n2. Switch the power off at the breaker or unplug it. If you cannot, push the source away with something dry that does not conduct electricity (wooden broom handle, plastic chair) while standing on something dry.\n3. Downed power line: stay at least 35 feet (10 metres) away and keep others back. Call 911 and the power company.\n4. Once the person is clear of the source: check breathing. Not breathing → start CPR.\n5. Cover burns loosely with a clean dry cloth. Do not use ice or ointment.\n6. Everyone who has had a serious shock should be seen by a doctor — the heart can be affected hours later.`},
+    { k:['seizure','convulsion','convulsing','fitting','having a fit','epilep','shaking uncontrollably'],
+      r:`🧠 SEIZURE\n\n1. Stay with the person and note the time it started.\n2. Ease them to the floor and turn them gently onto one side.\n3. Move hard or sharp things away. Put something soft under the head.\n4. Loosen anything tight around the neck. Remove glasses.\n5. Do NOT hold them down. Do NOT put anything in their mouth.\n6. Stay until they are fully awake, then tell them calmly what happened.\n\nCALL 911 if:\n• the seizure lasts longer than 5 minutes\n• another seizure starts soon after\n• they have trouble breathing or do not wake up afterwards\n• they are injured, pregnant, have diabetes, or it happened in water\n• they have never had a seizure before`},
+
     // Water
     { k:['water','purify','safe to drink','contaminated','boil'],
       r:`💧 WATER PURIFICATION\n\n1. Boiling (best): Bring to rolling boil for 1 min (3 min above 6500 ft). Let cool. Most reliable method.\n\n2. Chemical (no heat): Add 8 drops unscented household bleach (5–9% chlorine) per gallon. Wait 30 min. Should smell faintly of chlorine — if not, repeat once.\n\n3. Iodine tablets: Follow package. Not for pregnant women or thyroid conditions. 30–60 min contact time.\n\n4. Filtering + treatment: DIY filter (gravel → sand → charcoal in a bottle) removes sediment but NOT pathogens — always treat after filtering.\n\n⚠️ Signs water may be unsafe: unusual color, odor, foam, dead animals nearby, industrial area upstream.`},
     // Fire
-    { k:['fire','start a fire','no lighter','no matches','spark','flint','tinder'],
+    { k:['start a fire','make a fire','build a fire','light a fire','campfire','fire starting','no lighter','no matches','spark','flint','tinder'],
       r:`🔥 STARTING FIRE WITHOUT LIGHTER\n\nFriction method (bow drill):\n1. Carve a spindle ~18" long, pencil-width\n2. Carve a fireboard flat piece — same dry wood type\n3. Cut small notch in fireboard, place bark below to catch coal\n4. Loop string of bow around spindle, press down hard, bow back-and-forth fast\n5. When smoke and ember form, transfer to tinder bundle, blow gently\n\nFlint and steel: Strike flint against hard steel at angle over dry char cloth or tinder fungus.\n\nTinder: dry grass, bark shreds, birch paper bark, dry leaves, cattail fluff, pine needles. NOT damp material.\n\nFire lay: Teepee for fast heat, log cabin for sustained burn. Keep wind in mind — fire needs oxygen from downwind side.`},
     // Wound
     { k:['wound','bleeding','cut','deep cut','laceration','blood','treat wound','bandage','stop bleeding'],
@@ -9142,10 +9426,10 @@ const ARKai = (() => {
       r:`🔥 BURN TREATMENT\n\nFirst, determine severity:\n- 1st degree: red, painful, no blisters (sunburn-like)\n- 2nd degree: blisters, intense pain, wet/shiny skin\n- 3rd degree: white/brown/black, leathery, may be painless (nerve damage)\n\n1st & 2nd degree (small area):\n1. Cool with cool running water 10–20 min — NOT ice, NOT butter/toothpaste/egg white\n2. After cooling: cover loosely with clean non-stick bandage\n3. Do NOT pop blisters\n4. Pain relief: ibuprofen or acetaminophen\n\n⚠️ Seek immediate help for:\n- Any 3rd degree burn\n- Burns on face, hands, feet, genitals, joints\n- Burns > palm-size (>1% body for 2nd/3rd)\n- Chemical or electrical burns\n- Smoke inhalation (hoarse voice, soot in mouth/nose)\n\nChemical burn: flush with large amounts of water 20+ min, remove contaminated clothing (protect yourself first)`},
     // CPR
     { k:['cpr','not breathing','cardiac arrest','heart stopped','chest compressions','resuscitation','unconscious not breathing'],
-      r:`❤️ CPR — QUICK GUIDE\n\nADULT/CHILD (8+):\n1. Check scene is safe. Tap shoulders: "Are you OK?"\n2. Call 911 (or send someone)\n3. No normal breathing → start CPR\n4. Heel of hand on center of chest (between nipples)\n5. 30 compressions: push down 2–2.4", rate 100–120/min (beat of "Stayin' Alive")\n6. Tilt head, lift chin, give 2 rescue breaths (1 sec each, chest should rise)\n7. Repeat 30:2 until help arrives or person recovers\n\nINFANT (under 1 yr):\n- 2 fingers on center of chest, just below nipple line\n- Compress 1.5" depth\n- 30 compressions → 2 gentle breaths\n\nCHILD (1–8):\n- 1 or 2 hands depending on child size\n- Compress 2"\n- 30:2 same ratio\n\nAED (if available): Turn on, follow voice prompts. Use as soon as possible — delivers shock before CPR if needed.\n\n🚨 Hands-only CPR (no breaths) is acceptable for adult bystander CPR — compression-only is better than nothing.`},
+      r:`❤️ CPR — QUICK GUIDE\n\nADULT/CHILD (8+):\n1. Check scene is safe. Tap shoulders: "Are you OK?"\n2. Call 911 (or send someone)\n3. No normal breathing → start CPR\n4. Heel of hand on center of chest (between nipples)\n5. 30 compressions: push down 2–2.4", rate 100–120/min (beat of "Stayin' Alive")\n6. Tilt head, lift chin, give 2 rescue breaths (1 sec each, chest should rise)\n7. Repeat 30:2 until help arrives or person recovers\n\nINFANT (under 1 yr):\n- Both thumbs on center of chest (hands wrapped around the chest), just below nipple line — or the heel of one hand\n- Compress 1.5" depth\n- 30 compressions → 2 gentle breaths\n\nCHILD (1–8):\n- 1 or 2 hands depending on child size\n- Compress 2"\n- 30:2 same ratio\n\nAED (if available): Turn on, follow voice prompts. Use as soon as possible — delivers shock before CPR if needed.\n\n🚨 Hands-only CPR (no breaths) is acceptable for adult bystander CPR — compression-only is better than nothing.`},
     // Choking
     { k:['choking','heimlich','can\'t breathe','obstruction','throat blocked','choking adult','choking infant','choking baby'],
-      r:`🫁 CHOKING — HEIMLICH MANEUVER\n\nADULT / CHILD (1+):\n1. Ask "Are you choking?" — if they can cough, encourage coughing\n2. If they can't speak/breathe/cough:\n   - Stand behind, arms around waist\n   - Fist thumb-side just above navel, below chest\n   - Grab fist with other hand\n   - 5 firm upward thrusts (J-motion: in and up)\n3. Alternate: 5 back blows between shoulder blades with heel of hand\n4. Repeat until object dislodged or they go unconscious\n5. If unconscious: lower to ground, call 911, begin CPR\n\nINFANT (under 1 yr):\n1. Face-down on forearm, head lower than chest\n2. 5 firm back blows between shoulder blades\n3. Flip face-up: 2 fingers on chest, 5 quick chest thrusts\n4. Check mouth — only remove object if you can SEE it\n5. Repeat until cleared or infant goes unresponsive → infant CPR\n\nIf ALONE and choking:\n- Thrust your upper abdomen against hard edge of table/chair back\n- Self-Heimlich: fist technique same as above, thrust hard`},
+      r:`🫁 CHOKING — HEIMLICH MANEUVER\n\nADULT / CHILD (1+):\n1. Ask "Are you choking?" — if they can cough, encourage coughing\n2. If they can't speak/breathe/cough:\n   - Stand behind, arms around waist\n   - Fist thumb-side just above navel, below chest\n   - Grab fist with other hand\n   - 5 firm upward thrusts (J-motion: in and up)\n3. Alternate: 5 back blows between shoulder blades with heel of hand\n4. Repeat until object dislodged or they go unconscious\n5. If unconscious: lower to ground, call 911, begin CPR\n\nINFANT (under 1 yr):\n1. Face-down on forearm, head lower than chest\n2. 5 firm back blows between shoulder blades\n3. Flip face-up: heel of one hand on center of chest, 5 quick chest thrusts\n4. Check mouth — only remove object if you can SEE it\n5. Repeat until cleared or infant goes unresponsive → infant CPR\n\nIf ALONE and choking:\n- Thrust your upper abdomen against hard edge of table/chair back\n- Self-Heimlich: fist technique same as above, thrust hard`},
     // Dehydration
     { k:['dehydration','dehydrated','thirsty','no water','fluid','electrolyte','hydration','signs of dehydration'],
       r:`💧 DEHYDRATION — SIGNS & TREATMENT\n\nSigns by severity:\n\nMild: dark urine, thirsty, slightly dry mouth, tired\nModerate: very dark/no urine, dry mouth, headache, dizziness, rapid heart rate, muscle cramps, irritability\nSevere: sunken eyes, no urine >8h, rapid breathing, confusion, can't stand — EMERGENCY\n\nChildren: sunken fontanelle (soft spot on infant head), no tears when crying, no wet diaper >6h → urgent\n\nTreatment:\n1. Drink small amounts frequently — not large gulps (can cause vomiting)\n2. Oral Rehydration Solution (ORS) if available — better than plain water\n   DIY ORS: 1 liter clean water + 6 tsp sugar + 1/2 tsp salt\n3. If vomiting: small sips every 5 min, ice chips, popsicles\n4. Rest in cool/shaded area\n5. Avoid caffeine and alcohol\n\nSurvival note:\nAdult minimum need: ~2 liters/day in mild conditions; more in heat, exertion, illness\nFood survival: 3+ weeks without food\nWater survival: 3–5 days without water (less in heat)`},
@@ -9153,7 +9437,7 @@ const ARKai = (() => {
     { k:['shelter','cold','hypothermia','stay warm','build shelter','stay dry','survive cold','exposure'],
       r:`🏕️ EMERGENCY SHELTER & HYPOTHERMIA\n\nHypothermia signs:\n- Mild: shivering, confusion, slurred speech, stumbling\n- Moderate: intense shivering, pale skin, confusion\n- Severe: shivering stops (bad sign), unconscious, rigid muscles\n\nHypothermia treatment:\n1. Get to shelter, out of wind and wet\n2. Remove wet clothing\n3. Cover with dry insulation (blankets, leaves, clothing layers)\n4. Warm core first (chest, groin, armpits) — not extremities\n5. Warm sweet drinks if conscious and swallowing\n6. Do NOT rub extremities (drives cold blood to core)\n7. Handle gently — rough movement can cause cardiac arrest in severe hypothermia\n\nBuilding a debris shelter:\n1. Find natural windbreak (rock face, fallen log)\n2. Lean dead branches against it at 45°\n3. Pack debris (leaves, pine needles, bark) 2–3 ft thick on sides and roof\n4. Inside: deep leaf bed 4"+ off ground for insulation\n5. Opening: face away from prevailing wind\n6. Size: just big enough to fit — smaller holds body heat better\n\nInsulation priority: ground > sides > top. Cold ground steals heat 25x faster than cold air.`},
     // Signaling
-    { k:['signal','help','rescue','found','lost','sos','signal for help','stranded','how to be found'],
+    { k:['signal','rescue','i am lost','i\'m lost','we are lost','sos','signal for help','stranded','how to be found'],
       r:`📡 SIGNALING FOR RESCUE\n\nRule of Threes for signaling: 3 of anything = distress (3 whistle blasts, 3 fires, 3 gunshots)\n\nMost visible signals:\n1. Signal mirror: flash toward aircraft/horizon. Can be seen 10+ miles. Aim reflection at target, use two-finger "V" aiming sight.\n2. Ground-to-air signals (stomp in snow or lay rocks/logs, minimum 10 ft tall):\n   - X = need medical help\n   - V = need help\n   - → = going this direction\n3. Fire/smoke: 3 fires in triangle, 100 ft apart. Green leaves/rubber = white smoke (visible in trees). Oil/rubber = black smoke (visible against snow).\n4. Whistle: 3 blasts, pause, repeat. Carries further than voice.\n5. Bright colors: lay any bright material flat in open area, contrast with background.\n\nStay put vs. move:\n- STAY if someone knows your location\n- STAY if you have shelter and water\n- MOVE only if you know exactly where help is and you have the ability`},
     // Food survival
     { k:['food','survive without food','hunger','what to eat','edible plants','foraging','rations','food storage'],
@@ -9166,12 +9450,12 @@ const ARKai = (() => {
       r:`📻 MORSE CODE — SOS & ESSENTIALS\n\nSOS: · · · — — — · · · (3 short, 3 long, 3 short)\nThis is THE universal distress signal. Any medium — light, sound, radio, tapping.\n\nBasic letters:\nA ·—   B —···  C —·—·  D —··   E ·\nF ··—·  G ——·   H ····   I ··    J ·———\nK —·—  L ·—··  M ——    N —·    O ———\nP ·——·  Q ——·—  R ·—·   S ···    T —\nU ··—   V ···—   W ·——   X —··—  Y —·——  Z ——··\n\nNumbers:\n1 ·——— 2 ··——— 3 ···——  4 ····— 5 ·····\n6 —···· 7 ——··· 8 ———·· 9 ————· 0 —————\n\nTiming: dot = 1 unit, dash = 3 units, space between letters = 3 units, space between words = 7 units`},
     // Radio
     { k:['radio','communicate','frequency','walkie','ham radio','baofeng','radio frequencies'],
-      r:`📡 EMERGENCY RADIO GUIDE\n\nFREQUENCIES TO KNOW:\n- 462.675 MHz — NOAA National Call Frequency\n- 155.340 MHz — National Search & Rescue\n- 156.800 MHz (Channel 16) — Marine distress & calling\n- 121.5 MHz — Aviation emergency (guard frequency)\n- GMRS/FRS (family radios): 462–467 MHz range\n\nFCC Emergency Authorization:\nDuring declared emergency, unlicensed use of ham frequencies is permitted to save lives or property.\n\nMESSAGE FORMAT (when radio works but conditions poor):\n- Say callsign/name\n- Say location (GPS or landmark)\n- Say situation briefly\n- Repeat 3 times\n- Listen 2× as long as you transmit\n\nBATTERY CONSERVATION:\n- Scan mode instead of monitoring\n- Lower power setting at close range\n- Charge via solar/hand-crank in power outage\n\nSee ARK's Radio tab for the Morse code trainer and frequency logger.`},
+      r:`📡 EMERGENCY RADIO GUIDE\n\nFREQUENCIES TO KNOW:\n- 162.400–162.550 MHz — NOAA Weather Radio (listen only; 7 channels)\n- 462.675 MHz — GMRS channel 20, widely used for emergency and traveler calling (GMRS license required to transmit)\n- 155.160 MHz — commonly used for search and rescue\n- 156.800 MHz (Channel 16) — Marine distress & calling\n- 121.5 MHz — Aviation emergency (guard frequency)\n- GMRS/FRS (family radios): 462–467 MHz range\n\nTransmitting without a license:\nFCC rules allow any means of radio communication only when human life or property is in immediate danger and no other way to call for help is available. Listening never needs a license.\n\nMESSAGE FORMAT (when radio works but conditions poor):\n- Say callsign/name\n- Say location (GPS or landmark)\n- Say situation briefly\n- Repeat 3 times\n- Listen 2× as long as you transmit\n\nBATTERY CONSERVATION:\n- Scan mode instead of monitoring\n- Lower power setting at close range\n- Charge via solar/hand-crank in power outage\n\nSee ARK's Radio tab for the Morse code trainer and frequency logger.`},
     // General emergency
     { k:['power outage','blackout','grid down','no power','earthquake','hurricane','tornado','flood','disaster'],
-      r:`🚨 GENERAL EMERGENCY PROTOCOL\n\nFIRST 60 SECONDS:\n1. Is anyone injured? Life safety first\n2. Is there immediate danger? (fire, gas, structure damage)\n3. 911 if phone works\n\nFIRST 24 HOURS:\n- Shelter in place unless ordered to evacuate\n- Gather: water, food, medications, documents, phone charger\n- Tune to emergency broadcast radio\n- Tell household your status (use ARK Hub)\n- Charge all devices now if power is intermittent\n\nUTILITY SAFETY:\n- Gas smell → leave immediately, don't flip switches, call utility from outside\n- Downed power line → 50 ft minimum clearance, never touch, treat as live\n- Water main break → turn off at house valve\n\nFOOD SAFETY in outage:\n- Fridge: safe 4 hours if closed\n- Freezer: safe 24–48 hours if closed (full freezer = longer)\n- When in doubt, throw it out\n\nEVACUATION bag (72-hour kit):\nWater 3 liters/person, food 3 days, first aid kit, medications 1 week, flashlight, radio, documents (ID/insurance), cash small bills, phone charger, warm layers, map (paper)`},
+      r:`🚨 GENERAL EMERGENCY PROTOCOL\n\nFIRST 60 SECONDS:\n1. Is anyone injured? Life safety first\n2. Is there immediate danger? (fire, gas, structure damage)\n3. 911 if phone works\n\nFIRST 24 HOURS:\n- Shelter in place unless ordered to evacuate\n- Gather: water, food, medications, documents, phone charger\n- Tune to emergency broadcast radio\n- Tell household your status (use ARK Hub)\n- Charge all devices now if power is intermittent\n\nUTILITY SAFETY:\n- Gas smell → leave immediately, don't flip switches, call utility from outside\n- Downed power line → 50 ft minimum clearance, never touch, treat as live\n- Water main break → turn off at house valve\n\nFOOD SAFETY in outage:\n- Fridge: safe 4 hours if closed\n- Freezer: safe 24–48 hours if closed (full freezer = longer)\n- When in doubt, throw it out\n\nEVACUATION bag (72-hour kit):\nWater 1 gallon (about 4 liters) per person per day — carry what you can and a way to purify more, food 3 days, first aid kit, medications 1 week, flashlight, radio, documents (ID/insurance), cash small bills, phone charger, warm layers, map (paper)`},
     // Hypothermia in water
-    { k:['drowning','water rescue','cold water','fallen in water','water immersion'],
+    { k:['water rescue','cold water','fallen in water','fell in water','water immersion'],
       r:`🌊 COLD WATER SURVIVAL\n\nCold water (below 70°F) incapacitation:\n- 32°F: unconscious in 15 min, dead in 15–45 min\n- 50°F: exhausted/unconscious 1–2h\n- 60°F: exhausted/unconscious 2–7h\n\nIf YOU fall in:\n1. Don't panic — involuntary gasp reflex passes in 60–90 seconds\n2. Keep head above water, control breathing\n3. HELP position (Heat Escape Lessening Position): cross arms tight on chest, knees up — reduces heat loss 50%\n4. DON'T swim to exhaustion — HELP or treading is better if you can't reach shore quickly\n5. Get OUT of the water as fast as possible — even lying on ice is better\n\nIf YOU rescue someone:\n1. Reach → Throw → Row → Go (last resort: go in)\n2. Horizontal extraction — don't stand them up (blood pressure crash)\n3. Treat for hypothermia (see Shelter section)\n4. Watch for cardiac arrhythmia — handle gently`},
     // Navigation
     { k:['navigate','lost','find direction','north','compass','stars','navigation','which way','orient','landmark'],
@@ -9184,7 +9468,7 @@ const ARKai = (() => {
       r:`🔒 SECURITY IN A CRISIS\n\n**Immediate threat assessment:**\n1. Lock and secure entry points — doors, windows, gates.\n2. Establish a rally point if the household is separated.\n3. Designate a safe room (interior room, no windows, hardened door).\n4. Check in with neighbors — mutual aid increases collective security.\n\n**Layered awareness:**\n- Outer perimeter: know who is approaching before they reach your door.\n- Middle: lighting at night deters opportunistic threats.\n- Inner: know your exits, have a plan if you must leave fast.\n\n**De-escalation first:**\n- Most threats in disaster are opportunistic, not violent — firm, calm boundary-setting often works.\n- Display of a group (multiple people visible) is a deterrent.\n- Avoid openly displaying high-value resources.\n\n**Communication:**\n- Establish check-in times with household members.\n- Code words for "I'm in danger" vs. "I'm safe."\n- Document strangers at your location if rule-of-law is uncertain.\n\n⚠️ In any situation involving an armed threat: compliance and escape are safer than confrontation. Property is replaceable.`},
     // Evacuation
     { k:['evacuate','evacuation','bug out','leave home','go bag','72 hour','emergency kit','flee','leave now','forced to leave'],
-      r:`🚗 EVACUATION — QUICK GUIDE\n\n**Go/No-Go decision:**\n- GO if: official evacuation order issued, structural threat to shelter, fire within 1 mile, rising water, toxic hazard nearby.\n- STAY if: no order issued, safer than roads, dependent household members can't travel.\n\n**72-Hour Bug-Out Bag (per person):**\n- Water: 1 liter + purification tabs/filter\n- Food: 3 days non-perishable, 2000 cal/day\n- First aid kit + 1-week medications\n- Copies of ID, insurance, contacts (waterproof bag)\n- Cash in small bills (ATMs may be down)\n- Phone charger + battery bank\n- Flashlight + extra batteries\n- Warm layers + rain poncho\n- Whistle, knife, duct tape\n- Paper map of your region\n\n**Before leaving:**\n1. Tell someone your destination and route.\n2. Turn off gas, unplug appliances (if time allows).\n3. Take pets and medications — these are hard to replace.\n4. Lock up — opportunistic looting follows evacuations.\n5. Take one photo of each room for insurance claims.\n\n**On the road:**\n- Use official evacuation routes — shortcuts may be blocked.\n- Keep fuel above half-tank during crisis periods.\n- If roads are gridlocked: local shelter > highway death trap.`},
+      r:`🚗 EVACUATION — QUICK GUIDE\n\n**Go/No-Go decision:**\n- GO if: official evacuation order issued, structural threat to shelter, fire within 1 mile, rising water, toxic hazard nearby.\n- STAY if: no order issued, safer than roads, dependent household members can't travel.\n\n**72-Hour Bug-Out Bag (per person):**\n- Water: as much as you can carry (aim for 1 gallon / 4 liters per day) + purification tabs/filter\n- Food: 3 days non-perishable, 2000 cal/day\n- First aid kit + 1-week medications\n- Copies of ID, insurance, contacts (waterproof bag)\n- Cash in small bills (ATMs may be down)\n- Phone charger + battery bank\n- Flashlight + extra batteries\n- Warm layers + rain poncho\n- Whistle, knife, duct tape\n- Paper map of your region\n\n**Before leaving:**\n1. Tell someone your destination and route.\n2. Turn off gas, unplug appliances (if time allows).\n3. Take pets and medications — these are hard to replace.\n4. Lock up — opportunistic looting follows evacuations.\n5. Take one photo of each room for insurance claims.\n\n**On the road:**\n- Use official evacuation routes — shortcuts may be blocked.\n- Keep fuel above half-tank during crisis periods.\n- If roads are gridlocked: local shelter > highway death trap.`},
     // Tools & improvised equipment
     { k:['tools','equipment','improvise','make do','no tools','knife','rope','cord','tarp','duct tape','paracord','improvised'],
       r:`🔧 IMPROVISED TOOLS & EQUIPMENT\n\n**Essential multi-use items to have:**\n- Duct tape — repairs, splints, shelter patching, blister prevention, cordage\n- Paracord — shelter lines, tourniquets, clothesline, tripwire alarm, fishing line (inner strands)\n- Tarp — shelter roof, ground cloth, water collection funnel, stretcher\n- Garbage bags — waterproofing, rain poncho, water storage, signal (orange/yellow)\n- Bandana — dust mask, bandage, water pre-filter, signal, cooling\n\n**Improvised tools:**\n- Knife from broken glass (flint-knapping technique or smash bottle to get edge)\n- Shovel from flat board or hub cap\n- Hammer from heavy rock\n- Rope from strips of clothing braided 3-strand\n- Water container from large plastic bag tied at top\n- Candle from fat/grease + twisted cloth wick in a tin can\n\n**Knife safety (improvised):**\n- Always cut away from body\n- Secure workpiece before cutting\n- Never catch a falling blade\n\n**Friction fire tools need:** dry wood, the right species (cottonwood, willow, cedar, basswood), and patience. If wood feels cold or won't powder, it's too moist — find drier material.`},
@@ -9736,77 +10020,98 @@ window.addEventListener('unhandledrejection', e => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  UI.init();
-  Checklist.init();
-  ARKai.init();
-  if (typeof MissingPersons !== 'undefined') MissingPersons.init();
-  Hub.updateSyncDisplay();
+  // Every start-up step runs on its own: if one fails, the rest of the app still loads.
+  const safe = (name, fn) => {
+    try { return fn(); }
+    catch (e) {
+      console.warn('ARK start-up step failed:', name, e);
+      try { window._arkErrors.push({ msg: 'boot:' + name + ': ' + (e && e.message), ts: Date.now() }); } catch (_) {}
+    }
+  };
+
+  // First run is decided first, so the welcome wizard appears even if a later step fails.
+  safe('onboarding', () => {
+    if (!Store.get('first_run_done')) {
+      // Only generate a new hh_id if one doesn't already exist (preserves imported backups)
+      if (!Store.get('hh_id')) Store.set('hh_id', generateID());
+      document.getElementById('set-hh-id') && (document.getElementById('set-hh-id').value = Store.get('hh_id'));
+      // Slight delay so the UI finishes rendering before overlay appears
+      setTimeout(() => safe('onboarding-start', () => Onboarding.start()), 300);
+    }
+  });
+
+  safe('ui', () => UI.init());
+
+  // Bottom tab bar (thumb navigation on phones)
+  safe('bottom-bar', () => {
+    const syncBTB = tab => document.querySelectorAll('.btb-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.btb-btn').forEach(btn => {
+      btn.addEventListener('click', () => { if (btn.dataset.tab) UI.switchTab(btn.dataset.tab); });
+    });
+    const origSwitch = UI.switchTab;
+    UI.switchTab = function(tab, ...args) {
+      const result = origSwitch.call(this, tab, ...args);
+      // "More" stands for every tab that has no button of its own
+      syncBTB(document.querySelector('.btb-btn[data-tab="' + tab + '"]') ? tab : 'settings');
+      return result;
+    };
+    syncBTB(UI.currentTab || 'home');
+  });
+
+  safe('checklist', () => Checklist.init());
+  safe('ai', () => ARKai.init());
+  safe('missing', () => { if (typeof MissingPersons !== 'undefined') MissingPersons.init(); });
+  safe('hub-display', () => Hub.updateSyncDisplay());
 
   // Load persisted alert level
-  UI.renderAlertLevel(Store.get('alert_level', 1));
+  safe('alert', () => UI.renderAlertLevel(Store.get('alert_level', 1)));
 
   // Pre-fill alias
-  const aliasInputs = document.querySelectorAll('#msg-alias');
-  const savedAlias = Store.get('last_alias', '');
-  aliasInputs.forEach(el => { if (savedAlias) el.value = savedAlias; });
+  safe('alias', () => {
+    const aliasInputs = document.querySelectorAll('#msg-alias');
+    const savedAlias = Store.get('last_alias', '');
+    aliasInputs.forEach(el => { if (savedAlias) el.value = savedAlias; });
+  });
 
   // Apply persisted settings
-  const fontSize = Store.get('font_size', 16);
-  document.documentElement.style.fontSize = fontSize + 'px';
-  if (Store.get('high_contrast', false)) Settings.applyContrast();
-  if (Store.get('low_power', false)) document.documentElement.classList.add('low-power');
-  if (Store.get('dark_mode', false)) Settings.applyDarkMode();
+  safe('settings', () => {
+    const fontSize = parseInt(Store.get('font_size', 16), 10);
+    if (fontSize >= 12 && fontSize <= 28) document.documentElement.style.fontSize = fontSize + 'px';
+    if (Store.get('high_contrast', false)) Settings.applyContrast();
+    if (Store.get('low_power', false)) document.documentElement.classList.add('low-power');
+    if (Store.get('dark_mode', false)) Settings.applyDarkMode();
+  });
 
   // Start hub sync
-  Hub.startAutoSync();
+  safe('autosync', () => Hub.startAutoSync());
 
-  // Auto-hub: if no external hub is configured, first opener becomes the hub
-  SoftHub.init();
+  // Share messages between ARK tabs open in this browser
+  safe('softhub', () => SoftHub.init());
 
   // === AUTO-DISCOVERY ===
   // After a short delay (let SoftHub settle), start discovery:
   // - announce ourselves to other open ARK tabs/windows
   // - listen for nearby hubs and show a "Join →" banner if one found
-  setTimeout(() => {
-    SoftHub.startDiscovery();
-    // Also kick off IP detection so we can broadcast our address
-    Network.detectLocalIP().then(ip => {
-      if (ip) {
-        // If we're the hub, re-broadcast with our IP
-        setTimeout(() => {
-          if (SoftHub.isHub()) SoftHub.startDiscovery();
-        }, 500);
-      }
-    });
-  }, 2000);
-
-  // Check for first run — show onboarding wizard
-  if (!Store.get('first_run_done')) {
-    // Only generate a new hh_id if one doesn't already exist (preserves imported backups)
-    if (!Store.get('hh_id')) Store.set('hh_id', generateID());
-    document.getElementById('set-hh-id') && (document.getElementById('set-hh-id').value = Store.get('hh_id'));
-    // Slight delay so the UI finishes rendering before overlay appears
-    setTimeout(() => Onboarding.start(), 300);
-  }
+  setTimeout(() => safe('discovery', () => SoftHub.startDiscovery()), 2000);
 
   // Register service worker
-  registerSW();
+  safe('service-worker', () => registerSW());
 
   // Resources initial render
-  Resources.render();
-  Guides.init();
-  Radio.init();
+  safe('resources', () => Resources.render());
+  safe('guides', () => Guides.init());
+  safe('radio', () => Radio.init());
 
   // W20: Init new modules
-  FreqLog.render();
-  HomeStats.render();
-  Settings.checkBackupReminder();
+  safe('freqlog', () => FreqLog.render());
+  safe('homestats', () => HomeStats.render());
+  safe('backup-reminder', () => Settings.checkBackupReminder());
 
   // W20: Refresh home stats every 30s so board stays current (skip when tab is hidden)
-  setInterval(() => { if (!document.hidden) HomeStats.render(); }, 30000);
+  setInterval(() => { if (!document.hidden) safe('homestats', () => HomeStats.render()); }, 30000);
 
   // Auto-patch check: silent check on startup, then every 2 hours
-  Network.initPatchCheck();
+  safe('patch-check', () => Network.initPatchCheck());
 });
 
 // PWA install prompt
@@ -9840,31 +10145,7 @@ window.addEventListener('beforeunload', () => {
   if (alias && alias.value.trim()) Store.set('last_alias', alias.value.trim());
 });
 
-// Bottom tab bar sync — keep it in sync with the top nav
-(function(){
-  function syncBTB(tab){
-    document.querySelectorAll('.btb-btn').forEach(b=>{
-      b.classList.toggle('active', b.dataset.tab===tab);
-    });
-  }
-  document.querySelectorAll('.btb-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const t = btn.dataset.tab;
-      if(t && window.UI) UI.switchTab(t);
-    });
-  });
-  // Patch into tab switch
-  const origSwitch = window.UI && UI.switchTab;
-  if(origSwitch){
-    UI.switchTab = function(tab,...args){
-      origSwitch.call(this,tab,...args);
-      syncBTB(tab);
-    };
-  }
-  // Initial sync
-  const active = document.querySelector('.nav-btn.active');
-  if(active) syncBTB(active.dataset.tab||'home');
-})();
+// (The bottom tab bar is wired up in the DOMContentLoaded start-up above, once it exists.)
 </script>
 
 <!-- BOTTOM TAB BAR -->
@@ -9892,5 +10173,10 @@ window.addEventListener('beforeunload', () => {
   </button>
 </nav>
 
+<script>
+// ARK_PRISTINE_MARKER — an untouched copy of this file, captured before the app starts, so
+// "Download ARK to share" can hand over a clean app even when ARK was opened from a saved file.
+try { window.__ARK_PRISTINE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML; } catch (e) {}
+</script>
 </body>
 </html>

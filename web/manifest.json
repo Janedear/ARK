@@ -1,0 +1,20 @@
+{
+  "name": "ARK Crisis Suite",
+  "short_name": "ARK",
+  "description": "Free emergency app that keeps working when the internet is down: messaging, offline AI helper, maps, first-aid guides and your family plan.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f0ebe0",
+  "theme_color": "#dcbf78",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["utilities", "medical", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

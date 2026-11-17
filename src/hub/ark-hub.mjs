@@ -28,14 +28,23 @@ const LOG_FILE = join(DATA, 'hub.log');
 const LOG_MAX = 1024 * 1024; // 1MB max log size before rotation
 
 const STRUCTURED_CHANNELS = new Set(['help', 'safe', 'offers', 'missing', 'general', 'resources', 'medical', 'shelter', 'water', 'power']);
+const APP_FILE = 'ARK-CRISIS-SUITE.html';
 const KIT_FILES = {
   'start-here': 'START-HERE.html',
-  guidance: 'ARK-Emergency-Guidance.html',
+  guidance: APP_FILE,          // first aid and survival guides live inside the app
   'meeting-point': 'MEETING-POINT.txt',
   contacts: 'Emergency-Contacts.txt',
   worksheet: 'Household-Plan-Worksheet.txt',
-  relay: 'ARK-Offline-Relay.html',
+  relay: APP_FILE,             // the app people save to their own phone
 };
+// Kit files sit beside hub/ in a packed kit, or under kit/ and the repository root when run from source.
+async function kitPath(name) {
+  for (const base of [KIT, join(KIT, 'kit'), join(KIT, '..'), join(KIT, '..', 'kit')]) {
+    const candidate = join(base, name);
+    try { if ((await stat(candidate)).isFile()) return candidate; } catch { /* try the next place */ }
+  }
+  return join(KIT, name);
+}
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.txt': 'text/plain; charset=utf-8',
@@ -532,7 +541,7 @@ const routes = {
     if (!allowed(ip)) return send(res, 429, { error: 'Too many posts from this phone. Wait 10 minutes.' });
     const driftMin = checkClockDrift(req);
     const body = await readBody(req, 8000);
-    const alias = String(body.alias || '').trim().slice(0, 40), text = String(body.text || '').trim().slice(0, 1000);
+    const alias = String(body.alias || '').trim().slice(0, 40), text = String(body.text || body.body || '').trim().slice(0, 1000);
     if (!alias || !text) return send(res, 400, { error: 'Add your name and a message.' });
     const channel = topic(body.channel);
     const packet = await signer.sign({ channel, alias, text, hours: body.hours });
@@ -540,6 +549,13 @@ const routes = {
     if (driftMin) result.clock_warning = `Your clock is ${driftMin} minutes off from the hub.`;
     send(res, 201, result);
   },
+
+  // The ARK app (ARK-CRISIS-SUITE.html) posts here; same rules as /api/post.
+  'POST /api/messages': (req, res, url, ip) => routes['POST /api/post'](req, res, url, ip),
+
+  // The full ARK app, so phones on this Wi-Fi can open it or save it with no internet.
+  'GET /app': async (req, res) => streamFile(req, res, await kitPath(APP_FILE), false),
+  'GET /ARK-CRISIS-SUITE.html': async (req, res) => streamFile(req, res, await kitPath(APP_FILE), false),
 
   // Acknowledge (I saw this)
   'POST /api/ack': async (req, res, url, ip) => {
@@ -736,8 +752,8 @@ const server = http.createServer(async (req, res) => {
 
     // Kit files
     if (req.method === 'GET' && url.pathname.startsWith('/kit/')) {
-      const name = KIT_FILES[url.pathname.slice(5)];
-      return name ? streamFile(req, res, join(KIT, name), name === 'ARK-Offline-Relay.html') : send(res, 404, { error: 'Not found on this hub.' });
+      const key = url.pathname.slice(5), name = KIT_FILES[key];
+      return name ? streamFile(req, res, await kitPath(name), key === 'relay') : send(res, 404, { error: 'Not found on this hub.' });
     }
 
     // Library files — track download count

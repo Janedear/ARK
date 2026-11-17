@@ -2,8 +2,8 @@
  * Checks that this machine can sign a packet and, if a function URL is set,
  * that the ARK gateway accepts it. Run this before starting a bridge.
  */
-import { loadDevice, buildPacket, canonical } from './lib/envelope.mjs';
-import { pushPackets } from './lib/gateway.mjs';
+import { loadDevice, buildPacket, canonical } from './lib-envelope.mjs';
+import { pushPackets } from './lib-gateway.mjs';
 
 const device = await loadDevice();
 console.log('signing key ready; public x =', device.x.slice(0, 12) + '…');

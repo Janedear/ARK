@@ -138,10 +138,17 @@ class Gateway extends EventEmitter {
       try {
         this._connectWs(hub);
         const result = await this._hubCall(hub, '/api/bundle', { protocol: 'ARK-RELAY-1', packets });
-        result.rejected?.forEach(item => console.log('hub refused packet', item.id, item.reason));
+        // A hub may refuse individual packets while storing the rest. Never report a
+        // refused packet as stored: that would silently drop an undelivered message.
+        if (!result || !Array.isArray(result.rejected)) {
+          throw new Error('Hub returned an invalid storage receipt; keeping the local queue.');
+        }
+        const rejectedIds = new Set(result.rejected.map(item => item.id));
+        for (const item of result.rejected) console.warn('hub refused packet', item.id, item.reason);
+        const accepted = packets.filter(p => !rejectedIds.has(p.id)).map(p => ({ id: p.id }));
         this._setStatus(Status.CONNECTED);
-        this.emit('push', { count: packets.length });
-        return { accepted: packets.map(p => ({ id: p.id })) };
+        this.emit('push', { count: accepted.length });
+        return { accepted, rejected: result.rejected };
       } catch (err) {
         console.error('hub push failed, falling back:', err.message);
         this._setStatus(Status.DEGRADED);

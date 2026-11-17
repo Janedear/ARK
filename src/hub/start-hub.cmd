@@ -8,4 +8,4 @@ set NODE=node
 if exist library\files\node-win\node.exe set NODE=library\files\node-win\node.exe
 echo If Windows Firewall asks, allow access on PRIVATE networks so phones can connect.
 "%NODE%" hub\ark-hub.mjs
-pause
+pause

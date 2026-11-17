@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARK — Start here</title>
+<style>
+  :root { --bg:#f0ebe0; --card:#faf7f0; --line:#d9cfba; --ink:#2b2418; --soft:#6b5d45; --accent:#8b6f3e; --red:#a3261c; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.6 Georgia, "Times New Roman", serif; }
+  main { max-width:720px; margin:0 auto; padding:28px 18px 60px; }
+  h1 { font-size:1.9rem; line-height:1.2; margin:0 0 6px; }
+  h2 { font-size:1.2rem; margin:0 0 8px; color:var(--accent); }
+  p { margin:0 0 12px; }
+  .lead { color:var(--soft); margin-bottom:22px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:16px; }
+  .danger { border-color:var(--red); }
+  .danger h2 { color:var(--red); }
+  ol, ul { margin:0 0 6px; padding-left:22px; }
+  li { margin-bottom:8px; }
+  code { background:#fff; border:1px solid var(--line); border-radius:6px; padding:1px 6px; font:15px/1.4 ui-monospace, Consolas, monospace; }
+  .foot { color:var(--soft); font-size:.9rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>ARK — Start here</h1>
+  <p class="lead">This folder is the whole ARK kit. It works with no internet. Read this page once now, while things are normal.</p>
+
+  <div class="card danger">
+    <h2>In immediate danger</h2>
+    <p><strong>Call 911</strong> (or your local emergency number). ARK is not an emergency service and nobody monitors it.</p>
+  </div>
+
+  <div class="card">
+    <h2>1. Use ARK on your own phone or computer</h2>
+    <ol>
+      <li>Open the file <code>ARK-CRISIS-SUITE.html</code> in this folder. It opens in any web browser.</li>
+      <li>Fill in your household plan and emergency contacts.</li>
+      <li>Print the emergency card (Household tab) and keep a paper copy.</li>
+    </ol>
+    <p>Everything you type stays on your own device.</p>
+  </div>
+
+  <div class="card">
+    <h2>2. Link the phones around you — with no internet</h2>
+    <p>One laptop or Raspberry Pi becomes the <strong>hub</strong>. Every phone on the same Wi-Fi can then read and post messages.</p>
+    <ol>
+      <li><strong>Windows:</strong> open the <code>hub</code> folder and double-click <code>start-hub.cmd</code>. If Windows Firewall asks, allow <em>private</em> networks.<br>
+          <strong>Mac, Linux, Raspberry Pi:</strong> open Terminal in this folder and run <code>sh hub/start-hub.sh</code> (Node.js must be installed).</li>
+      <li>The hub window shows an address such as <code>http://192.168.1.20:8080</code>. Write it on paper, or open <code>http://localhost:8080/sign</code> and print the sign.</li>
+      <li>Everyone joins the same Wi-Fi and types that address into their browser. A router that is switched on but has no internet is fine.</li>
+    </ol>
+    <p>The message board is public to everyone on that Wi-Fi. Do not post anything you would not pin to a noticeboard.</p>
+  </div>
+
+  <div class="card">
+    <h2>3. Fill these in now</h2>
+    <ul>
+      <li><code>MEETING-POINT.txt</code> — where your household meets if you cannot reach each other.</li>
+      <li><code>Emergency-Contacts.txt</code> — local numbers you will not be able to look up later.</li>
+      <li><code>Household-Plan-Worksheet.txt</code> — print it and fill it in by hand.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>4. Pass it on</h2>
+    <p>Copy this whole folder to a USB stick for a neighbour. Anyone on a hub's Wi-Fi can also tap <strong>Save full kit</strong> on the hub page.</p>
+  </div>
+
+  <p class="foot">Practise once before you need it: start the hub, join with two phones, post a message. More detail is in <code>hub/HUB-GUIDE.md</code>.</p>
+</main>
+</body>
+</html>
