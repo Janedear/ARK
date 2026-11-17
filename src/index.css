@@ -1,42 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root, .dark {
-  --fo-bg: #E6ECE6;
-  --fo-surface: #F8FAF6;
-  --fo-ink: #203B32;
-  --fo-muted: #687A62;
-  --fo-line: #c3cfc0;
-  --fo-header-muted: #c9d6c6;
-  --fo-primary-hover: #2c5144;
+  --fo-bg: #F7F5F0;
+  --fo-surface: #FCFBF8;
+  --fo-ink: #262626;
+  --fo-muted: #67635C;
+  --fo-line: #E8E3D8;
+  --fo-header-muted: #D6D0C4;
+  --fo-primary-hover: #3A3A3A;
+  --fo-gold: #9C7F55;
+  --fo-gold-soft: #EFE8DA;
 }
 
 @layer base {
   :root, .dark {
-    --font-heading: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --font-body: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-    --font-display: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --background: 120 13.64% 91.37%;
-    --foreground: 157.78 29.67% 17.84%;
-    --card: 90 28.57% 97.25%;
-    --card-foreground: 157.78 29.67% 17.84%;
-    --popover: 90 28.57% 97.25%;
-    --popover-foreground: 157.78 29.67% 17.84%;
-    --primary: 157.78 29.67% 17.84%;
-    --primary-foreground: 90 28.57% 97.25%;
-    --secondary: 110 15.79% 85.1%;
-    --secondary-foreground: 157.78 29.67% 17.84%;
-    --muted: 110 15.79% 85.1%;
-    --muted-foreground: 105 10.91% 43.14%;
-    --accent: 105 19.35% 87.84%;
-    --accent-foreground: 157.78 29.67% 17.84%;
+    --font-heading: "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-body: "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+    --background: 43 30% 95%;
+    --foreground: 0 0% 15%;
+    --card: 45 33% 98%;
+    --card-foreground: 0 0% 15%;
+    --popover: 45 33% 98%;
+    --popover-foreground: 0 0% 15%;
+    --primary: 0 0% 15%;
+    --primary-foreground: 45 33% 98%;
+    --secondary: 41 26% 90%;
+    --secondary-foreground: 0 0% 15%;
+    --muted: 41 26% 91%;
+    --muted-foreground: 37 5% 38%;
+    --accent: 40 37% 91%;
+    --accent-foreground: 0 0% 15%;
     --destructive: 11 59% 30%;
-    --destructive-foreground: 90 28.57% 97.25%;
-    --border: 108 13.51% 78.24%;
-    --input: 108.57 11.73% 64.9%;
-    --ring: 157.78 29.67% 17.84%;
-    --radius: 0.375rem;
+    --destructive-foreground: 45 33% 98%;
+    --border: 41 26% 88%;
+    --input: 41 18% 78%;
+    --ring: 35 30% 47%;
+    --radius: 0.875rem;
     --success-soft: 109 21% 91%;
     --success-border: 109 21% 74%;
     --success: 123 27% 37%;

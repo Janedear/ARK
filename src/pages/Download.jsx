@@ -5,7 +5,11 @@ import { buildZip, downloadBlob } from '@/components/toolkit/zip';
 import { buildKitFiles, KIT_CONTENTS } from '@/components/kit/kitFiles';
 import GetArk from '@/components/kit/GetArk';
 import MeetingPointPicker from '@/components/kit/MeetingPointPicker';
+import { BrandLockup } from '@/components/halo/brand';
+import LandingHero from '@/components/halo/LandingHero';
+import FeatureCards from '@/components/halo/FeatureCards';
 import '@/components/lifeline/lifeline.css';
+import '@/components/halo/halo.css';
 
 export default function Download() {
   const [done, setDone] = useState(false);
@@ -22,17 +26,26 @@ export default function Download() {
     catch { setError('The download could not start. Please try again.'); }
   };
 
-  return <div className="ark-download min-h-screen bg-background">
-    <header className="border-b border-border bg-card">
-      <div className="ll-page" style={{ padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span className="flex items-center gap-2 font-heading font-bold"><Shield size={18} />ARK</span>
-        <Link to="/Home" className="ll-btn ghost" style={{ minHeight: 38, padding: '6px 14px' }}>Open the app <ArrowRight size={15} /></Link>
+  return <div className="ark-download halo-landing">
+    <header className="halo-nav">
+      <Link to="/"><BrandLockup /></Link>
+      <nav>
+        <Link to="/Guidance">Guides</Link>
+        <Link to="/HouseholdPlan">Household plan</Link>
+        <Link to="/Network">Messages</Link>
+      </nav>
+      <div className="halo-nav-right">
+        <Link to="/Home" className="halo-link">Open the app</Link>
+        <a href="#kit" className="halo-pill">Get ARK</a>
       </div>
     </header>
 
-    <main className="ll-page">
-      <span className="ll-eyebrow">Offline kit · free</span>
-      <h1 style={{ margin: '10px 0 10px' }}>Prepare now for a day without signal</h1>
+    <LandingHero />
+    <FeatureCards />
+
+    <main className="ll-page" id="kit" style={{ scrollMarginTop: 16, marginTop: 40 }}>
+      <span className="ll-eyebrow">Free · one download</span>
+      <h2 className="halo-section-title">Save it today. <em>Thank yourself later.</em></h2>
       <p className="ll-muted" style={{ fontSize: 17 }}>One download with emergency guidance, an offline message relay, a household plan to print, and the scripts volunteers need to connect radio and SMS. Save it now, while you have signal.</p>
 
       <MeetingPointPicker value={meetingPoint} onChange={setMeetingPoint} />
